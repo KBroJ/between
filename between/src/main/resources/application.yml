@@ -1,0 +1,16 @@
+# ?? ?? - ?? ? ???? ??
+#server:
+#  port: 8080
+
+spring:
+  # DB(MySQL) ?? ??
+  datasource:
+    # ?????
+    url: jdbc:mysql://localhost:3306/testdb?serverTimezone=Asia/Seoul&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: 0000
+    # ?????
+#    URL: jdbc:mysql://10.1.2.171:3306/wbedu
+#    ID: wbuser
+#    pw: 1qaz2wsx!@
+    driver-class-name: com.mysql.cj.jdbc.Driver
