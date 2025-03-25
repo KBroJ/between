@@ -6,11 +6,11 @@ spring:
   # DB(MySQL) ?? ??
   datasource:
     # ?????
-    url: jdbc:mysql://localhost:3306/testdb?serverTimezone=Asia/Seoul&useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/between?serverTimezone=Asia/Seoul&useSSL=false&allowPublicKeyRetrieval=true
     username: root
     password: 0000
     # ?????
-#    URL: jdbc:mysql://10.1.2.171:3306/wbedu
+#    URL: jdbc:mysql://10.1.2.171:3306/between
 #    ID: wbuser
 #    pw: 1qaz2wsx!@
     driver-class-name: com.mysql.cj.jdbc.Driver
