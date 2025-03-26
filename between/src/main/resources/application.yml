@@ -6,11 +6,10 @@ spring:
   # DB Connection Setting(DB 연결 설정)
   datasource:
     # Local DB(MySQL)
-    url: jdbc:mysql://localhost:3306/between?serverTimezone=Asia/Seoul&useSSL=false&allowPublicKeyRetrieval=true
-    username: root
-    password: 0000
+#    url: jdbc:mysql://localhost:3306/between
+#    username: root
+#    password: 0000
     # Winbit Server DB(MySQL)
-#    URL: jdbc:mysql://10.1.2.171:3306/between
-#    ID: root
-#    pw: 1qaz2wsx!@
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    URL: jdbc:mysql://10.1.2.171:3306/wb_between
+    username: root
+    password: 1qaz2wsx!@
