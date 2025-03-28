@@ -3,13 +3,36 @@
 #  port: 8080
 
 spring:
+
   # DB Connection Setting(DB 연결 설정)
   datasource:
     # Local DB(MySQL)
-#    url: jdbc:mysql://localhost:3306/between
-#    username: root
-#    password: 0000
-    # Winbit Server DB(MySQL)
-    URL: jdbc:mysql://10.1.2.171:3306/wb_between
+    url: jdbc:mysql://localhost:3306/wb_between_local?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
     password: 1qaz2wsx!@
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # Winbit Server DB(MySQL)
+#    URL: jdbc:mysql://10.1.2.171:3306/wb_between
+#    username: root
+#    password: 1qaz2wsx!@
+
+  # JPA Setting(JPA 설정)
+  jpa:
+    hibernate:
+      ddl-auto: update  # 애플리케이션 실행 시 변경점만 반영
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl   # 테이블명, 컬럼명을 CamelCase로 인식(스네이크 케이스(_넣기)로 변경하지 않음)
+    properties:
+      hibernate:
+        show_sql: true    # 콘솔에 SQL 출력
+        format_sql: true  # SQL 출력 포맷팅 여부(가독성 향상)
+#        use_sql_comments: true  # SQL 코멘트(주석) 사용 여부
+#        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+
+  logging:
+    level:
+      org:
+        hibernate:
+          type:
+            descriptor:
+              sql: trace  # query의 ?에 어떤 값이 들어가는지 추적할 수 있는 설정(TRACE Log에 값을 보여줍니다.)

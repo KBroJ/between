@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <title>회원가입</title>
+        <!--
+        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+        -->
+        <link href="css/login/signup.css" rel="stylesheet">
+    </head>
+    <body class="bg-gray-100 flex items-center justify-center min-h-screen">
+        <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold mb-6 text-center">회원가입</h2>
+            <form id="signupForm" class="space-y-4">
+                <div>
+                    <label for="email" class="block mb-2">이메일</label>
+                    <div class="flex flex-col">
+                        <div class="flex">
+                            <input type="email" id="email" name="email" required
+                                class="w-full px-3 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <button type="button" id="checkDuplication"
+                                class="bg-blue-500 text-white px-3 py-2 rounded-r-md hover:bg-blue-600 whitespace-nowrap">
+                                중복확인
+                            </button>
+                        </div>
+                        <span id="emailValidation" class="text-sm text-red-500 mt-1"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="password" class="block mb-2">비밀번호</label>
+                    <input type="password" id="password" name="password" required
+                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label for="confirmPassword" class="block mb-2">비밀번호 확인</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required
+                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <span id="passwordValidation" class="text-sm text-red-500"></span>
+                </div>
+
+                <div>
+                    <label for="name" class="block mb-2">이름</label>
+                    <input type="text" id="name" name="name" required
+                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label for="phoneNumber" class="block mb-2">휴대폰 번호</label>
+                    <input type="tel" id="phoneNumber" name="phoneNumber" required
+                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div id="verificationSection" class="hidden">
+                    <div>
+                        <label for="verificationCode" class="block mb-2">인증번호</label>
+                        <div class="flex flex-col">
+                            <div class="flex">
+                                <input type="text" id="verificationCode" name="verificationCode"
+                                    class="w-full px-3 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <span id="countdownTimer"
+                                    class="bg-red-100 text-red-600 px-4 py-2 rounded-r-md">
+                                    03:00
+                                </span>
+                            </div>
+                        </div>
+                        <span id="verificationCodeValidation" class="text-sm text-red-500"></span>
+                    </div>
+                </div>
+
+                <button type="button" id="verifyButton"
+                    class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 disabled:opacity-50">
+                    인증하기
+                </button>
+            </form>
+        </div>
+        <script src="js/login/signup.js"></script>
+    </body>
+</html>
