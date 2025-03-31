@@ -30,21 +30,22 @@ public class UserController {
 
         model.addAttribute("user", new User());
 
-//        return "login/signup";
-        return "login/testSignup";
+        return "login/signup";
     }
 
 // 회원가입
     @PostMapping("/signup")
     public String registerUser(
-            // @Valid : SignupRequest 객체에 대한 유효성 검사
+            // @Valid : SignupRequest 객체에서 설정한 유효성 검사 실행
+            // signupRequest : 회원가입 정보를 담는 객체
+            // BindingResult : 유효성 검사 결과를 담는 객체
             @Valid @ModelAttribute("user") SignupRequest signupRequest,
             BindingResult result, Model model
     ) {
 
         System.out.println("UserController|registerUser|signupRequest = " + signupRequest);
 
-        // 유효성 검사 실패 시 로그 출력
+        // SignupRequest 유효성 검사 실패 시 로그 출력
         System.out.println("유효성 검사|result.hasErrors() = " + result.hasErrors());
         if (result.hasErrors()) {
 
@@ -70,6 +71,7 @@ public class UserController {
 
         try {
 
+            // 회원가입 진행
             System.out.println("UserController|registerUser|회원가입 진행 전");
             User user = userService.registerUser(signupRequest);
             System.out.println("UserController|registerUser|회원가입 진행 후 | user = " + user);
