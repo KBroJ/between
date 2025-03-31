@@ -38,36 +38,45 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // 실제 구현에서는 서버에 요청을 보내야 합니다
-        fetch('/checkEmail?email=' + encodeURIComponent(email))
-            .then(response => {
-                if (!response.ok) {
-                  throw new Error('HTTP status ' + response.status);
-                }
-                return response.json();
-            })
-            .then(data => {
+//        fetch('/checkEmail?email=' + encodeURIComponent(email))   // GET 방식
+        fetch('/checkEmail', {  // POST 방식
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email: email })
+        })
+        .then(response => {
+            if (!response.ok) {
+              throw new Error('HTTP status ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
 
-                console.log("checkEmail||RES" + JSON.stringify(data));
+            console.log("checkEmail||RES" + JSON.stringify(data));
 
-                if (data.available) {
-                    emailMessage.textContent = '사용 가능한 이메일입니다.';
-                    emailMessage.style.color = 'green';
-                    isEmailVerified = true;
-                } else {
-                    emailMessage.textContent = '이미 사용 중인 이메일입니다.';
-                    emailMessage.style.color = '#dc3545';
-                    isEmailVerified = false;
-                }
-            })
-            .catch(error => {
-                // 테스트용 코드 (실제로는 서버 통신 필요)
+            if (data.available) {
                 emailMessage.textContent = '사용 가능한 이메일입니다.';
                 emailMessage.style.color = 'green';
                 isEmailVerified = true;
-            });
+            } else {
+                emailMessage.textContent = '이미 사용 중인 이메일입니다.';
+                emailMessage.style.color = '#dc3545';
+                isEmailVerified = false;
+            }
+        })
+        .catch(error => {
+            // 테스트용 코드 (실제로는 서버 통신 필요)
+            emailMessage.textContent = '사용 가능한 이메일입니다.';
+            emailMessage.style.color = 'green';
+            isEmailVerified = true;
+        });
     });
 
     // 휴대폰 번호 입력 시 숫자만 허용하고 자동으로 하이픈 추가
+    /*
+    */
     phoneNumberInput.addEventListener('input', function(e) {
         // 숫자 이외의 문자 제거
         let value = this.value.replace(/[^0-9]/g, '');

@@ -18,21 +18,16 @@ spring:
 
   # JPA Setting(JPA 설정)
   jpa:
+    show_sql: true    # 콘솔에 SQL 출력
+    properties:
+      hibernate:
+        format_sql: true  # SQL 출력 포맷팅 여부(가독성 향상)
     hibernate:
       ddl-auto: update  # 애플리케이션 실행 시 변경점만 반영
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl   # 테이블명, 컬럼명을 CamelCase로 인식(스네이크 케이스(_넣기)로 변경하지 않음)
-    properties:
-      hibernate:
-        show_sql: true    # 콘솔에 SQL 출력
-        format_sql: true  # SQL 출력 포맷팅 여부(가독성 향상)
-#        use_sql_comments: true  # SQL 코멘트(주석) 사용 여부
-#        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
 
-  logging:
-    level:
-      org:
-        hibernate:
-          type:
-            descriptor:
-              sql: trace  # query의 ?에 어떤 값이 들어가는지 추적할 수 있는 설정(TRACE Log에 값을 보여줍니다.)
+logging:
+  level:
+    # 쿼리 바인딩 로그찍기 참고 : https://byunsw4.tistory.com/25
+    org.hibernate.orm.jdbc.bind: trace  # query의 ?에 어떤 값이 들어가는지 추적할 수 있는 설정(TRACE Log에 값을 보여줍니다.)

@@ -45,9 +45,18 @@ public class User {
     @Column(name = "createDt", nullable = false, updatable = false)
     private LocalDateTime createDt;
 
-    @UpdateTimestamp                                                            // 엔티티가 수정되어 저장될 때 시간이 자동 저장
+//    @UpdateTimestamp                                                            // 엔티티가 저장되거나 업데이트 될 때 시간이 자동 저장 => Insert시에도 값이 저장되어버리므로 주석처리
     @Column(name = "updateDt")
     private LocalDateTime updateDt;
+    // 생성 시에는 updateDt에 값이 저장되지 않도록 처리
+    @PrePersist
+    public void prePersist() {
+    }
+    // 수정 시에 updateDt에 값이 저장되도록 처리
+    @PreUpdate
+    public void preUpdate() {
+        this.updateDt = LocalDateTime.now();
+    }
 
     @Column(name = "loginM", length = 10, nullable = false)
     private String loginM;
