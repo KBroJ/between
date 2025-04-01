@@ -30,8 +30,14 @@ public class WebSecurityConfig {
     // 특정 HTTP 요청에 대한 웹 기반 보안 구성
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login", "/faqList", "/css/**", "/js/**", "/images/**", "/error", "/favicon.ico").permitAll() // "/login" 누구나 접근 가능하게
+        http
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(
+                                "/css/**", "/js/**", "/img/**",
+                                "/", "/main",
+                                "/signup", "/checkEmail", "/send-verification",
+                                "/login", "/faqList", "/error", "/favicon.ico"
+                        ).permitAll() // "/login" 누구나 접근 가능하게
                         .anyRequest().authenticated()             // 나머지 요청은 인증 필요
                 )
                 // 4. 폼 기반 로그인 설정
