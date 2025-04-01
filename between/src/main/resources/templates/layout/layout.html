@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+
+    <!-- ⬇ title 영역은 자식 템플릿에서 덮어씌울 수 있도록 설정 -->
+    <title layout:fragment="title">기본 타이틀</title>
+    <!-- ✅ 정적 리소스로 CSS 연결 -->
+    <link rel="stylesheet" th:href="@{/css/layout/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/common/header.css}">
+    <link rel="stylesheet" th:href="@{/css/common/footer.css}">
+    <link rel="stylesheet" th:href="@{/css/common/menu.css}">
+    <th:block layout:fragment="page-css"></th:block>
+</head>
+<body>
+<!--헤더-->
+<header th:replace="~{common/header :: commonHeader}"></header>
+<!-- 메인 -->
+<main layout:fragment="content">
+</main>
+<!--푸터-->
+<footer th:replace="~{common/footer :: commonFooter}"></footer>
+<!--스크립트 위치-->
+<!--jquery-->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<!--레이아웃-->
+<script>
+    $(document).ready(function () {
+
+    });
+</script>
+<!--자식요소스크립트-->
+<th:block layout:fragment="page-script"></th:block>
+</body>
+</html>

@@ -1,0 +1,44 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+/* --- 초기화 (reset) --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+html, body {
+    height: 100%;
+    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+    background-color: #fff;
+    color: #333;
+}
+
+/* --- 공통 레이아웃 --- */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+/* --- 헤더 / 푸터 공통 여백 처리 --- */
+header,
+footer {
+    width: 100%;
+}
+
+/* --- 콘텐츠 높이 채우기 (푸터를 아래로) --- */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+main {
+    flex: 1;
+}
+
+/* --- 유틸리티 클래스 (선택사항) --- */
+.text-center {
+    text-align: center;
+}
+.mt-16 {
+    margin-top: 16px;
+}

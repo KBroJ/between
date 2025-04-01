@@ -1,0 +1,10 @@
+<div th:fragment="commonHeader">
+    <header class="header-container">
+<!--        로고-->
+        <div class="logo">
+            <a href="/main" style="text-decoration: none; color: inherit;">BetWeen</a>
+        </div>
+<!--        네비게이션-->
+        <div th:replace="~{/common/menu :: commonMenu}"></div>
+    </header>
+</div>

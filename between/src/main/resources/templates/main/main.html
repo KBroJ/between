@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+  <title>홈 화면</title>
+    <th:block layout:fragment="page-css">
+    <!-- swiper 스타일 -->
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+      <!-- ✅ 페이지 전용 스타일 삽입 -->
+      <link rel="stylesheet" th:href="@{/css/main/main.css}">
+    </th:block>
+</head>
+<body>
+
+<main layout:fragment="content">
+  <!-- Swiper 컨테이너 -->
+  <div class="swiper">
+    <div class="swiper-wrapper">
+<!--      <div class="swiper-slide">-->
+<!--        <img th:src="@{/img/slide1.jpg}" alt=""/>-->
+<!--      </div>-->
+<!--      <div class="swiper-slide">-->
+<!--        <img th:src="@{/img/slide2.jpg}" alt=""/>-->
+<!--      </div>-->
+<!--      <div class="swiper-slide">-->
+<!--        <img th:src="@{/img/slide3.jpg}" alt=""/>-->
+<!--      </div>-->
+
+      <div class="swiper-slide" th:each="banner : ${bannerList}">
+        <img th:src="@{${banner.bImageUrl}}" alt=""/>
+      </div>
+    </div>
+
+
+    <!-- 페이지 네비게이션 (옵션) -->
+    <div class="swiper-pagination"></div>
+    <div class="swiper-button-prev"></div>
+    <div class="swiper-button-next"></div>
+  </div>
+
+  <!-- 소개 섹션 (회사 소개) -->
+  <section class="section about-section">
+    <div class="about-inner">
+      <div class="about-image">
+<!--        <img src="/img/about-office.jpg" alt="공유오피스 소개" />-->
+      </div>
+      <div class="about-text">
+        <h2>당신의 비즈니스를 위한 최고의 공간</h2>
+        <p>
+          BetWeen은 단순한 오피스를 넘어 창의적이고 유연한 업무 환경을 제공합니다.<br>
+          스타트업, 프리랜서, 크리에이터 모두를 위한 맞춤형 공유 오피스입니다.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 서비스 안내 -->
+  <section class="section service-section">
+    <div class="section-header">
+      <h2>우리가 제공하는 서비스</h2>
+      <p>편리하고 유연한 업무 환경을 위해 다양한 공간과 혜택을 제공합니다.</p>
+    </div>
+    <div class="service-grid">
+      <div class="service-card">
+<!--        <img src="/img/service-1.png" alt="프라이빗 오피스" />-->
+        <h3>프라이빗 오피스</h3>
+        <p>1~6인 팀을 위한 독립형 오피스 공간</p>
+      </div>
+      <div class="service-card">
+<!--        <img src="/img/service-2.png" alt="공용 라운지" />-->
+        <h3>공용 라운지</h3>
+        <p>자유롭게 소통하고 일할 수 있는 열린 공간</p>
+      </div>
+      <div class="service-card">
+<!--        <img src="/img/service-3.png" alt="회의실" />-->
+        <h3>회의실 예약</h3>
+        <p>필요할 때 간편하게 예약 가능한 회의실</p>
+      </div>
+    </div>
+  </section>
+
+   <!-- 가격 -->
+  <section class="section pricing-section">
+      <div class="section-header">
+          <h2>요금</h2>
+          <p>사용자의 시간에 맞춘 합리적인 요금을 제공합니다.</p>
+      </div>
+      <div class="pricing-cards">
+          <div class="card light-card">
+              <h3 class="card-title">기본</h3>
+              <p class="card-price">2,000원 <span>/1시간</span></p>
+              <p class="card-text">시간제 후불 이용</p>
+              <ul class="card-features">
+                  <li>기본 1시간 이용</li>
+<!--                  <li>Up to 10,000 subscribers</li>-->
+<!--                  <li>Advanced analytics</li>-->
+<!--                  <li>24-hour support response time</li>-->
+              </ul>
+<!--              <a href="#" class="card-button outline">Get started today</a>-->
+          </div>
+
+          <div class="card light-card">
+              <h3 class="card-title">월</h3>
+              <p class="card-price">99,000원 <span>/1개월</span></p>
+              <p class="card-text">월 정기 이용권</p>
+              <ul class="card-features">
+                  <li>기간내 시간 제한 없이 이용</li>
+<!--                  <li>Up to 10,000 subscribers</li>-->
+<!--                  <li>Advanced analytics</li>-->
+<!--                  <li>24-hour support response time</li>-->
+              </ul>
+<!--              <a href="#" class="card-button outline">Get started today</a>-->
+          </div>
+      </div>
+  </section>
+
+  <!-- 문의하기 -->
+  <section class="section contact-section">
+    <h2>무엇이든 문의하세요</h2>
+    <p class="contact-intro">입주 상담, 제휴, 서비스 관련 문의는 아래 연락처로 편하게 남겨주세요.</p>
+    <ul class="contact-info">
+      <li>📞 02-123-4567</li>
+      <li>📧 support@between.com</li>
+      <li>📍 서울시 강남구 테헤란로 123</li>
+    </ul>
+<!--    <a href="/contact" class="contact-button">문의 폼으로 이동</a>-->
+  </section>
+
+  <!-- 지도 -->
+  <section class="section map-section">
+    <h2>찾아오시는 길</h2>
+    <div class="map-wrapper">
+      <div id="map"></div>
+    </div>
+  </section>
+
+
+</main>
+<th:block layout:fragment="page-script">
+  <!-- swiper 스크립트 -->
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=5da18d7a3b92134652f249b6d2a46159"></script>
+  <script>
+    $(document).ready(function () {
+       const swiper = new Swiper('.swiper', {
+        loop: true,
+        pagination: {
+          el: '.swiper-pagination',
+          clickable: true
+        },
+        navigation: {
+          nextEl: '.swiper-button-next',
+          prevEl: '.swiper-button-prev',
+        },
+        autoplay: {
+          delay: 3000,
+        },
+      });
+
+      const container = document.getElementById('map'); //지도를 담을 영역의 DOM 레퍼런스
+      const options = { //지도를 생성할 때 필요한 기본 옵션
+        center: new kakao.maps.LatLng(33.450701, 126.570667), //지도의 중심좌표.
+        level: 3 //지도의 레벨(확대, 축소 정도)
+      };
+
+      const map = new kakao.maps.Map(container, options); //지도 생성 및 객체 리턴
+
+    });
+  </script>
+
+
+</th:block>
+</body>
+
+
+</html>

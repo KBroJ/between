@@ -29,6 +29,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
+
 
 	// DB 연결에 필요한 라이브러리
 	runtimeOnly 'com.mysql:mysql-connector-j'

@@ -1,0 +1,16 @@
+section {
+    padding: 100px 20px;
+}
+
+.error-inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    align-items: center;
+
+}
+
+.error-text {
+    flex: 1;
+    min-width: 280px;
+}

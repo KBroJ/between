@@ -1,0 +1,9 @@
+<div th:fragment="commonMenu">
+    <nav class="nav-menu">
+        <ul>
+            <li th:each="menu : ${menuList}">
+                <a th:href="@{${menu.menuUrl}}" th:text="${menu.menuNm}"></a>
+            </li>
+        </ul>
+    </nav>
+</div>
