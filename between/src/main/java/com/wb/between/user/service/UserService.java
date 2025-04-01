@@ -90,7 +90,6 @@ public class UserService {
         }
         System.out.println("================================================");
         System.out.println("UserService|generateAndSendVerificationCode|session|인증번호 요청 휴대폰번호 :  " + session.getAttribute(OTP_PREFIX + phoneNo));
-        System.out.println("UserService|generateAndSendVerificationCode|session|인증번호 유효시간(초) :  " + session.getMaxInactiveInterval());
 
         // 인증번호 SMS 발송 - 작업필요(API)
         // sendSMS(phoneNumber, code);
