@@ -22,7 +22,9 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())               // CSRF 보안 설정(위조 요청 방지)을 비활성화
                 .authorizeHttpRequests(auth -> auth    // URL 기반 접근제어 설정
-                        .requestMatchers("/", "/signup", "/checkEmail", "/send-verification", "/css/**", "/js/**").permitAll()
+                        .requestMatchers(
+                                "/", "/main",
+                                "/signup", "/checkEmail", "/send-verification", "/css/**", "/img/**", "/js/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form //
