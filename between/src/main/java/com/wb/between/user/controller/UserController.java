@@ -1,8 +1,9 @@
 package com.wb.between.user.controller;
 
 import com.wb.between.user.domain.User;
-import com.wb.between.user.dto.SignupRequest;
+import com.wb.between.user.dto.SignupReqDto;
 import com.wb.between.user.service.UserService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -39,11 +40,11 @@ public class UserController {
             // @Valid : SignupRequest 객체에서 설정한 유효성 검사 실행
             // signupRequest : 회원가입 정보를 담는 객체
             // BindingResult : 유효성 검사 결과를 담는 객체
-            @Valid @ModelAttribute("user") SignupRequest signupRequest,
+            @Valid @ModelAttribute("user") SignupReqDto signupReqDto,
             BindingResult result, Model model
     ) {
 
-        System.out.println("UserController|registerUser|signupRequest = " + signupRequest);
+        System.out.println("UserController|registerUser|signupRequest = " + signupReqDto);
 
         // SignupRequest 유효성 검사 실패 시 로그 출력
         System.out.println("유효성 검사|result.hasErrors() = " + result.hasErrors());
@@ -73,7 +74,7 @@ public class UserController {
 
             // 회원가입 진행
             System.out.println("UserController|registerUser|회원가입 진행 전");
-            User user = userService.registerUser(signupRequest);
+            User user = userService.registerUser(signupReqDto);
             System.out.println("UserController|registerUser|회원가입 진행 후 | user = " + user);
 
             return "redirect:/";
@@ -124,15 +125,29 @@ public class UserController {
     // 휴대폰번호 인증번호 전송
     @PostMapping("/send-verification")
     @ResponseBody
-    public Map<String, String> sendVerificationCode(@RequestBody Map<String, String> request) {
-        String phoneNumber = request.get("phoneNumber");
-        String code = userService.generateAndSendVerificationCode(phoneNumber);
+    public Map<String, String> sendVerificationCode(@RequestBody Map<String, String> request, HttpSession session) {
+        System.out.println("UserController|sendVerificationCode|시작 ==========> request : " + request);
+
+        String phoneNo = request.get("phoneNo");
+        String code = userService.generateAndSendVerificationCode(session, phoneNo);
 
         Map<String, String> response = new HashMap<>();
         response.put("success", "true");
         // 실제 구현에서는 코드를 클라이언트에 반환하지 않음
         // 여기서는 테스트를 위해 반환
         response.put("code", code);
+        return response;
+    }
+
+    @PostMapping("/verify-code")
+    public Map<String, Boolean> verifyCode(@RequestBody Map<String, String> request, HttpSession session) {
+        String phoneNumber = request.get("phoneNumber");
+        String code = request.get("code");
+
+        boolean isValid = userService.verifyCode(session, phoneNumber, code);
+
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("valid", isValid);
         return response;
     }
 

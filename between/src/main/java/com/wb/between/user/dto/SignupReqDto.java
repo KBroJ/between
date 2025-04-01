@@ -16,7 +16,7 @@ import lombok.Data;
     명확한 API 계약: 클라이언트가 제공해야 할 데이터 형식을 명확히 정의
  */
 @Data
-public class SignupRequest {
+public class SignupReqDto {
 
     @NotBlank(message = "이메일은 필수 입력값입니다.")   // 입력값이 null이거나 공백인 경우 유효성 검증 실패
     @Email(message = "유효한 이메일 형식이 아닙니다.")   // 이메일 형식이 아닌 경우 유효성 검증 실패

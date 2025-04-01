@@ -21,10 +21,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const verificationMessage = document.getElementById('verificationMessage');
 
     let countdownTimer;
-    let isEmailVerified = false;
-    let isVerificationExpired = false;
+    let isEmailVerified = false;        // 이메일 중복 확인 여부
+    isPhoneVerified = false;            // 휴대폰 번호 인증 여부
+    let isVerificationExpired = false;  // 인증번호 입력 카운트다운 만료 여부
 
-    // 이메일 중복 확인 버튼 클릭 이벤트
+// 이메일 중복 확인 버튼 클릭 이벤트
     checkEmailBtn.addEventListener('click', function() {
         const email = emailInput.value;
         if (!email) {
@@ -74,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // 휴대폰 번호 입력 시 숫자만 허용하고 자동으로 하이픈 추가
+// 휴대폰 번호 입력 시 숫자만 허용하고 자동으로 하이픈 추가
     /*
     */
     phoneNumberInput.addEventListener('input', function(e) {
@@ -102,9 +103,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // 인증하기 버튼 클릭 이벤트
+// 휴대폰 번호 인증번호 발송
     sendVerificationBtn.addEventListener('click', function() {
-        // 모든 필수 입력값 검증
+        // 모든 필수 입력값 입력 여부 검증
         if (!validateAllInputs()) {
             return;
         }
@@ -132,12 +133,13 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(() => {
             // 테스트용 코드 (실제로는 서버 통신 필요)
-            verificationSection.style.display = 'block';
-            registerBtn.style.display = 'block';
-            sendVerificationBtn.style.display = 'none';
-            startCountdown(180); // 3분 카운트다운
+//            verificationSection.style.display = 'block';
+//            registerBtn.style.display = 'block';
+//            sendVerificationBtn.style.display = 'none';
+//            startCountdown(180); // 3분 카운트다운
 
-            alert('인증번호가 발송되었습니다.');
+//            alert('인증번호가 발송되었습니다.');
+            alert('오류발생');
         });
     });
 
@@ -151,47 +153,98 @@ document.addEventListener('DOMContentLoaded', function() {
             clearInterval(countdownTimer);
         }
 
-        countdownTimer = setInterval(function() {
-            let minutes = parseInt(timer / 60, 10);
-            let seconds = parseInt(timer % 60, 10);
+        countdownTimer = setInterval(
+            function() {
+                let minutes = parseInt(timer / 60, 10);
+                let seconds = parseInt(timer % 60, 10);
 
-            minutes = minutes < 10 ? "0" + minutes : minutes;
-            seconds = seconds < 10 ? "0" + seconds : seconds;
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
 
-            countdownSpan.textContent = minutes + ":" + seconds;
+                countdownSpan.textContent = minutes + ":" + seconds;
 
-            if (--timer < 0) {
-                clearInterval(countdownTimer);
-                countdownSpan.textContent = "시간 만료";
+                if (--timer < 0) {
+                    clearInterval(countdownTimer);
+                    countdownSpan.textContent = "시간 만료";
 
-                isVerificationExpired = true;
+                    isVerificationExpired = true;
 
-                // 회원가입 버튼을 인증하기 버튼으로 변경
-                registerBtn.style.display = 'none';
-                sendVerificationBtn.style.display = 'block';
-                verificationMessage.textContent = '인증 시간이 만료되었습니다. 다시 인증해주세요.';
-            }
-        }, 1000);
+                    // 회원가입 버튼을 인증하기 버튼으로 변경
+                    registerBtn.style.display = 'none';
+                    sendVerificationBtn.style.display = 'block';
+                    verificationMessage.textContent = '인증 시간이 만료되었습니다. 다시 인증해주세요.';
+                }
+            }, 1000);
     }
 
     // 폼 제출 이벤트
     form.addEventListener('submit', function(event) {
         event.preventDefault();
 
-        // 인증번호 확인 (실제로는 서버에서 검증해야 함)
+        // 인증번호 입력란에 입력값 확인
         const verificationCode = verificationCodeInput.value;
+
+        // 인증번호 입력값이 없으면 메시지 출력
         if (!verificationCode) {
             verificationMessage.textContent = '인증번호를 입력해주세요.';
             return;
         }
 
-        // 여기서는 예시로 "1234"가 올바른 인증번호라고 가정
+    // 인증번호 입력값 확인
+    /* 테스트용 : 여기서는 예시로 "1234"가 올바른 인증번호라고 가정
         if (verificationCode === "1234") {
             // 실제 구현에서는 서버에 폼 데이터를 제출합니다
             this.submit();
         } else {
             verificationMessage.textContent = '인증번호가 올바르지 않습니다.';
         }
+    */
+        // 서버에 인증번호 검증 요청
+        fetch('/verify-code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                phoneNumber: phoneNumber,
+                code: verificationCode
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('HTTP status ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.valid) {
+                // 인증 성공
+                verificationMessage.textContent = '인증이 완료되었습니다.';
+                verificationMessage.style.color = 'green';
+                isPhoneVerified = true;
+                registerBtn.disabled = false;
+
+                // 카운트다운 중지
+                if (countdownTimer) {
+                    clearInterval(countdownTimer);
+                    countdownSpan.textContent = '인증완료';
+                }
+            }
+            // 테스트용
+            else if(verificationCode === "1234") {
+                this.submit();
+            } else {
+                // 인증 실패
+                verificationMessage.textContent = '인증번호가 올바르지 않습니다.';
+                verificationMessage.style.color = '#dc3545';
+                isPhoneVerified = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            verificationMessage.textContent = '서버 오류가 발생했습니다.';
+        });
+
     });
 
     // 모든 필수 입력값 검증 함수
