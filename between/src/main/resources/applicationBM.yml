@@ -1,0 +1,20 @@
+# Server port setting
+#server:
+#  port: 8080
+
+spring:
+  # DB Connection Setting(DB 연결 설정)
+  datasource:
+    # Local DB(MySQL)
+#    url: jdbc:mysql://localhost:3306/between
+#    username: root
+#    password: 0000
+    # Winbit Server DB(MySQL)
+    URL: jdbc:mysql://localhost:3306/wb_between
+    username: root
+    password: jy0115
+  jpa:
+    hibernate:
+      ddl-auto: update  # 애플리케이션 실행 시 변경점만 반영
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl   # 테이블명, 컬럼명을 CamelCase로 인식(스네이크 케이스(_넣기)로 변경하지 않음) 

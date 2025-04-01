@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>FAQ</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/custom-faq.css">
+</head>
+<body>
+<div class="p-5 mb-5 text-center bg-light">
+    <h4 class="mb-3">FAQ</h4>
+</div>
+
+<div class="container faq-container">
+    <div id="faqAccordion">
+        <div class="card faq-card" th:each="item, iterStat : ${faqList}">
+            <div class="card-header faq-header" th:id="'faqHeader' + ${item.qNo}">
+                <h5 class="mb-0">
+                    <button class="btn btn-link faq-question-btn collapsed"
+                            data-toggle="collapse"
+                            th:data-target="'#faqCollapse' + ${item.qNo}"  aria-expanded="false"
+                            th:aria-controls="'faqCollapse' + ${item.qNo}" >
+                        <span th:text="${item.question}">Question Text</span>
+                        <i class="fas fa-chevron-down faq-icon"></i> </button>
+                </h5>
+            </div>
+
+            <div th:id="'faqCollapse' + ${item.qNo}"
+                 class="collapse faq-content"
+                 th:aria-labelledby="'faqHeader' + ${item.qNo}" data-parent="#faqAccordion">
+                <div class="card-body"> <p class="card-text" th:text="${item.answer}"></p>
+                </div>
+            </div>
+        </div></div> </div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+
+</body>
+</html>
