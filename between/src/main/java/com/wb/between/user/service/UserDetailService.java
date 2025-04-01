@@ -1,7 +1,8 @@
 package com.wb.between.user.service;
 
-import com.wb.between.user.domain.User;
-import com.wb.between.user.repository.UserRepository;
+
+import com.wb.between.user.domain.UserBM;
+import com.wb.between.user.repository.UserRepositoryBM;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -11,11 +12,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserDetailService implements UserDetailsService {
 
-    private final UserRepository userRepository;
+    private final UserRepositoryBM userRepositoryBM;
 
     @Override
-    public User loadUserByUsername(String email){
-        return userRepository.findByEmail(email)
+    public UserBM loadUserByUsername(String email){
+        return userRepositoryBM.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다. - " + email));
     }
 }

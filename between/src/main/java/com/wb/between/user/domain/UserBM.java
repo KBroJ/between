@@ -19,7 +19,7 @@ import java.util.List;
 @NoArgsConstructor(access =  AccessLevel.PROTECTED)
 @Getter
 @Entity
-public class User implements UserDetails {
+public class UserBM implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,7 +56,7 @@ public class User implements UserDetails {
     private String loginM;
 
     @Builder
-    public User(String email, String password){
+    public UserBM(String email, String password){
         this.email = email;
         this.password = password;
     }
