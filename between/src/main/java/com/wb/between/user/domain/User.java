@@ -7,8 +7,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 //@Table(name = "User") // 매핑할 테이블명 선언 (생략 시 클래스명을 테이블명으로 사용가능)
@@ -16,7 +21,7 @@ import java.time.LocalDateTime;
 @Builder                // 빌더 패턴 클래스 생성
 @NoArgsConstructor      // 인자가 없는 생성자 생성
 @AllArgsConstructor     // 모든 필드를 인자로 받는 생성자 생성
-public class User {
+public class User implements UserDetails {
 
     @Id                                                                         // PK 필드 선언
     @GeneratedValue(strategy = GenerationType.IDENTITY)                         // 기본 키를 자동으로 생성(IDENTITY전략은 기본 키 생성을 데이터베이스에 위임)
@@ -60,4 +65,39 @@ public class User {
 
     @Column(name = "loginM", length = 10, nullable = false)
     private String loginM;
+
+    @Override   // 권한
+    public Collection<? extends GrantedAuthority> getAuthorities(){
+        return List.of(new SimpleGrantedAuthority("user"));
+    }
+
+    // 사용자의 id를 반환 (고유한 값)
+    @Override
+    public String getUsername(){
+        return email;
+    }
+
+    // 사용자의 패스워드 반환
+    @Override
+    public String getPassword(){
+        return password;
+    }
+
+    // 계정 만료 여부 반환
+    @Override
+    public boolean isAccountNonExpired(){
+        return true;    // 계정 만료되었는지 확인하는 로직 (true면 만료되지 않았음)
+    }
+
+    // 계정 잠금 여부 반환
+    @Override
+    public boolean isAccountNonLocked(){
+        return true;    // 패스워드 만료됐는지 확인하는 로직
+    }
+
+    @Override
+    public boolean isEnabled(){
+        return true;    // 계정 사용 가능 확인하는 로직
+    }
+
 }

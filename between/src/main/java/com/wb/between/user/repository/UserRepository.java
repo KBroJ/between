@@ -6,8 +6,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
+
+    Optional<User> findByEmail(String eamil);   // email로 사용자 정보 가지고 옴
 
     // 방법1. User 엔티티에 선언된 변수명을 기반으로 메소드명 짓기
     boolean existsByEmail(String email);

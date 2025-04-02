@@ -19,7 +19,7 @@ public class MainController {
 
     private final BannerService bannerService;
 
-    @GetMapping("/main")
+    @GetMapping("/")
     public String main(Model model) {
         List<BannerListResponseDto> bannerList = bannerService.findBannerList();
         model.addAttribute("bannerList", bannerList);
