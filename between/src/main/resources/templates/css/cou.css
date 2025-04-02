@@ -1,0 +1,250 @@
+/* --- ▼▼▼ 탭 필터 스타일 추가 ▼▼▼ --- */
+.coupon-filter-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    /* ▼ 수정된 부분 ▼ */
+    padding: 25px 30px 25px; /* 위아래 패딩 25px, 좌우 30px */
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: 30px; /* 하단 마진은 30px 유지 (리스트와의 간격) */
+    /* ▲ 수정된 부분 ▲ */
+}
+
+.filter-tab {
+    padding: 10px 20px; /* 탭 내부 패딩 */
+    border: 1px solid var(--border-light); /* 기본 테두리 */
+    background-color: var(--white); /* 기본 배경색 */
+    color: var(--text-light); /* 기본 글자색 */
+    border-radius: 20px; /* 둥근 모서리 */
+    cursor: pointer; /* 마우스 커서 변경 */
+    font-size: 0.95em;
+    font-weight: 500;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; /* 부드러운 전환 효과 */
+}
+
+.filter-tab:hover {
+    background-color: var(--secondary-color); /* 호버 시 배경색 변경 */
+    border-color: #d1d9e6;
+    color: var(--text-dark);
+}
+
+.filter-tab.active {
+    background-color: var(--primary-color); /* 활성 탭 배경색 */
+    color: var(--white); /* 활성 탭 글자색 */
+    border-color: var(--primary-color); /* 활성 탭 테두리 색 */
+    font-weight: 600;
+}
+/* --- ▲▲▲ 탭 필터 스타일 추가 ▲▲▲ --- */
+
+
+/* --- 기본 & 변수 설정 --- */
+:root {
+    --primary-color: #5e72e4; /* 메인 색상 (소프트 블루) */
+    --secondary-color: #f7fafc; /* 부드러운 배경 */
+    --text-dark: #32325d; /* 진한 텍스트 */
+    --text-light: #8898aa; /* 연한 텍스트 */
+    --green: #2dce89; /* 사용 가능 */
+    --grey: #adb5bd; /* 사용 완료 */
+    --red: #f5365c; /* 만료 */
+    --white: #ffffff;
+    --border-light: #e9ecef;
+    --shadow-soft: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-hover: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+}
+
+body {
+    font-family: 'Poppins', 'Noto Sans KR', sans-serif; /* Poppins 우선, 없으면 Noto Sans KR */
+    background-color: var(--secondary-color);
+    margin: 0;
+    padding: 30px 15px; /* 상하 패딩 증가, 좌우 패딩 */
+    color: var(--text-dark);
+    line-height: 1.7;
+}
+
+/* --- 컨테이너 --- */
+.coupon-container {
+    max-width: 750px;
+    margin: 30px auto;
+    background-color: var(--white);
+    border-radius: 15px; /* 더 둥글게 */
+    box-shadow: var(--shadow-soft);
+    overflow: hidden; /* 내부 요소가 넘치지 않도록 */
+}
+
+/* --- 메인 헤더 --- */
+.coupon-main-header {
+    background: linear-gradient(87deg, var(--primary-color) 0, #8898aa 100%) !important; /* 그라데이션 배경 */
+    color: var(--white);
+    padding: 40px 30px; /* 패딩 증가 */
+    text-align: center;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.coupon-main-header h1 {
+    margin: 0 0 10px 0;
+    font-size: 2em; /* 크기 증가 */
+    font-weight: 600;
+}
+
+.coupon-main-header h1 i {
+    margin-right: 12px;
+    vertical-align: middle;
+}
+
+.coupon-main-header p {
+    margin: 0;
+    font-size: 1em;
+    opacity: 0.9; /* 약간 투명하게 */
+}
+
+/* --- 쿠폰 리스트 --- */
+.coupon-list {
+    padding: 30px; /* 리스트 내부 패딩 */
+}
+
+/* --- 개별 쿠폰 아이템 --- */
+.coupon-item {
+    background-color: var(--white);
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    margin-bottom: 25px;
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden; /* 내부 요소가 넘치지 않도록 */
+}
+
+.coupon-item:hover {
+    transform: translateY(-5px) scale(1.01); /* 약간 확대되는 효과 */
+    box-shadow: var(--shadow-hover);
+}
+
+/* --- 쿠폰 메인 정보 영역 (아이콘 + 텍스트) --- */
+.coupon-main-info {
+    display: flex; /* Flexbox 사용 */
+    align-items: center; /* 세로 중앙 정렬 */
+    padding: 20px;
+    position: relative;
+}
+
+/* 쿠폰 아이콘 영역 */
+.coupon-icon-area {
+    flex-shrink: 0; /* 아이콘 영역 크기 고정 */
+    width: 60px;
+    height: 60px;
+    background-color: var(--secondary-color);
+    border-radius: 50%; /* 원형 배경 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 20px;
+    font-size: 1.5em; /* 아이콘 크기 */
+    color: var(--primary-color); /* 아이콘 색상 */
+}
+
+/* 상태별 아이콘 색상 */
+.coupon-item.status-available .coupon-icon-area { color: var(--green); }
+.coupon-item.status-used .coupon-icon-area { color: var(--grey); }
+.coupon-item.status-expired .coupon-icon-area { color: var(--red); }
+
+/* 쿠폰 텍스트 영역 */
+.coupon-text-area {
+    flex-grow: 1; /* 남은 공간 모두 차지 */
+}
+
+.coupon-name {
+    font-size: 1.2em; /* 이름 크기 */
+    font-weight: 600;
+    margin: 0 0 5px 0;
+    color: var(--text-dark);
+}
+
+.coupon-description {
+    font-size: 0.95em;
+    color: var(--text-light);
+    margin: 0 0 10px 0;
+}
+
+/* 쿠폰 상태 뱃지 */
+.coupon-badge {
+    display: inline-block; /* 인라인 블록 요소로 */
+    padding: 5px 12px;
+    border-radius: 20px; /* 둥근 알약 모양 */
+    font-size: 0.8em;
+    font-weight: 500;
+    color: var(--white);
+    vertical-align: middle;
+}
+
+.coupon-badge i {
+    margin-right: 5px;
+}
+
+/* 상태별 뱃지 색상 */
+.status-available-badge { background-color: var(--green); }
+.status-used-badge { background-color: var(--grey); }
+.status-expired-badge { background-color: var(--red); }
+
+
+/* --- 쿠폰 상세 정보 (유효기간, 조건 등) --- */
+.coupon-details {
+    background-color: #fdfdfe; /* 약간 다른 배경색 */
+    padding: 15px 20px;
+    border-top: 1px dashed var(--border-light); /* 점선 구분 */
+    font-size: 0.9em;
+    color: var(--text-light);
+}
+
+.coupon-details p {
+    margin: 5px 0; /* 문단 간격 줄임 */
+    display: flex; /* 아이콘과 텍스트 정렬 */
+    align-items: center;
+}
+
+.coupon-details i {
+    margin-right: 8px;
+    width: 15px; /* 아이콘 너비 고정 */
+    text-align: center;
+    color: var(--primary-color); /* 상세 아이콘 색상 */
+}
+
+/* --- 상태별 투명도 및 필터 --- */
+.coupon-item.status-used,
+.coupon-item.status-expired {
+    filter: grayscale(30%); /* 약간 회색조 */
+    opacity: 0.8; /* 살짝 투명하게 */
+}
+
+/* --- 반응형 (간단 예시) --- */
+@media (max-width: 600px) {
+    body {
+        padding: 20px 10px;
+    }
+    .coupon-container {
+        margin: 20px auto;
+    }
+    .coupon-main-header {
+        padding: 30px 20px;
+    }
+    .coupon-main-header h1 {
+        font-size: 1.8em;
+    }
+    .coupon-list {
+        padding: 20px;
+    }
+    .coupon-main-info {
+        padding: 15px;
+    }
+    .coupon-icon-area {
+        width: 50px;
+        height: 50px;
+        font-size: 1.3em;
+        margin-right: 15px;
+    }
+    .coupon-name {
+        font-size: 1.1em;
+    }
+    .coupon-details {
+        padding: 12px 15px;
+        font-size: 0.85em;
+    }
+}
