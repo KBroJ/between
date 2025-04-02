@@ -120,7 +120,9 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch('/send-verification', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({phoneNo: phoneNumberInput.value})
+            body: JSON.stringify(
+                { phoneNo: phoneNumberInput.value.replace(/[^0-9]/g, '') }  // 하이픈 제거
+            )
         })
         .then(response => response.json())
         .then(() => {
@@ -206,7 +208,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                phoneNo: phoneNumberInput.value,
+                phoneNo: phoneNumberInput.value.replace(/[^0-9]/g, ''),  // 하이픈 제거
                 code: verificationCode
             })
         })
@@ -222,18 +224,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 verificationMessage.textContent = '인증이 완료되었습니다.';
                 verificationMessage.style.color = 'green';
                 isPhoneVerified = true;
-                registerBtn.disabled = false;
+//                registerBtn.disabled = false;
 
                 // 카운트다운 중지
                 if (countdownTimer) {
                     clearInterval(countdownTimer);
                     countdownSpan.textContent = '인증완료';
                 }
+
+                this.submit();
             }
             // 테스트용
-            else if(verificationCode === "1234") {
-                this.submit();
-            } else {
+//            else if(verificationCode === "1234") {
+//                this.submit();
+//            }
+            else {
                 // 인증 실패
                 verificationMessage.textContent = '인증번호가 올바르지 않습니다.';
                 verificationMessage.style.color = '#dc3545';

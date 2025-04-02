@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>계정 찾기</title>
+        <link rel="stylesheet" th:href="@{/css/login/findUserInfo.css}">
+    </head>
+    <body>
+        <div class="container">
+            <div class="tab-container">
+                <button class="tab active" data-tab="find-email">이메일 찾기</button>
+                <button class="tab" data-tab="find-pw">비밀번호 찾기</button>
+            </div>
+
+            <!-- 이메일 찾기 폼 -->
+            <div id="find-email-form" class="form-container active">
+                <div class="form-group">
+                    <label for="phone">휴대폰 번호</label>
+                    <input type="tel" id="phone" placeholder="010-1234-5678">
+                    <span id="phone-error" class="error-message"></span>
+                </div>
+                <button id="send-email-verify" class="verify-btn">인증번호 발송</button>
+
+                <div id="email-verify-section" class="verify-section" style="display: none;">
+                    <div class="form-group">
+                        <label for="email-verify-code">인증번호</label>
+                        <input type="text" id="email-verify-code">
+                        <span id="email-countdown" class="countdown"></span>
+                    </div>
+                    <button id="confirm-email-verify" class="confirm-btn">인증확인</button>
+                </div>
+            </div>
+
+            <!-- 비밀번호 찾기 폼 -->
+            <div id="find-pw-form" class="form-container">
+                <div class="form-group">
+                    <label for="email">이메일</label>
+                    <input type="email" id="email" placeholder="example@domain.com">
+                    <span id="email-error" class="error-message"></span>
+                </div>
+                <button id="send-pw-verify" class="verify-btn">인증번호 발송</button>
+
+                <div id="pw-verify-section" class="verify-section" style="display: none;">
+                    <div class="form-group">
+                        <label for="pw-verify-code">인증번호</label>
+                        <input type="text" id="pw-verify-code">
+                        <span id="pw-countdown" class="countdown"></span>
+                    </div>
+                    <button id="confirm-pw-verify" class="confirm-btn">인증확인</button>
+                </div>
+            </div>
+        </div>
+
+    <!-- JavaScript -->
+    <script th:src="@{/js/login/findUserInfo.js}"></script>
+    </body>
+</html>

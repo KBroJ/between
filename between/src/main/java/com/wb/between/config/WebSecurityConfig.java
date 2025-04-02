@@ -35,7 +35,7 @@ public class WebSecurityConfig {
                         .requestMatchers(
                                 "/css/**", "/js/**", "/img/**",
                                 "/", "/main",
-                                "/signup", "/checkEmail", "/send-verification",
+                                "/signup", "/findUserInfo","/checkEmail", "/send-verification", "/verify-code",
                                 "/login", "/faqList", "/error", "/favicon.ico"
                         ).permitAll() // "/login" 누구나 접근 가능하게
                         .anyRequest().authenticated()             // 나머지 요청은 인증 필요

@@ -34,6 +34,15 @@ public class UserController {
         return "login/signup";
     }
 
+    // 회원정보(email/pwd) 확인 페이지 호출
+    @GetMapping("/findUserInfo")
+    public String findUserInfoForm(Model model) {
+
+        model.addAttribute("user", new User());
+
+        return "login/findUserInfo";
+    }
+
 // 회원가입
     @PostMapping("/signup")
     public String registerUser(
@@ -77,7 +86,7 @@ public class UserController {
             User user = userService.registerUser(signupReqDto);
             System.out.println("UserController|registerUser|회원가입 진행 후 | user = " + user);
 
-            return "redirect:/";
+            return "redirect:/main";
 
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
@@ -140,11 +149,15 @@ public class UserController {
     }
 
     @PostMapping("/verify-code")
+    @ResponseBody
     public Map<String, Boolean> verifyCode(@RequestBody Map<String, String> request, HttpSession session) {
-        String phoneNumber = request.get("phoneNumber");
+        System.out.println("UserController|verifyCode|시작 ==========> request : " + request);
+
+        String phoneNo = request.get("phoneNo");
         String code = request.get("code");
 
-        boolean isValid = userService.verifyCode(session, phoneNumber, code);
+        boolean isValid = userService.verifyCode(session, phoneNo, code);
+        System.out.println("UserController|verifyCode|isValid : " + isValid);
 
         Map<String, Boolean> response = new HashMap<>();
         response.put("valid", isValid);

@@ -31,3 +31,13 @@ logging:
   level:
     # 쿼리 바인딩 로그찍기 참고 : https://byunsw4.tistory.com/25
     org.hibernate.orm.jdbc.bind: trace  # query의 ?에 어떤 값이 들어가는지 추적할 수 있는 설정(TRACE Log에 값을 보여줍니다.)
+
+# 휴대폰 본인인증 SMS 발송 API(coolSMS) 설정
+coolsms:
+  api:
+#    key: "발급받은 API KEY"
+#    secret: "발급받은 API SECRET"
+#    number: 01012345678
+    key: 
+    secret: 07BX4JANLSJ1YPNNMDXGOZP68CY4TAA5
+    from: 01081081851
