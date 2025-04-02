@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+  <title>마이페이지 화면</title>
+  <th:block layout:fragment="page-css">
+    <!-- ✅ 페이지 전용 스타일 삽입 -->
+    <link rel="stylesheet" th:href="@{/css/mypage/mypage.css}">
+  </th:block>
+</head>
+<body>
+
+<main layout:fragment="content">
+  <div class="mypage-dashboard">
+    <div class="mypage-header">
+      <h2>마이페이지</h2>
+      <p>회원님의 공유오피스 활동 및 멤버십 정보를 한눈에 확인하세요.</p>
+    </div>
+
+    <div class="mypage-overview">
+      <div class="overview-box">
+        <h3>현재 이용 중</h3>
+        <p><strong>프라이빗 오피스 302호</strong></p>
+        <p>이용 종료일: 2025-04-30</p>
+      </div>
+      <div class="overview-box">
+        <h3>다음 예약</h3>
+        <p><strong>회의실 A</strong></p>
+        <p>2025-04-05 14:00 ~ 15:00</p>
+      </div>
+<!--      <div class="overview-box">-->
+<!--        <h3>멤버십</h3>-->
+<!--        <p>프리미엄 요금제</p>-->
+<!--        <p>다음 결제: 2025-04-30</p>-->
+<!--      </div>-->
+    </div>
+
+    <div class="mypage-grid">
+      <!-- 최근 예약 내역 -->
+      <div class="mypage-card">
+        <div class="card-header">
+          <h3>최근 예약</h3>
+          <a href="/reservations">전체 보기</a>
+        </div>
+        <ul class="mypage-list">
+          <li><span>4/3</span> 회의실 B 10:00 ~ 12:00</li>
+          <li><span>4/2</span> 라운지 좌석 14:00 ~ 17:00</li>
+          <li><span>4/1</span> 회의실 A 09:00 ~ 10:30</li>
+        </ul>
+      </div>
+
+      <!-- 이용 기록 -->
+      <div class="mypage-card">
+        <div class="card-header">
+          <h3>최근 이용 기록</h3>
+          <a href="/usage-history">전체 보기</a>
+        </div>
+        <ul class="mypage-list">
+          <li><span>3/31</span> 프린터 5매 사용</li>
+          <li><span>3/30</span> 커피머신 이용</li>
+          <li><span>3/29</span> 라운지 이용</li>
+        </ul>
+      </div>
+
+      <!-- 문의내역 -->
+      <div class="mypage-card">
+        <div class="card-header">
+          <h3>내 문의</h3>
+          <a href="/inquiries">문의하기</a>
+        </div>
+        <ul class="mypage-list">
+          <li><span>답변 완료</span> 회의실 예약 변경 가능할까요?</li>
+          <li><span>처리 중</span> 카드 결제 오류가 있습니다</li>
+        </ul>
+      </div>
+
+      <!-- 공지사항 -->
+      <div class="mypage-card">
+        <div class="card-header">
+          <h3>공지사항</h3>
+          <a href="/notices">전체 보기</a>
+        </div>
+        <ul class="mypage-list">
+          <li><a href="/notice/1">[안내] 5월 공휴일 운영시간 변경</a></li>
+          <li><a href="/notice/2">멤버십 요금제 개편 안내</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</main>
+
+</body>
+</html>

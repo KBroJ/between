@@ -9,7 +9,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 @Repository
-public interface BannerRepository extends JpaRepository<Banner, BigInteger> {
+public interface BannerRepository extends JpaRepository<Banner, Long> {
 
     //사용여부 기준, 정렬 조회
     List<Banner> findByUseAt(String useAt, Sort sort);

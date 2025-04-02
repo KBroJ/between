@@ -27,4 +27,6 @@ public class Menu {
     private String useAt;
 
     private Date createDt;
+
+    private int sortOrder;
 }

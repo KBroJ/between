@@ -39,4 +39,10 @@ public class MenuService {
     }
 
 
+    public List<MenuListResponseDto> findByRole(String roleAdmin) {
+        List<Menu> menuList = menuRepository.findByUseAt("Y", Sort.by(Sort.Direction.ASC, "menuNo"));
+        log.debug("menuList: {}", menuList);
+
+        return menuList.stream().map(MenuListResponseDto::from).toList();
+    }
 }

@@ -23,6 +23,8 @@ public class MenuListResponseDto {
 
     private String useAt;
 
+    private int sortOrder;
+
     public static MenuListResponseDto from(Menu menu) {
         return MenuListResponseDto.builder()
                 .menuNo(menu.getMenuNo())
@@ -31,6 +33,9 @@ public class MenuListResponseDto {
                 .menuDsc(menu.getMenuDsc())
                 .menuUrl(menu.getMenuUrl())
                 .useAt(menu.getUseAt())
+                .sortOrder(menu.getSortOrder())
                 .build();
     }
+
+
 }
