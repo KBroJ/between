@@ -50,6 +50,8 @@ dependencies {
 //	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'net.nurigo:sdk:4.3.2'										// 휴대폰 본인인증(coolsms) 라이브러리
 
+	//타임리프 + 시큐리티
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 }
 
 tasks.named('test') {
