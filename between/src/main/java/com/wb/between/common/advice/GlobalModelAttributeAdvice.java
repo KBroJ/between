@@ -28,23 +28,18 @@ public class GlobalModelAttributeAdvice {
 
         List<String> roles;
 
+        log.debug("authentication {}", authentication);
+        //인증여부
         if (authentication == null || !authentication.isAuthenticated()) {
             roles = List.of("ROLE_ANONYMOUS");
         } else {
+//            roles = List.of("ROLE_ANONYMOUS");
             roles = authentication.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority)
                     .collect(Collectors.toList());
+            log.debug("roles after auth {}", roles);
         }
 
-        // 권한명으로 세션 키를 구분
-        String sessionKey = "menuList_" + String.join("_", roles);
-
-        // 세션 캐싱을 추가하면 성능을 더 향상시킬 수 있음
-        List<MenuListResponseDto> cachedMenu = (List<MenuListResponseDto>) session.getAttribute("menuList");
-
-        if (cachedMenu != null) {
-            return cachedMenu;
-        }
 
         try {
             List<MenuListResponseDto> menus = roles.stream()
@@ -53,7 +48,6 @@ public class GlobalModelAttributeAdvice {
                     .sorted(Comparator.comparingInt(MenuListResponseDto::getSortOrder))
                     .collect(Collectors.toList());
 
-            session.setAttribute(sessionKey, menus);
             return menus;
 
         } catch (Exception e) {

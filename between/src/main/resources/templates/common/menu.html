@@ -1,5 +1,8 @@
 <div th:fragment="commonMenu">
     <nav class="nav-menu">
+        <div th:if="${#authorization.expression('isAuthenticated()')}">
+            <span th:text="${#authentication.name}">사용자 이메일</span> 님 환영합니다!
+        </div>
         <ul>
             <li th:each="menu : ${menuList}">
                 <a th:href="@{${menu.menuUrl}}" th:text="${menu.menuNm}"></a>

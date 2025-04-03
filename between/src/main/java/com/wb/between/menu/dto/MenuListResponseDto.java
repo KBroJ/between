@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigInteger;
+import java.util.List;
 
 @Getter
 @Builder
@@ -24,6 +25,8 @@ public class MenuListResponseDto {
     private String useAt;
 
     private int sortOrder;
+
+    private List<String> roleName;
 
     public static MenuListResponseDto from(Menu menu) {
         return MenuListResponseDto.builder()

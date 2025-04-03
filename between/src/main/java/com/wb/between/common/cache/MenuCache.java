@@ -25,7 +25,14 @@ public class MenuCache {
         loadMenus(); // 서버 시작 시 최초 캐싱
     }
 
+
+    public void reload() {
+        roleMenuCache.clear();
+        loadMenus(); // 서버 시작 시 최초 캐싱
+    }
+
     public void loadMenus() {
+        roleMenuCache.put("user", menuService.findByRole("user"));
         roleMenuCache.put("ROLE_ADMIN", menuService.findByRole("ROLE_ADMIN"));
         roleMenuCache.put("ROLE_USER", menuService.findByRole("ROLE_USER"));
         roleMenuCache.put("ROLE_MANAGER", menuService.findByRole("ROLE_MANAGER"));

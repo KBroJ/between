@@ -3,21 +3,18 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/layout}">
 <head>
-  <title>수정 화면</title>
-  <th:block layout:fragment="page-css">
-    <!-- ✅ 페이지 전용 스타일 삽입 -->
+  <title>마이페이지 화면</title>
     <link rel="stylesheet" th:href="@{/css/layout/mypage.css}">
-  </th:block>
 </head>
 <body>
 
 <main layout:fragment="content">
-  <div class="mypage-wrapper">
-    <!-- 사이드 메뉴 -->
+  <div class="mypage-container">
+<!--    &lt;!&ndash; 사이드 메뉴 &ndash;&gt;-->
     <aside th:replace="~{/mypage/sidebar :: mypage-sidebar}"></aside>
-    <h2>탈퇴 수정화면</h2>
+<!--    &lt;!&ndash; ✅ 메인 콘텐츠 &ndash;&gt;-->
+    <div class="mypage-content" layout:fragment="mypage-content"></div>
   </div>
 </main>
-
 </body>
 </html>

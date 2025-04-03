@@ -1,19 +1,39 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/layout}">
+      layout:decorate="~{layout/mypage}">
 <head>
   <title>수정 화면</title>
-  <th:block layout:fragment="page-css">
     <!-- ✅ 페이지 전용 스타일 삽입 -->
-    <link rel="stylesheet" th:href="@{/css/mypage/mypage.css}">
-  </th:block>
+    <link rel="stylesheet" th:href="@{/css/mypage/edit-profile.css}">
 </head>
 <body>
 
-<main layout:fragment="content">
-  <h2>프로파일 수정화면</h2>
-</main>
+<div layout:fragment="mypage-content">
+  <div class="profile-edit-wrapper">
+    <h2>회원정보 수정</h2>
+    <form th:action="@{/mypage/profile}" method="post" class="profile-form">
+      <div class="form-group">
+        <label for="name">이름</label>
+        <input type="text" id="name" name="name" th:value="${userInfo.name}" />
+      </div>
+
+      <div class="form-group">
+        <label for="email">이메일</label>
+        <input type="email" id="email" name="email" th:value="${userInfo.email}" readonly />
+      </div>
+
+      <div class="form-group">
+        <label for="phone">연락처</label>
+        <input type="text" id="phone" name="phone" th:value="${userInfo.phoneNo}" />
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn-primary">정보 수정</button>
+        <button type="button" class="btn-danger" onclick="location.href='/mypage/delete-account'">회원 탈퇴</button>
+      </div>
+    </form>
+  </div>
+</div>
 
 </body>
 </html>

@@ -112,13 +112,14 @@ CREATE TABLE `UserCoupon` (
 
 
 CREATE TABLE `Menu` (
-	`menuNo`	VARCHAR(255)	NOT NULL AUTO_INCREMENT,
-	`upperMenuNo`	VARCHAR(255)	NULL,
-	`menuNm`	VARCHAR(255)	NULL,
-	`menuDsc`	VARCHAR(255)	NULL,
-	`menuUrl`	VARCHAR(255)	NULL,
-	`useAt`	VARCHAR(255)	NULL,
-	`createDt`	VARCHAR(255)	NULL,
+    `menuNo` bigint NOT NULL AUTO_INCREMENT,
+    `upperMenuNo` bigint DEFAULT NULL,
+    `menuNm` varchar(255) DEFAULT NULL,
+    `menuDsc` varchar(255) DEFAULT NULL,
+    `menuUrl` varchar(255) DEFAULT NULL,
+    `useAt` varchar(10) DEFAULT NULL,
+    `createDt` timestamp NULL DEFAULT NULL,
+    `sortOrder` int DEFAULT NULL,
     PRIMARY KEY (menuNo)
 );
 
@@ -147,3 +148,21 @@ CREATE TABLE `Faq` (
 	`createDt`	timestamp	NOT NULL,
     PRIMARY KEY (qNo)
 );
+
+
+INSERT INTO `Menu` (
+    `upperMenuNo`,
+    `menuNm`,
+    `menuDsc`,
+    `menuUrl`,
+    `useAt`,
+    `createDt`,
+    `sortOrder`
+) VALUES
+    (null,
+     '로그아웃',
+     '로그아웃',
+     '/logout',
+     'Y',
+     now(),
+     0);

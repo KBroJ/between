@@ -39,10 +39,19 @@ public class MenuService {
     }
 
 
-    public List<MenuListResponseDto> findByRole(String roleAdmin) {
+    public List<MenuListResponseDto> findByRole(String roles) {
         List<Menu> menuList = menuRepository.findByUseAt("Y", Sort.by(Sort.Direction.ASC, "menuNo"));
-        log.debug("menuList: {}", menuList);
 
-        return menuList.stream().map(MenuListResponseDto::from).toList();
+        return menuList.stream()
+                .filter(menu -> {
+                    if("user".equals(roles)) {
+                        return !menu.getMenuNm().equals("로그인") &&
+                                !menu.getMenuNm().equals("회원가입");
+                    } else {
+                        return !menu.getMenuNm().equals("마이페이지") &&
+                                !menu.getMenuNm().equals("로그아웃");
+                    }
+                })
+                .map(MenuListResponseDto::from).toList();
     }
 }

@@ -1,9 +1,39 @@
-<div th:fragment="mypage-sidebar">
-    <nav class="mypage-side-menu">
+<!-- Sidebar -->
+<aside class="sidebar" th:fragment="mypage-sidebar">
+    <h2 class="sidebar-title">마이페이지</h2>
+    <nav class="sidebar-nav">
         <ul>
-            <li th:each="menu : ${menuList}">
-                <a th:href="@{${menu.menuUrl}}" th:text="${menu.menuNm}"></a>
+            <li>
+                <a href="/mypage" class="menu-item active">
+                    <i class="fas fa-user-circle icon"></i> <!-- Font Awesome Icon -->
+                    <span>회원 정보</span>
+                </a>
+            </li>
+            <li>
+                <a href="/mypage/edit" class="menu-item">
+                    <i class="fas fa-edit icon"></i>
+                    <span>정보 수정</span>
+                </a>
+            </li>
+            <li>
+                <a href="/mypage/chagePassword" class="menu-item">
+                    <i class="fas fa-shopping-bag icon"></i>
+                    <span>비밀번호 수정</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="menu-item">
+                    <i class="fas fa-cog icon"></i>
+                    <span>설정</span>
+                </a>
             </li>
         </ul>
     </nav>
-</div>
+    <!-- Logout Link -->
+    <div class="sidebar-footer">
+        <a href="#" class="logout-link">
+            <i class="fas fa-sign-out-alt icon"></i>
+            <span>로그아웃</span>
+        </a>
+    </div>
+</aside>

@@ -1,29 +1,45 @@
 package com.wb.between.mypage.controller;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
+import com.wb.between.mypage.dto.MypageResponseDto;
+import com.wb.between.mypage.service.MypageService;
+import com.wb.between.user.domain.User;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+@Slf4j
 @Controller
 @RequestMapping("/mypage")
+@RequiredArgsConstructor
 public class MypageController {
 
-    @GetMapping("/")
-    public String mypage(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null){
+    private final MypageService mypageService;
 
-        }
-        return "mypage/mypage";
+    @GetMapping
+    public String mypage(@AuthenticationPrincipal User user, Model model) {
+
+        log.debug("user = {}", user);
+        MypageResponseDto mypageResponseDto = mypageService.findUserbyId(user.getUserNo());
+
+        model.addAttribute("userInfo", mypageResponseDto);
+
+        return "mypage/dashboard";
     }
 
     @GetMapping("/edit")
-    public String editProfile(Model model) {
+    public String editProfile(@AuthenticationPrincipal User user, Model model) {
+
+        log.debug("user = {}", user);
+        MypageResponseDto mypageResponseDto = mypageService.findUserbyId(user.getUserNo());
+        log.debug("mypageResponseDto = {}", mypageResponseDto);
+        log.debug("mypageResponseDto.getEmail = {}", mypageResponseDto.getEmail());
+
+        model.addAttribute("userInfo", mypageResponseDto);
+
         return "mypage/edit-profile";
     }
 
@@ -36,4 +52,5 @@ public class MypageController {
     public String resign(Model model) {
         return "mypage/resign";
     }
+
 }

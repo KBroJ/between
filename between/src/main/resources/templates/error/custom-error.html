@@ -5,21 +5,36 @@
   <title th:text="'에러 - '+ ${code}">에러</title>
   <link rel="stylesheet" th:href="@{/css/error/custom-error.css}">
 </head>
+<!--<body>-->
+<!--<main>-->
+<!--  <section class="section error-section">-->
+<!--    <div class="error-inner">-->
+<!--      <div class="about-image">-->
+<!--        &lt;!&ndash;        <img src="/img/about-office.jpg" alt="공유오피스 소개" />&ndash;&gt;-->
+<!--      </div>-->
+<!--      <div class="error-text">-->
+<!--        <h2 th:text="${status + ' 오류 발생'}"></h2>-->
+<!--        <p th:text="${message}">에러 메시지</p>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </section>-->
+
+<!--</main>-->
+
 <body>
-<main>
-  <section class="section error-section">
-    <div class="error-inner">
-      <div class="about-image">
-        <!--        <img src="/img/about-office.jpg" alt="공유오피스 소개" />-->
-      </div>
-      <div class="error-text">
-        <h2 th:text="${status + ' 오류 발생'}"></h2>
-        <p th:text="${message}">에러 메시지</p>
-      </div>
+
+<main class="notfound-container">
+  <div class="text-center">
+    <p th:text="${code}" class="status-code"></p>
+    <h2 th:text="${status}" class="title"></h2>
+    <p th:text="${message}" class="description"></p>
+    <div class="button-group">
+      <a href="/" class="btn-primary">Go back home</a>
+      <a href="/support" class="btn-link">Contact support →</a>
     </div>
-  </section>
-
+  </div>
 </main>
-
 </body>
+
+
 </html>

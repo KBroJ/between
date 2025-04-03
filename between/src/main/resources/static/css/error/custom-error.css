@@ -1,16 +1,96 @@
-section {
-    padding: 100px 20px;
+/* 전체 페이지를 화면 전체 높이로 설정 */
+html, body {
+    height: 100%;
+    margin: 0;
+    font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+    background-color: #ffffff;
 }
 
-.error-inner {
+.full-height {
+    height: 100%;
+}
+
+/* 메인 컨테이너 중앙 정렬 */
+.notfound-container {
+    display: grid;
+    place-items: center;
+    height: 100%;
+}
+
+/* 텍스트 정렬 */
+.text-center {
+    text-align: center;
+}
+
+/* 상태 코드 */
+.status-code {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #4f46e5; /* indigo-600 */
+    margin: 0;
+}
+
+/* 메인 타이틀 */
+.title {
+    font-size: 3rem;
+    font-weight: 600;
+    color: #111827; /* gray-900 */
+    margin-top: 16px;
+    margin-bottom: 0;
+}
+
+@media (min-width: 640px) {
+    .title {
+        font-size: 4.5rem;
+    }
+}
+
+/* 설명 문장 */
+.description {
+    margin-top: 24px;
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: #6b7280; /* gray-500 */
+}
+
+@media (min-width: 640px) {
+    .description {
+        font-size: 1.25rem;
+    }
+}
+
+/* 버튼 영역 */
+.button-group {
+    margin-top: 40px;
     display: flex;
-    flex-wrap: wrap;
-    gap: 40px;
-    align-items: center;
-
+    justify-content: center;
+    gap: 24px;
 }
 
-.error-text {
-    flex: 1;
-    min-width: 280px;
+/* 홈 버튼 */
+.btn-primary {
+    background-color: #4f46e5;
+    color: white;
+    padding: 10px 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: #6366f1; /* hover:bg-indigo-500 */
+}
+
+/* 서포트 링크 */
+.btn-link {
+    color: #111827;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.btn-link:hover {
+    text-decoration: underline;
 }

@@ -48,7 +48,7 @@ public class WebSecurityConfig {
                 )
                 // 5. 로그아웃 설정
                 .logout(logout -> logout
-                        .logoutSuccessUrl("/login")         // 로그아웃 성공 시 이동할 URL
+                        .logoutSuccessUrl("/")         // 로그아웃 성공 시 이동할 URL
                         .invalidateHttpSession(true)        // 로그아웃 시 세션 무효화
                 )
                 // 6. CSRF 비활성화

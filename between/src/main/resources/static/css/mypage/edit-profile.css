@@ -1,0 +1,87 @@
+/* 전체 영역 */
+.profile-edit-wrapper {
+    background-color: #ffffff;
+    padding: 32px;
+    border-radius: 12px;
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* 제목 */
+.profile-edit-wrapper h2 {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 10px;
+}
+
+/* form 구조 */
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* label + input 묶음 */
+.form-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: #333;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #fafafa;
+    transition: border 0.3s;
+}
+
+.form-group input:focus {
+    border-color: #1976d2;
+    outline: none;
+    background-color: #fff;
+}
+
+/* 버튼 영역 */
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.btn-primary {
+    background-color: #1976d2;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+    background-color: #1259aa;
+}
+
+.btn-danger {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-danger:hover {
+    background-color: #dc2626;
+}
