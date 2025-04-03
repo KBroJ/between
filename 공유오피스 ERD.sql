@@ -17,7 +17,7 @@ CREATE TABLE `User` (
 	`email` varchar(100) UNIQUE NOT NULL COMMENT '사용자 관점에서 ID로 사용됨',
 	`password` varchar(255) NOT NULL COMMENT '영문 대소문자, 특수문자 , 숫자 조합해서 저장 대신 공백 불가',
 	`name` varchar(50) NOT NULL,
-	`phoneNo` varchar(11) NOT NULL COMMENT '숫자만 저장',
+	`phoneNo` varchar(11) UNIQUE NOT NULL COMMENT '숫자만 저장',
 	`userStts` varchar(10) NOT NULL COMMENT '일반, 휴면, 탈퇴',
 	`authCd` VARCHAR(10) NOT NULL COMMENT '일반, 임직원, 관리자 등',
 	`createDt` timestamp NOT NULL COMMENT '회원가입 생성일자',

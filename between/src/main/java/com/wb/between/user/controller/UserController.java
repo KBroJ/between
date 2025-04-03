@@ -2,6 +2,7 @@ package com.wb.between.user.controller;
 
 import com.wb.between.user.domain.User;
 import com.wb.between.user.dto.SignupReqDto;
+import com.wb.between.user.dto.VerificationResult;
 import com.wb.between.user.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -12,13 +13,16 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Controller
 public class UserController {
 
     private UserService userService;
+    private static final String OTP_PREFIX = "OTP_";
 
     @Autowired
     public UserController(UserService userService) {
@@ -142,13 +146,14 @@ public class UserController {
 
         Map<String, String> response = new HashMap<>();
         response.put("success", "true");
-        // 실제 구현에서는 코드를 클라이언트에 반환하지 않음
-        // 여기서는 테스트를 위해 반환
-        response.put("code", code);
+
+//        response.put("code", code); // 디버깅용으로 클라이언트에 반환
         return response;
+
     }
 
-    @PostMapping("/verify-code")
+    // 회원가입 > 휴대폰 인증번호 확인
+    @PostMapping("/signup/verify-code")
     @ResponseBody
     public Map<String, Boolean> verifyCode(@RequestBody Map<String, String> request, HttpSession session) {
         System.out.println("UserController|verifyCode|시작 ==========> request : " + request);
@@ -161,7 +166,84 @@ public class UserController {
 
         Map<String, Boolean> response = new HashMap<>();
         response.put("valid", isValid);
+
+        // 검증 성공 시 컨트롤러에서 세션 OTP 제거
+        if (isValid) {
+            session.removeAttribute(OTP_PREFIX + phoneNo);              // 인증번호 세션 제거
+            session.removeAttribute(OTP_PREFIX + phoneNo + "_expiry");  // 인증번호 만료 시간 세션 제거
+
+                System.out.println("========== 세션에 저장된 인증번호 삭제 확인 ==========");
+                Enumeration<String> attributeNames = session.getAttributeNames();
+                while (attributeNames.hasMoreElements()) {
+                    String attributeName = attributeNames.nextElement();
+                    Object attributeValue = session.getAttribute(attributeName);
+                    System.out.println("키: " + attributeName + ", 값: " + attributeValue);
+                }
+                System.out.println("=================================================");
+        }
+
         return response;
+    }
+
+// 회원정보찾기 > 이메일 찾기 : 휴대번호로 인증 후 이메일 조회
+    @PostMapping("/findUserInfo/verify-code")
+    @ResponseBody
+    public Map<String, Object> findEmailByVerifiedPhone(@RequestBody Map<String, String> request, HttpSession session) {
+        System.out.println("UserController|findEmailByVerifiedPhone|시작 ==========> request : " + request);
+
+        String phoneNo = request.get("phoneNo");
+        String code = request.get("code");
+
+        // 인증번호 검증 및 이메일 정보 조회
+        VerificationResult result = userService.verifyAndGetUserByPhone(session, phoneNo, code);
+
+        Map<String, Object> response = new HashMap<>();
+
+        // 결과 상태(VerificationStatus)에 따라 분기
+        switch (result.status()) {
+            case SUCCESS:
+                String email = result.email();
+                System.out.println("UserController|findEmailByVerifiedPhone| 최종 성공: " + email);
+                response.put("success", true);
+                response.put("email", email);
+                break;
+
+            case USER_NOT_FOUND:
+                System.out.println("UserController|findEmailByVerifiedPhone| 실패: 사용자 없음");
+                response.put("success", false);
+                response.put("message", "인증번호는 확인되었으나, 해당 번호로 가입된 사용자를 찾을 수 없습니다.");
+                break;
+
+            case OTP_INVALID_OR_EXPIRED:
+                System.out.println("UserController|findEmailByVerifiedPhone| 실패: OTP 오류");
+                response.put("success", false);
+                response.put("message", "인증번호가 올바르지 않거나 만료되었습니다.");
+                break;
+
+            default:
+                System.out.println("UserController|findEmailByVerifiedPhone| 실패: 알 수 없는 오류");
+                response.put("success", false);
+                response.put("message", "알 수 없는 오류가 발생했습니다.");
+                break;
+        }
+
+        return response;
+    }
+
+    // 이메일 마스킹(사용안함)
+    private String maskEmail(String email) {
+
+        if (email == null || !email.contains("@")) return email;
+
+        int atIndex = email.indexOf("@");
+        String localPart = email.substring(0, atIndex);
+        String domainPart = email.substring(atIndex);
+
+        if (localPart.length() <= 3) {
+            return "***" + domainPart;
+        } else {
+            return localPart.substring(0, 3) + "***" + domainPart;
+        }
     }
 
 }
