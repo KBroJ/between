@@ -1,8 +1,6 @@
 package com.wb.between.user.controller;
 
 import com.wb.between.user.domain.User;
-import com.wb.between.user.dto.PasswordOtpRequestDto;
-import com.wb.between.user.dto.PasswordOtpVerifyDto;
 import com.wb.between.user.dto.SignupReqDto;
 import com.wb.between.user.dto.VerificationResult;
 import com.wb.between.user.service.UserService;
@@ -18,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Controller
 public class UserController {
@@ -240,14 +237,16 @@ public class UserController {
      */
     @PostMapping("/findUserInfo/reqSendEmail")
     @ResponseBody
-    public Map<String, Object> requestPasswordOtp(@RequestBody PasswordOtpRequestDto requestDto, HttpSession session) {
-        System.out.println("UserController|requestPasswordOtp| 시작 ==========> email: " + requestDto.getEmail());
+    public Map<String, Object> reqSendEmail(@RequestBody Map<String, String> request, HttpSession session) {
+        System.out.println("UserController|requestPasswordOtp| 시작 ==========> email: " + request.get("email"));
+
+        String email = request.get("email");
 
         Map<String, Object> response = new HashMap<>();
 
         try {
             // 회원여부 확인 > 인증번호 생성 > 메일 발송(세션저장)
-            boolean requested = userService.requestPasswordOtp(requestDto.getEmail(), session);
+            boolean requested = userService.requestPasswordOtp(email, session);
             response.put("success", requested);
 
             if (!requested) {
@@ -267,15 +266,18 @@ public class UserController {
      */
     @PostMapping("/findUserInfo/verifyPwdCode")
     @ResponseBody
-    public Map<String, Object> verifyPasswordOtp(@RequestBody PasswordOtpVerifyDto requestDto, HttpSession session) {
-        System.out.println("UserController|verifyPasswordOtp| 시작 ==========> email: " + requestDto.getEmail() + ", code: " + requestDto.getCode());
+    public Map<String, Object> verifyPwdCode(@RequestBody Map<String, String> request, HttpSession session) {
+        System.out.println("UserController|verifyPasswordOtp| 시작 ==========> email: " + request.get("email") + ", code: " + request.get("code"));
+
+        String email = request.get("email");
+        String code = request.get("code");
 
         Map<String, Object> response = new HashMap<>();
 
         try {
 
             // 인증번호 및 유효시간 검증 > 유효 시 세션 제거
-            boolean isValid = userService.verifyPasswordOtp(requestDto.getEmail(), requestDto.getCode(), session);
+            boolean isValid = userService.verifyPasswordOtp(email, code, session);
             response.put("success", isValid);
 
             if (!isValid) {
@@ -297,9 +299,9 @@ public class UserController {
      */
     @PostMapping("/api/resetPwd")
     @ResponseBody
-    public Map<String, Object> resetPassword(@Valid @RequestBody User requestDto, BindingResult bindingResult) {
-        System.out.println("UserController|resetPassword| 시작 ==========> email: " + requestDto.getEmail());
-        System.out.println("UserController|resetPassword| 시작 ==========> password: " + requestDto.getPassword());
+    public Map<String, Object> resetPwd(@Valid @RequestBody User user, BindingResult bindingResult) {
+        System.out.println("UserController|resetPassword| 시작 ==========> email: " + user.getEmail());
+        System.out.println("UserController|resetPassword| 시작 ==========> password: " + user.getPassword());
         Map<String, Object> response = new HashMap<>();
 
         // User Param(email) 유효성 검사 결과 확인
@@ -312,7 +314,7 @@ public class UserController {
         }
 
         try {
-            boolean resetSuccess = userService.resetPassword(requestDto.getEmail(), requestDto.getPassword());
+            boolean resetSuccess = userService.resetPassword(user.getEmail(), user.getPassword());
             response.put("success", resetSuccess);
 
             if (!resetSuccess) {
