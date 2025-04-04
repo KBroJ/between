@@ -39,26 +39,49 @@
                         <button type="button" id="find-email-action-button" data-status="idle">인증하기</button>
                     </div>
                 </form>
-
             </div>
+
+
             <div class="tab-content" id="find-password-content">
                 <h2>비밀번호 찾기</h2>
-                <p class="info-text">가입 시 등록한 이메일 주소를 입력해주세요.<br>비밀번호 재설정 안내 메일을 발송해 드립니다.</p>
-                <form id="find-password-form">
-                    <div class="form-group">
-                        <label for="find-pw-email">이메일 주소</label>
-                        <input type="email" id="find-pw-email" name="email" placeholder="가입한 이메일 주소" required>
+                <form id="find-password-main-form">
+
+                    <div id="password-email-group">
+                        <p class="info-text">가입 시 등록한 이메일 주소를 입력해주세요.<br>인증번호를 발송해 드립니다.</p>
+                        <div class="form-group">
+                            <label for="find-pw-email">이메일 주소</label>
+                            <input type="email" id="find-pw-email" name="email" placeholder="가입한 이메일 주소" required>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="find-pw-name">이름 (선택)</label>
-                        <input type="text" id="find-pw-name" name="name" placeholder="가입 시 등록한 이름">
+
+                    <div id="password-otp-group" class="otp-section">
+                        <div class="form-group">
+                            <label for="find-pw-otp">이메일로 받은 인증번호</label>
+                            <input type="text" id="find-pw-otp" name="otp" placeholder="인증번호 6자리 입력">
+                            <div id="password-otp-timer" class="otp-timer"></div>
+                        </div>
                     </div>
+
+                    <div id="password-newpw-group" class="new-password-section" style="display: none;">
+                        <h3>새 비밀번호 설정</h3>
+                        <div class="form-group">
+                            <label for="new-password">새 비밀번호</label>
+                            <input type="password" id="new-password" name="newPassword" placeholder="새 비밀번호 입력" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm-new-password">새 비밀번호 확인</label>
+                            <input type="password" id="confirm-new-password" name="confirmNewPassword" placeholder="새 비밀번호 다시 입력" required>
+                        </div>
+                    </div>
+
+                    <div id="find-password-result" class="result-message" style="display: none;"></div>
+                    <div id="find-password-error" class="error-message" style="display: none;"></div>
+
                     <div class="form-actions">
-                        <button type="submit">비밀번호 재설정 메일 받기</button>
+                        <button type="button" id="password-action-button" data-status="idle">인증번호 받기</button>
                     </div>
+
                 </form>
-                <div id="find-password-result" class="result-message" style="display: none;"></div>
-                <div id="find-password-error" class="error-message" style="display: none;"></div>
             </div>
             <div class="links">
                 <a th:href="@{/login}">로그인 페이지로 돌아가기</a>

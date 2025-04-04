@@ -202,7 +202,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     */
         // 서버에 인증번호 검증 요청
-        fetch('/verify-code', {
+        fetch('/signup/verify-code', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

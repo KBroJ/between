@@ -7,6 +7,10 @@ import com.wb.between.user.dto.VerificationResult;
 import com.wb.between.user.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,16 +26,22 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final SmsUtil smsUtil;
 
-    // 휴대폰 인증번호
+    // 인증번호
     private static final String OTP_PREFIX = "OTP_";
     private static final int EXPIRATION_TIME = 180; // 3분
 
+    // 이메일 인증번호
+    private final JavaMailSender mailSender;
+    @Value("${spring.mail.username}") // application.properties/yml 값 주입
+    private String fromEmail;
+
     // 생성자 주입
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, SmsUtil smsUtil) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, SmsUtil smsUtil, JavaMailSender mailSender) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.smsUtil = smsUtil;
+        this.mailSender = mailSender;
     }
 
 // 1. 회원가입
@@ -181,5 +191,138 @@ public class UserService {
             return VerificationResult.otpInvalid();
         }
     }
+
+
+    /**
+     * [비밀번호 찾기 1단계] 이메일 존재 확인 및 OTP 발송 요청 처리
+     * @param email 사용자 이메일
+     * @param session HttpSession
+     * @return 성공 여부 (사용자 존재 및 메일 발송 성공 시 true)
+     */
+    public boolean requestPasswordOtp(String email, HttpSession session) {
+
+        // 이메일로 회원정보 조회
+        Optional<User> userOptional = userRepository.findByEmail(email);
+
+        if (userOptional.isEmpty()) {
+            System.out.println("UserService|requestPasswordOtp| 사용자를 찾을 수 없음: " + email);
+            return false;
+        }
+
+        // 인증번호 생성
+        String code = String.format("%06d", new Random().nextInt(1000000));
+        System.out.println("UserService|requestPasswordOtp| 생성된 OTP: " + code);
+
+        try {
+
+            // 이메일 발송
+            sendOtpEmail(email, code);
+            System.out.println("UserService|requestPasswordOtp| 이메일 발송 성공: " + email);
+
+            // 세션에 인증번호 및 만료 시간 저장
+            long expiryTimeMillis = System.currentTimeMillis() + (EXPIRATION_TIME * 1000);
+            String sessionKey = OTP_PREFIX + email;
+            String expiryKey = sessionKey + "_expiry";
+            session.setAttribute(sessionKey, code);
+            session.setAttribute(expiryKey, expiryTimeMillis);
+
+            System.out.println("UserService|requestPasswordOtp| 세션 저장 완료 - Key(Code): " + sessionKey + ", Key(Expiry): " + expiryKey);
+            return true;
+
+        } catch (MailException e) {
+            System.err.println("UserService|requestPasswordOtp| 이메일 발송 실패: " + email);
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * 이메일 발송
+     */
+    private void sendOtpEmail(String toEmail, String otp) throws MailException {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setFrom(fromEmail);
+        message.setSubject("[Between] 비밀번호 찾기 인증번호 안내");
+        message.setText("요청하신 비밀번호 찾기 인증번호는 [" + otp + "] 입니다.\n" +
+                "이 인증번호는 " + (EXPIRATION_TIME / 60) + "분 동안 유효합니다.");
+        mailSender.send(message);
+    }
+
+    /**
+     * [비밀번호 찾기 2단계] 이메일로 받은 OTP 검증
+     * @param email 사용자 이메일
+     * @param code 입력받은 OTP 코드
+     * @param session HttpSession
+     * @return OTP 유효 여부 (true/false)
+     */
+    public boolean verifyPasswordOtp(String email, String code, HttpSession session) {
+
+        System.out.println("UserService|verifyPasswordOtp| ===============> 시작");
+        String sessionKey = OTP_PREFIX + email;
+        String expiryKey = sessionKey + "_expiry";
+
+        String storedCode = (String) session.getAttribute(sessionKey);
+        Long expiryTimeMillis = (Long) session.getAttribute(expiryKey);
+
+        System.out.println("UserService|verifyPasswordOtp|session|storedCode :  " + storedCode);
+        System.out.println("UserService|verifyPasswordOtp|session|inputCode :  " + code);
+        System.out.println("UserService|verifyPasswordOtp|session|expiryTime : " + expiryTimeMillis);
+        System.out.println("UserService|verifyPasswordOtp|currentTime : " + System.currentTimeMillis());
+
+        boolean isValid = (
+                storedCode != null && expiryTimeMillis != null &&
+                System.currentTimeMillis() < expiryTimeMillis &&
+                storedCode.equals(code)
+        );
+
+        System.out.println("UserService|verifyPasswordOtp| isValid: " + isValid);
+
+        // 검증 시도 후 관련 세션 정보 제거
+        if(isValid) {
+            System.out.println("UserService|verifyPasswordOtp| 인증번호 검증 성공");
+            session.removeAttribute(sessionKey);
+            session.removeAttribute(expiryKey);
+            System.out.println("UserService|verifyPasswordOtp| 세션 속성 제거 완료: " + sessionKey);
+        }
+
+        return isValid;
+    }
+
+    /**
+     * [비밀번호 찾기 3단계] 비밀번호 재설정
+     * @param email 대상 사용자 이메일
+     * @param newPassword 새 비밀번호 (평문)
+     * @return 성공 여부
+     */
+    @Transactional
+    public boolean resetPassword(String email, String newPassword) {
+        System.out.println("UserService|resetPassword| ===============> 시작 | email: " + email);
+
+        // 이메일로 회원정보 조회
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if (userOptional.isEmpty()) {
+            System.err.println("UserService|resetPassword| 사용자를 찾을 수 없음: " + email);
+            return false;
+        }
+
+        // 새 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        System.out.println("UserService|resetPassword| 새 비밀번호 해싱 완료");
+
+        User user = userOptional.get();
+        user.setPassword(encodedPassword); // User 엔티티에 setPassword 필요
+
+        try {
+            userRepository.save(user);
+            System.out.println("UserService|resetPassword| 비밀번호 변경 및 저장 성공 | email: " + email);
+            return true;
+        } catch (Exception e) {
+            System.err.println("UserService|resetPassword| DB 저장 중 오류 발생 | email: " + email);
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 
 }
