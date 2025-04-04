@@ -1,6 +1,8 @@
 package com.wb.between.user.controller;
 
 import com.wb.between.user.domain.User;
+import com.wb.between.user.dto.PasswordOtpRequestDto;
+import com.wb.between.user.dto.PasswordOtpVerifyDto;
 import com.wb.between.user.dto.SignupReqDto;
 import com.wb.between.user.dto.VerificationResult;
 import com.wb.between.user.service.UserService;
@@ -230,20 +232,101 @@ public class UserController {
         return response;
     }
 
-    // 이메일 마스킹(사용안함)
-    private String maskEmail(String email) {
 
-        if (email == null || !email.contains("@")) return email;
 
-        int atIndex = email.indexOf("@");
-        String localPart = email.substring(0, atIndex);
-        String domainPart = email.substring(atIndex);
 
-        if (localPart.length() <= 3) {
-            return "***" + domainPart;
-        } else {
-            return localPart.substring(0, 3) + "***" + domainPart;
+    /**
+     * [API] 비밀번호 찾기 - 1단계: 이메일 확인 및 OTP 발송 요청
+     */
+    @PostMapping("/findUserInfo/reqSendEmail")
+    @ResponseBody
+    public Map<String, Object> requestPasswordOtp(@RequestBody PasswordOtpRequestDto requestDto, HttpSession session) {
+        System.out.println("UserController|requestPasswordOtp| 시작 ==========> email: " + requestDto.getEmail());
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // 회원여부 확인 > 인증번호 생성 > 메일 발송(세션저장)
+            boolean requested = userService.requestPasswordOtp(requestDto.getEmail(), session);
+            response.put("success", requested);
+
+            if (!requested) {
+                response.put("message", "가입되지 않은 이메일이 입니다.");
+            }
+        } catch (Exception e) {
+            System.err.println("UserController|requestPasswordOtp| 오류 발생: " + e.getMessage());
+            e.printStackTrace(); // 로그 추가
+            response.put("success", false);
+            response.put("message", "처리 중 오류가 발생했습니다.");
         }
+        return response;
     }
+
+    /**
+     * [API] 비밀번호 찾기 - 2단계: 이메일 인증번호 검증
+     */
+    @PostMapping("/findUserInfo/verifyPwdCode")
+    @ResponseBody
+    public Map<String, Object> verifyPasswordOtp(@RequestBody PasswordOtpVerifyDto requestDto, HttpSession session) {
+        System.out.println("UserController|verifyPasswordOtp| 시작 ==========> email: " + requestDto.getEmail() + ", code: " + requestDto.getCode());
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+
+            // 인증번호 및 유효시간 검증 > 유효 시 세션 제거
+            boolean isValid = userService.verifyPasswordOtp(requestDto.getEmail(), requestDto.getCode(), session);
+            response.put("success", isValid);
+
+            if (!isValid) {
+                response.put("message", "인증번호가 올바르지 않거나 만료되었습니다.");
+            }
+
+        } catch (Exception e) {
+            System.err.println("UserController|verifyPasswordOtp| 오류 발생: " + e.getMessage());
+            e.printStackTrace(); // 로그 추가
+            response.put("success", false);
+            response.put("message", "처리 중 오류가 발생했습니다.");
+        }
+        return response;
+    }
+
+    /**
+     * [API] 비밀번호 찾기 - 3단계: 새 비밀번호 설정
+     * @Valid 추가하여 DTO 유효성 검사 가능
+     */
+    @PostMapping("/api/resetPwd")
+    @ResponseBody
+    public Map<String, Object> resetPassword(@Valid @RequestBody User requestDto, BindingResult bindingResult) {
+        System.out.println("UserController|resetPassword| 시작 ==========> email: " + requestDto.getEmail());
+        System.out.println("UserController|resetPassword| 시작 ==========> password: " + requestDto.getPassword());
+        Map<String, Object> response = new HashMap<>();
+
+        // User Param(email) 유효성 검사 결과 확인
+        if (bindingResult.hasErrors()) {
+            System.out.println("UserController|resetPassword| 유효성 검사 실패");
+            // 첫번째 에러 메시지만 전달하거나, 모든 에러를 조합할 수 있음
+            response.put("success", false);
+            response.put("message", bindingResult.getAllErrors().get(0).getDefaultMessage());
+            return response;
+        }
+
+        try {
+            boolean resetSuccess = userService.resetPassword(requestDto.getEmail(), requestDto.getPassword());
+            response.put("success", resetSuccess);
+
+            if (!resetSuccess) {
+                response.put("message", "비밀번호 변경 중 오류가 발생했습니다.");
+            }
+
+        } catch (Exception e) {
+            System.err.println("UserController|resetPassword| 오류 발생: " + e.getMessage());
+            e.printStackTrace(); // 로그 추가
+            response.put("success", false);
+            response.put("message", "처리 중 오류가 발생했습니다.");
+        }
+        return response;
+    }
+
 
 }

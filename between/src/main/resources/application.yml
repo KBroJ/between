@@ -26,12 +26,31 @@ spring:
       ddl-auto: update  # 애플리케이션 실행 시 변경점만 반영
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl   # 테이블명, 컬럼명을 CamelCase로 인식(스네이크 케이스(_넣기)로 변경하지 않음)
+  mail:
+    host: smtp.gmail.com  #이메일 전송에 사용할 메일 서버의 호스트 이름으로 Gmail을 활용한다.
+    port: 587             #Gmail 포트로 default값
+    username:  #위에서 설정한 메일주소를 입력한다.
+    password:    #위에서 세팅 후 받은 패스워드를 입력한다.
+    properties: # 말그대로 세팅정보로 후에 Config 설정에서 사용된다.
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          # 타임아웃 설정
+          connectiontimeout: 5000 # SMTP 서버에 연결하는 데 허용되는 최대 시간(밀리초) : 5초
+          timeout: 5000           # SMTP 서버에서 응답을 기다리는 최대 시간(밀리초) : 5초
+          writetimeout: 5000      # SMTP 서버에 데이터를 전송할 때 허용되는 최대 시간(밀리초) : 5초
+    auth-code-expiration-millis: 1800000  # 인증코드가 만료되기까지 시간 30 * 60 * 1000 == 30분
+
 
 logging:
   level:
     # 쿼리 바인딩 로그찍기 참고 : https://byunsw4.tistory.com/25
     org.hibernate.orm.jdbc.bind: trace  # query의 ?에 어떤 값이 들어가는지 추적할 수 있는 설정(TRACE Log에 값을 보여줍니다.)
     com.wb.between: debug
+
 # 휴대폰 본인인증 SMS 발송 API(coolSMS) 설정
 coolsms:
   api:
