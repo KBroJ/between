@@ -1,41 +1,21 @@
-  /* 최종 스타일 (하늘색 테마, 요금제 포함) */
+  /* 최종 스타일 (하늘색 테마, 요금제, 쿠폰 포함) */
     :root {
         --primary-color: #64B5F6; --secondary-color: #B3E5FC; --title-color: #4A90E2;
         --payment-bar-bg: #E0F7FA; --payment-bar-text: #007791; --payment-bar-strong: #005f73;
-        --background-color: #F8F9FA; --card-bg-color: #FFFFFF; --text-color: #212529; --muted-color: #6c757d;
+        --background-color: #F8F9FA; --card-bg-color: #FFFFFF; --text-color: #212529; --muted-color: #6c757d; --primary-color: #64B5F6;
     }
-    body { background-color: var(--background-color); font-family: 'Noto Sans KR', sans-serif; color: var(--text-color); }
+    body { background-color: var(--background-color); font-family: 'Noto Sans KR', sans-serif; color: var(--text-color); padding-bottom: 100px; }
     .container { max-width: 1140px; }
     h1 { color: var(--title-color); margin-bottom: 2rem; font-weight: 700; letter-spacing: -1px; }
     .card-common { background-color: var(--card-bg-color); border-radius: 0.8rem; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); margin-bottom: 1.5rem; padding: 1.5rem; border: none; }
     .form-control { border-radius: 0.5rem; border-color: #ced4da; }
     .form-control:focus { border-color: var(--primary-color); box-shadow: 0 0 0 0.25rem rgba(100, 181, 246, 0.25); }
-    .flatpickr-calendar { border-radius: 0.8rem; box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); }
-    .flatpickr-day.selected { background: var(--primary-color); border-color: var(--primary-color); }
-    .flatpickr-day.today { border-color: var(--secondary-color); }
-    .calendar-input-wrapper { position: relative; }
-    .calendar-input-wrapper .form-control { padding-right: 2.5rem; background-color: #fff !important; }
-    .calendar-icon { position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--muted-color); cursor: pointer; }
-    .seat-legend span { display: inline-flex; align-items: center; margin-right: 1rem; font-size: 0.9rem; color: var(--muted-color); }
-    .seat-legend .icon { width: 1rem; height: 1rem; border-radius: 50%; margin-right: 0.4rem; border: 1px solid #dee2e6; }
-    .seat-legend .icon.available { background-color: #fff; } .seat-legend .icon.selected { background-color: var(--primary-color); border-color: var(--primary-color); } .seat-legend .icon.unavailable { background-color: #e9ecef; border-color: #ced4da; }
-       .seat-map-container {
-        background-color: #fdfdfd;
-        border-radius: 0.5rem;
-        padding: 1.5rem;
-        border: 1px solid #eee;
-        min-height: 200px; /* 높이는 내용에 맞게 조절 */
-        display: grid;
-        /* === 수정: 정확히 3개의 컬럼 만들기 === */
-        grid-template-columns: repeat(3, 1fr); /* 3개의 동일 너비 컬럼 */
-        /* 행 높이는 자동으로 설정되도록 하거나 필요시 지정 */
-        grid-auto-rows: minmax(80px, auto); /* 예시: 최소 행 높이 80px */
-        gap: 15px; /* 좌석 간 간격 조정 */
-        max-width: 400px; /* 컨테이너 최대 너비 (선택 사항) */
-        margin-left: auto; /* 컨테이너 가운데 정렬 (선택 사항) */
-        margin-right: auto;
-    }
-    .seat-item {  min-width: auto; /* Grid 셀 너비에 맞춤 */ min-height: 70px; /* 좌석 높이 조정 */ display: flex; align-items: center; justify-content: center; border: 1px solid #d0d0d0; padding: 0.3rem; text-align: center; border-radius: 0.4rem; transition: all 0.2s ease-in-out; font-size: 0.8rem; background-color: #fff; font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.1); min-width: 60px; min-height: 40px; }
+    .flatpickr-calendar { border-radius: 0.8rem; box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); z-index: 1050; }
+    .flatpickr-day.selected { background: var(--primary-color); border-color: var(--primary-color); } .flatpickr-day.today { border-color: var(--secondary-color); }
+    .calendar-input-wrapper { position: relative; } .calendar-input-wrapper .form-control { padding-right: 2.5rem; background-color: #fff !important; } .calendar-icon { position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--muted-color); cursor: pointer; }
+    .seat-legend span { display: inline-flex; align-items: center; margin-right: 1rem; font-size: 0.9rem; color: var(--muted-color); } .seat-legend .icon { width: 1rem; height: 1rem; border-radius: 50%; margin-right: 0.4rem; border: 1px solid #dee2e6; } .seat-legend .icon.available { background-color: #fff; } .seat-legend .icon.selected { background-color: var(--primary-color); border-color: var(--primary-color); } .seat-legend .icon.unavailable { background-color: #e9ecef; border-color: #ced4da; }
+    .seat-map-container { background-color: #fdfdfd; border-radius: 0.5rem; padding: 1.5rem; border: 1px solid #eee; min-height: 300px; display: grid; grid-template-columns: repeat(5, 1fr); grid-auto-rows: minmax(40px, auto); gap: 8px; /* 예시: 최소 행 높이 40px */ * grid-template-columns 등은 JS 또는 아래 추가 */ gap: 10px; }
+    .seat-item { display: flex; align-items: center; justify-content: center; border: 1px solid #d0d0d0; padding: 0.3rem; text-align: center; border-radius: 0.4rem; transition: all 0.2s ease-in-out; font-size: 0.8rem; background-color: #fff; font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.1); min-width: 60px; min-height: 40px; box-sizing: border-box; }
     .seat {} .room { border-style: dashed; border-color: var(--secondary-color); background-color: #fafcff; color: var(--muted-color); font-weight: bold; min-width: 100px; min-height: 60px; } .area-label { background-color: #e9ecef; color: var(--muted-color); border-style: dashed; font-weight: 500; }
     .available { cursor: pointer; } .available:hover { background-color: var(--secondary-color); border-color: var(--primary-color); transform: translateY(-2px); box-shadow: 0 3px 5px rgba(0,0,0,0.15); }
     .selected { background-color: var(--primary-color) !important; border-color: var(--primary-color) !important; color: #fff !important; font-weight: bold; transform: scale(1.08); box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important; }
@@ -46,8 +26,22 @@
     #time-slots input[type="checkbox"]:hover:not(:checked) + span { background-color: #E3F2FD; }
     .plan-selection-card .form-check { margin-bottom: 0.75rem; } .plan-selection-card .form-check-label { font-weight: 500; } .plan-selection-card .form-check-input:checked { background-color: var(--primary-color); border-color: var(--primary-color); }
     #time-selection-card.disabled { opacity: 0.5; pointer-events: none; }
+    .coupon-card .form-select { margin-top: 0.5rem; } #discount-info { font-size: 0.9em; min-height: 1.2em; }
     .summary-card strong { color: var(--text-color); } .summary-card span { color: var(--primary-color); font-weight: 500; }
     .payment-bar { background-color: var(--payment-bar-bg); color: var(--payment-bar-text); padding: 1rem 0; position: sticky; bottom: 0; left: 0; width: 100%; z-index: 1030; box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05); }
     .payment-bar .container { display: flex; justify-content: space-between; align-items: center; } .payment-bar .total-info { font-size: 1.2rem; font-weight: 600; } .payment-bar .total-info strong { color: var(--payment-bar-strong); }
     .payment-bar .btn-payment { font-size: 1.1rem; padding: 0.75rem 2rem; border-radius: 30px; font-weight: 600; background-color: var(--primary-color); border: none; color: #fff; transition: all 0.3s ease; }
     .payment-bar .btn-payment:hover { background-color: #42A5F5; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+     /* === 추가: 비활성화된 시간 슬롯 스타일 === */
+    #time-slots span.disabled {
+        background-color: #e9ecef !important; /* 연한 회색 배경 */
+        border-color: #dee2e6 !important;
+        color: #adb5bd !important; /* 연한 회색 글자 */
+        cursor: not-allowed !important;
+        text-decoration: line-through; /* 취소선 */
+        box-shadow: none !important;
+    }
+    #time-slots label:has(input:disabled) { /* 비활성 체크박스 포함 라벨 */
+         cursor: not-allowed !important;
+    }
+

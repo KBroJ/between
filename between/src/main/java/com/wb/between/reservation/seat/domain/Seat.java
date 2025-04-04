@@ -41,10 +41,10 @@ public class Seat {
     private String seatSort; // 좌석 종류 (DB 컬럼명 그대로 사용)
 
     // --- 위치 정보 필드 추가 ---
-    @Column(length = 50) // DB 컬럼: grid_row (또는 gridRow)
+    @Column(name = "grid_row" ,length = 50) // DB 컬럼: grid_row (또는 gridRow)
     private String gridRow;
 
-    @Column(length = 50) // DB 컬럼: grid_column (또는 gridColumn)
+    @Column(name = "grid_column", length = 50) // DB 컬럼: grid_column (또는 gridColumn)
     private String gridColumn;
 
     // branchId, gridRow, gridColumn 필드 제거됨
