@@ -1,5 +1,6 @@
 package com.wb.between.config;
 
+import com.wb.between.common.util.OAuth.CustomOAuth2UserService;
 import com.wb.between.user.service.UserDetailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -13,12 +14,15 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @RequiredArgsConstructor
 @Configuration
 public class WebSecurityConfig {
 
     private final UserDetailService userDetailService;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     // 스프링 시큐리티 기능 비활성화
     @Bean
@@ -38,7 +42,8 @@ public class WebSecurityConfig {
                                 "/signup", "/findUserInfo","/checkEmail", "/send-verification",
                                 "/signup/verify-code", "/findUserInfo/verify-code",
                                 "/findUserInfo/reqSendEmail", "/findUserInfo/verifyPwdCode", "/api/resetPwd",
-                                "/login", "/faqList", "/error", "/favicon.ico", "/reservation", "/api/**"
+                                "/login", "/faqList", "/error", "/favicon.ico", "/reservation", "/api/**",
+                                "/oauth2/**"
                         ).permitAll() // "/login" 누구나 접근 가능하게
                         .anyRequest().authenticated()             // 나머지 요청은 인증 필요
                 )
@@ -54,7 +59,20 @@ public class WebSecurityConfig {
                         .invalidateHttpSession(true)        // 로그아웃 시 세션 무효화
                 )
                 // 6. CSRF 비활성화
-                .csrf(AbstractHttpConfigurer::disable); // .csrf(csrf -> csrf.disable()) 와 동일, 메서드 레퍼런스 사용
+                .csrf(AbstractHttpConfigurer::disable) // .csrf(csrf -> csrf.disable()) 와 동일, 메서드 레퍼런스 사용
+
+                // 7. OAuth2 소셜 로그인 설정 추가
+                .oauth2Login(oauth2 -> oauth2
+                                .loginPage("/login") // 로그인 페이지 지정 (인증이 필요할 때 이동)
+                                // .defaultSuccessUrl("/") // 로그인 성공 시 이동할 URL (SuccessHandler 사용 시 주석 처리 가능)
+                                .userInfoEndpoint(userInfo -> userInfo
+                                        .userService(customOAuth2UserService) // 소셜 로그인 성공 후 사용자 정보 처리 서비스 지정
+                                )
+                        // 로그인 성공 핸들러 (선택적): 로그인 성공 후 특정 로직 수행 필요 시
+                         .successHandler(oAuth2LoginSuccessHandler())
+                        // 로그인 실패 핸들러 (선택적)
+                         .failureHandler(oAuth2LoginFailureHandler())
+                );
 
         return http.build();
     }
@@ -89,6 +107,28 @@ public class WebSecurityConfig {
     @Bean
     public  BCryptPasswordEncoder bCryptPasswordEncoder(){
         return new BCryptPasswordEncoder();
+    }
+
+
+    // --- 선택적: 로그인 성공/실패 핸들러 빈 등록 ---
+    /*
+    */
+    @Bean
+    public AuthenticationSuccessHandler oAuth2LoginSuccessHandler() {
+        // 성공 시 로직 구현 (예: 첫 로그인 시 추가 정보 입력 페이지 이동 등)
+        return (request, response, authentication) -> {
+            // Custom 로직 수행
+            response.sendRedirect("/"); // 예시: 성공 후 메인 페이지로 리다이렉트
+        };
+    }
+
+    @Bean
+    public AuthenticationFailureHandler oAuth2LoginFailureHandler() {
+        // 실패 시 로직 구현 (예: 에러 메시지와 함께 로그인 페이지로 리다이렉트)
+        return (request, response, exception) -> {
+            // Custom 로직 수행 (로깅 등)
+            response.sendRedirect("/login?error=oauth_fail"); // 예시: 실패 시 쿼리 파라미터와 함께 리다이렉트
+        };
     }
 }
 
