@@ -6,6 +6,9 @@ import com.wb.between.user.domain.User;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 @Getter
 @Builder
 public class MypageResponseDto {
@@ -18,12 +21,15 @@ public class MypageResponseDto {
 
     private String phoneNo;
 
+    private LocalDateTime createDt;
+
     public static MypageResponseDto from(User user) {
         return MypageResponseDto.builder()
                 .userNo(user.getUserNo())
                 .email(user.getEmail())
                 .name(user.getName())
                 .phoneNo(user.getPhoneNo())
+                .createDt(user.getCreateDt())
                 .build();
     }
 

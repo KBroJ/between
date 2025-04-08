@@ -42,6 +42,7 @@
     font-weight: 500;
     color: #495057; /* Default menu item color */
     transition: background-color 0.2s ease, color 0.2s ease;
+    text-decoration: none;
 }
 
 .menu-item .icon {

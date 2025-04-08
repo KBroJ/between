@@ -14,21 +14,21 @@
 
   <!-- Profile Summary Card -->
   <!-- th:object를 사용하면 내부에서 *{}로 필드 접근 가능 -->
-  <div class="card profile-card" th:object="${user}"> <!-- 컨트롤러에서 'user' 객체 전달 가정 -->
-    <div class="profile-summary">
-      <!-- 프로필 이미지 URL이 없다면 기본 이미지 사용 -->
-      <img class="profile-pic" alt="프로필 사진">
-      <div class="profile-info">
-<!--        <h2 class="profile-name" th:text="*{name}">[사용자 이름]</h2>-->
-<!--        <p class="profile-email" th:text="*{email}">[이메일 주소]</p>-->
-        <!-- 회원 등급 등 추가 정보 -->
-<!--        <span class="status-badge" th:text="*{membershipLevel ?: '일반회원'}">정회원</span>-->
-      </div>
-    </div>
-  </div>
+<!--  <div class="card profile-card" th:object="${user}"> &lt;!&ndash; 컨트롤러에서 'user' 객체 전달 가정 &ndash;&gt;-->
+<!--    <div class="profile-summary">-->
+<!--      &lt;!&ndash; 프로필 이미지 URL이 없다면 기본 이미지 사용 &ndash;&gt;-->
+<!--      <img class="profile-pic" alt="프로필 사진">-->
+<!--      <div class="profile-info">-->
+<!--&lt;!&ndash;        <h2 class="profile-name" th:text="*{name}">[사용자 이름]</h2>&ndash;&gt;-->
+<!--&lt;!&ndash;        <p class="profile-email" th:text="*{email}">[이메일 주소]</p>&ndash;&gt;-->
+<!--        &lt;!&ndash; 회원 등급 등 추가 정보 &ndash;&gt;-->
+<!--&lt;!&ndash;        <span class="status-badge" th:text="*{membershipLevel ?: '일반회원'}">정회원</span>&ndash;&gt;-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
 
   <!-- Detailed Information Card -->
-  <div class="card info-card" th:object="${user}">
+  <div class="card info-card" th:object="${userInfo}">
     <div class="card-header">
       <h3 class="card-title">상세 정보</h3>
       <a th:href="@{/mypage/edit}" class="edit-link"> <!-- 정보 수정 페이지 링크 -->
@@ -39,32 +39,32 @@
     <div class="info-grid">
       <div class="info-item">
         <label class="info-label">이름</label>
-<!--        <p class="info-value" th:text="*{name}">[사용자 이름]</p>-->
+        <p class="info-value" th:text="*{name}">[사용자 이름]</p>
       </div>
       <div class="info-item">
         <label class="info-label">이메일</label>
-<!--        <p class="info-value" th:text="*{email}">[이메일 주소]</p>-->
+        <p class="info-value" th:text="*{email}">[이메일 주소]</p>
       </div>
       <div class="info-item">
         <label class="info-label">연락처</label>
         <!-- 연락처가 없다면 '-' 표시 -->
-<!--        <p class="info-value" th:text="*{phoneNumber ?: '-'}">[연락처 정보]</p>-->
+        <p class="info-value" th:text="*{phoneNo}">[연락처 정보]</p>
       </div>
       <div class="info-item">
         <label class="info-label">가입일</label>
         <!-- 날짜 포맷팅 예시 (컨트롤러에서 Date 타입으로 전달 가정) -->
-<!--        <p class="info-value" th:text="*{#temporals.format(joinDate, 'yyyy-MM-dd')}">[가입 날짜]</p>-->
+        <p class="info-value" th:text="*{#temporals.format(createDt, 'yyyy-MM-dd')}">[가입 날짜]</p>
       </div>
-      <div class="info-item full-width">
-        <label class="info-label">주소</label>
-<!--        <p class="info-value" th:text="*{address ?: '-'}">[주소 정보]</p>-->
-      </div>
+<!--      <div class="info-item full-width">-->
+<!--        <label class="info-label">주소</label>-->
+<!--&lt;!&ndash;        <p class="info-value" th:text="*{address ?: '-'}">[주소 정보]</p>&ndash;&gt;-->
+<!--      </div>-->
     </div>
 
     <!-- Action Buttons -->
     <div class="card-footer">
       <button type="button" class="btn btn-secondary" onclick="location.href='/mypage/change-password'">비밀번호 변경</button> <!-- 비밀번호 변경 페이지 이동 예시 -->
-      <button type="button" class="btn btn-danger" onclick="confirmWithdrawal()">회원 탈퇴</button> <!-- 회원 탈퇴 확인 함수 호출 예시 -->
+      <button type="button" class="btn btn-danger" onclick="location.href='/mypage/resign'">회원 탈퇴</button> <!-- 회원 탈퇴 확인 함수 호출 예시 -->
     </div>
     <!-- 회원 탈퇴 확인을 위한 간단한 스크립트 예시 -->
     <script>
@@ -72,7 +72,7 @@
         if (confirm('정말로 회원을 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
           // 실제 탈퇴 처리 로직 호출 (예: form submit 또는 fetch API 사용)
           // location.href = '/mypage/withdraw'; // 예시 URL
-          alert('회원 탈퇴 로직을 구현해야 합니다.');
+          // alert('회원 탈퇴 로직을 구현해야 합니다.');
         }
       }
     </script>

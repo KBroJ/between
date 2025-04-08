@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/mypage}">
+<head>
+  <title>수정 화면</title>
+    <!-- ✅ 페이지 전용 스타일 삽입 -->
+    <link rel="stylesheet" th:href="@{/css/layout/mypage.css}">
+</head>
+<body>
+
+<div layout:fragment="mypage-content">
+  <h2>회원 탈퇴 - 비밀번호 확인</h2>
+  <p>회원 탈퇴를 계속하시려면 현재 비밀번호를 입력해주세요.</p>
+  <form th:action="@{/mypage/resignCheckPassword}" method="post">
+    <input type="password" name="currentPassword" placeholder="현재 비밀번호" />
+    <button type="submit">변경</button>
+  </form>
+</div>
+
+</body>
+</html>
