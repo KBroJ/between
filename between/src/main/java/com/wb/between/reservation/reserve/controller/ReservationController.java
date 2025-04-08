@@ -1,4 +1,4 @@
-package com.wb.between.reservation.controller;
+package com.wb.between.reservation.reserve.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

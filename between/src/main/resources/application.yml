@@ -84,3 +84,8 @@ logging:
     # 쿼리 바인딩 로그찍기 참고 : https://byunsw4.tistory.com/25
     org.hibernate.orm.jdbc.bind: trace  # query의 ?에 어떤 값이 들어가는지 추적할 수 있는 설정(TRACE Log에 값을 보여줍니다.)
     com.wb.between: debug
+
+redis:
+  host: 127.0.0.1
+  port: 6379
+  password: winbit01!

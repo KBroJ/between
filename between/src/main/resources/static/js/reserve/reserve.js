@@ -241,7 +241,7 @@
 
   // --- 결제 관련 함수 ---
   /** 결제 진행 처리 (토스 연동 없음 - 이전 버전) */
-  function proceedToPayment() {
+/*  function proceedToPayment() {
       const totalCount = parseInt(totalCountSpan?.textContent || '0');
       if (totalCount === 0) { alert('예약할 항목과 요금제를 선택해주세요.'); return; }
       const selectedItem = document.querySelector('.seat-item.selected');
@@ -260,13 +260,156 @@
       // --- !!! 실제 서버 전송 로직 구현 필요 !!! ---
       // fetch('/api/reservations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(reservationData) })
       // .then(response => response.json()) // 또는 response.ok 확인
-      // .then(result => { alert('예약 요청 완료!'); /* 성공 처리 */ })
-      // .catch(error => { alert('예약 요청 실패'); /* 실패 처리 */ });
+      // .then(result => { alert('예약 요청 완료!'); *//* 성공 처리 *//* })
+      // .catch(error => { alert('예약 요청 실패'); *//* 실패 처리 *//* });
       alert("결제 기능(서버 전송)은 아직 구현되지 않았습니다."); // 임시 알림
-  }
+  }*/
 
+ /** 결제 진행 처리 (백엔드 예약 API 호출 후 결제 생략) */
+ function proceedToPayment() {
+         // --- !!! 즉시 버튼 비활성화 및 재진입 방지 !!! ---
+         if (paymentButton.disabled) {
+             console.log("이미 예약 처리 중입니다.");
+             return; // 이미 클릭되어 처리 중이면 함수 종료
+         }
+         paymentButton.disabled = true; // 클릭 즉시 비활성화
+         paymentButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> 예약 처리 중...';
+         // ---------------------------------------------
+
+         // --- 1. 예약 정보 유효성 검사 ---
+         const totalCount = parseInt(totalCountSpan?.textContent || '0');
+         if (totalCount === 0) {
+             alert('예약할 항목과 요금제를 선택해주세요.');
+             // 오류 시 버튼 다시 활성화
+             paymentButton.disabled = false;
+             paymentButton.innerHTML = '<i class="fas fa-credit-card me-2"></i> 결제하기';
+             return;
+         }
+         const selectedItem = document.querySelector('.seat-item.selected');
+         const itemType = selectedItem?.dataset.seatType === 'ROOM' ? 'ROOM' : 'SEAT';
+         const itemId = selectedItem?.dataset.seatId;
+         const selectedTimeValues = Array.from(document.querySelectorAll('input[name="times"]:checked')).map(cb => cb.value);
+
+         if (!itemId || !selectedDate) {
+             alert('항목 또는 시작 날짜가 선택되지 않았습니다.');
+             paymentButton.disabled = false; // 오류 시 버튼 활성화
+             paymentButton.innerHTML = '<i class="fas fa-credit-card me-2"></i> 결제하기';
+             return;
+         }
+         if (selectedPlanType === 'HOURLY' && selectedTimeValues.length === 0) {
+             alert('시간제는 시간을 선택해야 합니다.');
+             paymentButton.disabled = false; // 오류 시 버튼 활성화
+             paymentButton.innerHTML = '<i class="fas fa-credit-card me-2"></i> 결제하기';
+             return;
+         }
+         const currentUserId = 123; // !!! 임시 사용자 ID, 실제로는 로그인 정보 연동 필요 !!!
+         if (!currentUserId) {
+             alert('사용자 정보를 가져올 수 없습니다.');
+             paymentButton.disabled = false; // 오류 시 버튼 활성화
+             paymentButton.innerHTML = '<i class="fas fa-credit-card me-2"></i> 결제하기';
+             return;
+         }
+         // --- 유효성 검사 끝 ---
+
+         // 2. 백엔드로 보낼 데이터 준비
+         const reservationRequestData = {
+              itemId: parseInt(itemId),
+              itemType: itemType,
+              planType: selectedPlanType,
+              reservationDate: selectedDate,
+              selectedTimes: selectedPlanType === 'HOURLY' ? selectedTimeValues : [],
+              couponId: selectedCoupon?.id || null,
+              userId: currentUserId
+          };
+
+         console.log("백엔드로 예약 생성 요청:", reservationRequestData);
+
+         // 3. 백엔드 예약 생성 API 호출
+         fetch('/api/reservations', { // !!! 백엔드 주소(포트 포함) 확인 !!!
+             method: 'POST',
+             headers: {
+                 'Content-Type': 'application/json',
+                 // CSRF 토큰 필요시 헤더 추가 (이전 답변 참고)
+                 // 'X-CSRF-TOKEN': csrfToken
+             },
+             body: JSON.stringify(reservationRequestData)
+         })
+         .then(response => {
+             // HTTP 상태 코드로 성공/실패 먼저 확인
+             if (response.status === 409) { // Conflict (락 실패 등)
+                  // 에러 메시지 추출을 위해 response.json() 시도
+                  return response.json().then(err => { throw new Error(err.message || '다른 사용자가 예약 중입니다.'); });
+             } else if (!response.ok) { // 4xx, 5xx 등 기타 에러
+                  // 에러 메시지 추출 시도
+                  return response.json().then(err => { throw new Error(err.message || `서버 오류 (${response.status})`); });
+             }
+             return response.json(); // 성공 (2xx) 시 JSON 파싱
+         })
+         .then(result => {
+             // 백엔드 응답 성공 처리 (result.success 필드 확인)
+             console.log('백엔드 예약 생성 성공 응답:', result);
+             if (result.success) { // 백엔드가 {success: true, ...} 형태로 응답한다고 가정
+
+                 // --- 예약 성공 후 처리 ---
+                 alert('예약이 성공적으로 완료되었습니다!'); // 성공 알림
+
+                 // 즉시 UI 업데이트 (좌석 상태 변경, 선택 초기화 등)
+                 const reservedSeatElement = document.querySelector(`.seat-item[data-seat-id="${itemId}"]`);
+                 if (reservedSeatElement) {
+                     reservedSeatElement.classList.remove('selected', 'available');
+                     reservedSeatElement.classList.add('unavailable');
+                     reservedSeatElement.style.cursor = 'not-allowed';
+                     reservedSeatElement.onclick = null; // 클릭 이벤트 제거
+                 } else {
+                     console.warn("예약된 좌석 요소를 화면에서 찾지 못했습니다:", itemId);
+                     // 필요시 전체 좌석 목록 새로고침
+                     // loadSeatStatus();
+                 }
+                 clearTimeSelection();
+                 selectedCoupon = null;
+                 if(couponSelect) couponSelect.value = "";
+                 if(discountInfoDiv) discountInfoDiv.textContent = '';
+                 updateSummary(); // 요약 정보 업데이트 (calculateTotal 호출됨)
+
+                 // --- !!! 중요: 성공 후 버튼 상태 !!! ---
+                 // 다음 예약을 위해 버튼 활성화 및 초기화
+                 if(paymentButton) {
+                     paymentButton.disabled = false;
+                     paymentButton.innerHTML = '<i class="fas fa-credit-card me-2"></i> 결제하기';
+                 }
+                 // ------------------------------------
+
+                 // location.reload(); // 페이지 새로고침은 제거된 상태
+
+                 // --- 실제 결제 연동 시 여기서 토스 결제 시작 ---
+                 // console.log("백엔드 예약 성공 -> 토스 결제 시작");
+                 // requestTossPayment(result); // 백엔드 응답의 결제 정보 사용
+                 // if(paymentWidgetSection) paymentWidgetSection.style.display = 'block';
+                 // const paymentBar = document.querySelector('.payment-bar');
+                 // if (paymentBar) paymentBar.style.display = 'none';
+                 // -------------------------------------------
+
+             } else {
+                  // 백엔드가 {success: false, message: "..."} 형태로 응답한 경우
+                  throw new Error(result.message || '알 수 없는 예약 오류');
+             }
+         })
+         .catch(error => {
+             // fetch 실패 또는 .then 내부에서 throw된 에러 처리
+             console.error('예약 생성 또는 처리 중 오류:', error);
+             alert(`예약 실패: ${error.message}`); // 실패 알림
+
+             // --- !!! 중요: 에러 시 버튼 다시 활성화 !!! ---
+             if(paymentButton) {
+                  paymentButton.disabled = false;
+                  paymentButton.innerHTML = '<i class="fas fa-credit-card me-2"></i> 결제하기';
+              }
+             // --------------------------------------
+         });
+     }
   // --- 초기화 및 이벤트 리스너 설정 ---
   /** 페이지 로드 시 실행 */
+/*
   document.addEventListener('DOMContentLoaded', function() {
       console.log("DOM 로드 완료. 초기화 시작.");
       // 이벤트 리스너 등록
@@ -283,4 +426,23 @@
       handlePlanChange(); // 초기 요금제 상태 반영
       updateSummary();
       console.log("초기화 로직 완료.");
-  });
+  });*/
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("DOM 로드 완료.");
+        // 이벤트 리스너 등록
+        calendarIcon?.addEventListener('click', openCalendar);
+        planRadios.forEach(radio => { radio.addEventListener('change', handlePlanChange); });
+        couponSelect?.addEventListener('change', handleCouponChange);
+        paymentButton?.addEventListener('click', proceedToPayment); // 결제 버튼에 수정된 함수 연결
+
+        // 초기화 함수 호출
+        const initialYear = new Date().getFullYear();
+        const initialMonth = new Date().getMonth() + 1;
+        loadCalendarDataAndInitialize(initialYear, initialMonth, new Date().toISOString().split('T')[0]);
+        loadAvailableCoupons();
+        handlePlanChange();
+        updateSummary();
+        console.log("초기화 완료.");
+        // 토스 위젯 초기화 로직은 제거하거나 주석 처리합니다.
+        // try { if (typeof PaymentWidget !== 'undefined') ... } catch ...
+    });
