@@ -1,6 +1,7 @@
 package com.wb.between.reservation.seat.contorller;
 
 
+import com.wb.between.reservation.seat.dto.TimeDto;
 import com.wb.between.reservation.seat.service.TimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -29,8 +30,8 @@ public class TimeController {
 
         try {
             // 서비스 호출 시 branchId 제거됨
-            List<String> availableTimes = timeService.getAvailableTimes(date, seatId);
-            return ResponseEntity.ok(availableTimes);
+            List<TimeDto> timeSlots = timeService.getAvailableTimesWithStatus(date, seatId);
+            return ResponseEntity.ok(timeSlots);
         } catch (Exception e) {
             System.err.println("Error fetching available times: " + e.getMessage());
             e.printStackTrace();

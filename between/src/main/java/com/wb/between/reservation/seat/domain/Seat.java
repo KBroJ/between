@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
-@Table(name = "Seat") // 테이블명 대문자 주의
+@Table(name = "seat")
 public class Seat {
     @Id
     // @GeneratedValue(strategy = GenerationType.IDENTITY) // DB에서 자동 증가 시 사용
@@ -41,13 +41,12 @@ public class Seat {
     private String seatSort; // 좌석 종류 (DB 컬럼명 그대로 사용)
 
     // --- 위치 정보 필드 추가 ---
-    @Column(name = "grid_row" ,length = 50) // DB 컬럼: grid_row (또는 gridRow)
+    @Column(name = "gridRow" ,length = 50)
     private String gridRow;
 
-    @Column(name = "grid_column", length = 50) // DB 컬럼: grid_column (또는 gridColumn)
+    @Column(name = "gridColumn", length = 50)
     private String gridColumn;
 
-    // branchId, gridRow, gridColumn 필드 제거됨
     // 기본 생성자, 다른 생성자 등 필요시 추가
     public Seat() {} // JPA는 기본 생성자가 필요할 수 있음
 }

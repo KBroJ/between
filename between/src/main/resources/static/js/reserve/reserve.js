@@ -186,49 +186,70 @@
               .finally(updateSummary); // 시간 로드 후 항상 요약 업데이트
       }
 
-      /** !!! 시간 슬롯 렌더링 (지난 시간 비활성화 로직 추가) !!! */
-      function renderTimeSlots(times = [], isSelectedDateToday, currentHour) { // 파라미터 추가
-          if(!timeSlotsDiv) return;
-          timeSlotsDiv.innerHTML = ''; // 이전 내용 클리어
+     /** 시간 슬롯 렌더링 (상태 기반 - AVAILABLE, BOOKED, PAST) */
+     function renderTimeSlots(timeSlots = []) { // 파라미터 이름 변경 (times -> timeSlots)
+         if(!timeSlotsDiv) return;
+         timeSlotsDiv.innerHTML = ''; // 이전 내용 클리어
 
-          if (!times?.length) { timeSlotsDiv.innerHTML = '<p class="text-warning small">예약 가능한 시간이 없습니다.</p>'; return; }
+         if (!timeSlots?.length) {
+             // API 호출은 성공했으나 데이터가 없는 경우 (백엔드 오류 등)
+             timeSlotsDiv.innerHTML = '<p class="text-warning small">시간 정보를 조회할 수 없습니다.</p>';
+             return;
+         }
 
-          times.forEach(tInfo => {
-              const timeValue = typeof tInfo==='object'?tInfo.startTime:tInfo;
-              const timeDisplay = typeof tInfo==='object'?`${tInfo.startTime}-${tInfo.endTime}`:`${timeValue}-${String(parseInt(timeValue.split(':')[0])+1).padStart(2,'0')}:00`;
-              const label = document.createElement('label');label.classList.add('me-2','mb-2');
-              const input = document.createElement('input');input.type='checkbox';input.name='times';input.value=timeValue;input.id=`time-${timeValue.replace(':','')}`;input.classList.add('d-none');
-              const span = document.createElement('span');span.textContent=timeDisplay;span.classList.add('btn','btn-outline-primary','btn-sm');
+         let hasAvailableSlot = false; // 예약 가능한 슬롯이 하나라도 있는지 확인용
 
-              let isDisabled = false;
-              // --- 오늘 날짜 선택 시, 지난 시간인지 확인 ---
-              if (isSelectedDateToday) {
-                  try {
-                      const slotHour = parseInt(timeValue.split(':')[0]);
-                      if (slotHour < currentHour) { // 시간 슬롯 시작 시간이 현재 시간보다 이전이면
-                          isDisabled = true;
-                      }
-                  } catch(e) { console.error("시간 비교 오류:", timeValue, e); }
-              }
-              // -----------------------------------------
+         timeSlots.forEach(slot => { // 각 TimeSlotDto 객체 순회
+             const timeValue = slot.startTime; // "HH:mm"
+             // 종료 시간은 시작 시간 + 1시간으로 가정하여 표시
+             const timeDisplay = `${timeValue} - ${String(parseInt(timeValue.split(':')[0]) + 1).padStart(2,'0')}:00`;
+             const label = document.createElement('label'); label.classList.add('me-2', 'mb-2');
+             const input = document.createElement('input'); input.type = 'checkbox'; input.name = 'times'; input.value = timeValue; input.id = `time-${timeValue.replace(':', '')}`; input.classList.add('d-none');
+             const span = document.createElement('span'); span.textContent = timeDisplay; // 기본 텍스트는 시간 표시
 
-              if (isDisabled) {
-                  input.disabled = true; // 체크박스 비활성화
-                  span.classList.add('disabled'); // 비활성화 CSS 클래스
-                  // span.style.textDecoration = 'line-through'; // CSS에서 처리
-                  label.style.cursor = 'not-allowed'; // 라벨 커서 변경
-              } else {
-                  // 활성화된 슬롯에만 이벤트 리스너 추가
-                  input.addEventListener('change',(e)=>{
-                      span.classList.toggle('btn-primary',input.checked);
-                      span.classList.toggle('btn-outline-primary',!input.checked);
-                      updateSummary();
-                  });
-              }
+             // --- !!! 상태(status)에 따라 스타일 및 동작 결정 !!! ---
+             switch(slot.status) {
+                 case 'AVAILABLE':
+                     hasAvailableSlot = true; // 예약 가능 슬롯 있음!
+                     span.classList.add('btn', 'btn-outline-primary', 'btn-sm', 'available');
+                     input.disabled = false;
+                     label.style.cursor = 'pointer';
+                     // 활성화된 슬롯에만 이벤트 리스너 추가
+                     input.addEventListener('change', (e) => {
+                         span.classList.toggle('btn-primary', input.checked);
+                         span.classList.toggle('btn-outline-primary', !input.checked);
+                         updateSummary();
+                     });
+                     break;
+                 case 'BOOKED':
+                     span.classList.add('btn', 'btn-secondary', 'btn-sm', 'booked'); // 'booked' 클래스 추가
+                     span.textContent = "예약 완료"; // !!! 텍스트 변경 !!!
+                     input.disabled = true;
+                     label.style.cursor = 'not-allowed';
+                     break;
+                 case 'PAST':
+                 default: // PAST 또는 알 수 없는 상태
+                     span.classList.add('btn', 'btn-light', 'btn-sm', 'disabled'); // 기존 'disabled' 스타일 활용
+                     span.style.textDecoration = 'line-through';
+                     input.disabled = true;
+                     label.style.cursor = 'not-allowed';
+                     break;
+             }
+             // ----------------------------------------------------
 
-              label.appendChild(input);label.appendChild(span);timeSlotsDiv.appendChild(label);
-          });
-      }
+             label.appendChild(input); label.appendChild(span); timeSlotsDiv.appendChild(label);
+         });
+
+         // 만약 AVAILABLE 슬롯이 하나도 없다면 안내 문구 표시
+         if (!hasAvailableSlot) {
+              // timeSlotsDiv.innerHTML = '<p class="text-warning small">선택하신 좌석은 현재 예약 가능한 시간이 없습니다.</p>';
+              // 또는 기존 버튼들을 그대로 두되, 안내 문구만 추가
+              const noTimeMsg = document.createElement('p');
+              noTimeMsg.className = 'text-warning small w-100'; // 전체 너비 차지
+              noTimeMsg.textContent = '예약 가능한 시간이 없습니다.';
+              timeSlotsDiv.appendChild(noTimeMsg);
+         }
+     }
   // --- 요약 및 금액 계산 함수 ---
   /** 할인 전 기본 가격 */
   function calculateBasePrice() { const c=document.querySelectorAll('input[name="times"]:checked').length; const i=document.querySelector('.seat-item.selected'); let p=0; if(i){ switch(selectedPlanType){ case 'HOURLY': p=c*2000;break; case 'DAILY': p=10000;break; case 'MONTHLY': p=99000;break; }} return p; }
