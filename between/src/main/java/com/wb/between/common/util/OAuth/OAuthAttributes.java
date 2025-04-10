@@ -4,6 +4,7 @@ import com.wb.between.user.domain.User;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.time.LocalDateTime;
 
@@ -33,8 +34,13 @@ public class OAuthAttributes {
     public static OAuthAttributes of(String registrationId, String userNameAttributeName, Map<String, Object> attributes) {
 
         if ("naver".equals(registrationId)) {
-            return ofNaver("id", attributes); // 네이버는 user-name-attribute가 response지만, 실제 고유 ID는 response 내의 id 임
+            return ofNaver("email", attributes); // 네이버는 user-name-attribute가 response지만, 실제 고유 ID는 response 내의 id 임
         }
+        //카카오
+        if("kakao".equals(registrationId)) {
+            return ofKakao("email", attributes);
+        }
+
         // 다른 소셜 로그인(Google, Kakao 등) 추가 시 여기에 분기 추가
 
         return null; // 지원하지 않는 소셜 로그인일 경우
@@ -62,6 +68,36 @@ public class OAuthAttributes {
                 .email((String) response.get("email"))
                 .mobile((String) response.get("mobile"))    // 네이버는 mobile 제공
                 .attributes(response)                       // attributes에는 response 맵 자체를 저장
+                .nameAttributeKey(userNameAttributeName)    // 여기서는 response 맵 안의 고유 식별자 키 ('id')
+                .build();
+    }
+
+    private static OAuthAttributes ofKakao(String userNameAttributeName, Map<String, Object> attributes) {
+
+        // 카카오 최상위에 id, connected_at, properties, kakao_account 필드를 가짐
+        // 이름 정보는 properties Map안에 있음
+        Map<String, Object> properties = (Map<String, Object>) attributes.get("properties");
+        // 카카오 계정 정보는 kakao_account 필드 값인 Map 안에 있음
+        Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
+
+        System.out.println("OAuthAttributes|ofKakao|kakaoAccount = " + kakaoAccount);
+
+        // 수정 가능한 새 맵 생성 (원본 복사)
+        Map<String, Object> mutableAttributes = new HashMap<>(attributes);
+
+        if (properties == null || kakaoAccount == null) {
+            // 예외 처리 또는 로깅: 네이버 응답 형식이 예상과 다름
+            throw new IllegalArgumentException("Invalid Kakao response structure.");
+        }
+
+        mutableAttributes.put("email", kakaoAccount.get("email")); // 루트 레벨에 email 추가 (선택적)
+
+        // 네이버에서 제공하는 사용자 정보 추출
+        return OAuthAttributes.builder()
+                .name((String) properties.get("nickname"))
+                .email((String) kakaoAccount.get("email"))
+                .mobile("")    // 카카오는 mobile 미제공
+                .attributes(mutableAttributes)                       // attributes에는 response 맵 자체를 저장
                 .nameAttributeKey(userNameAttributeName)    // 여기서는 response 맵 안의 고유 식별자 키 ('id')
                 .build();
     }
