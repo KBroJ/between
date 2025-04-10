@@ -12,26 +12,28 @@
 <div layout:fragment="mypage-content">
   <div class="profile-edit-wrapper">
     <h2>회원정보 수정</h2>
-    <form th:action="@{/mypage/profile}" method="post" class="profile-form">
-      <div class="form-group">
-        <label for="name">이름</label>
-        <input type="text" id="name" name="name" th:value="${userInfo.name}" />
-      </div>
+    <div th:object="${userInfo}">
+      <form th:action="@{/mypage/edit}" method="post" class="profile-form">
+        <div class="form-group">
+          <label for="name">이름</label>
+          <input type="text" id="name" name="name" th:field="*{name}" />
+        </div>
 
-      <div class="form-group">
-        <label for="email">이메일</label>
-        <input type="email" id="email" name="email" th:value="${userInfo.email}" readonly />
-      </div>
+        <div class="form-group">
+          <label for="email">이메일</label>
+          <input type="email" id="email" name="email" th:field="*{email}" readonly />
+        </div>
 
-      <div class="form-group">
-        <label for="phone">연락처</label>
-        <input type="text" id="phone" name="phone" th:value="${userInfo.phoneNo}" />
-      </div>
-      <div class="form-actions">
-        <button type="submit" class="btn-primary">정보 수정</button>
-        <button type="button" class="btn-danger" onclick="location.href='/mypage/delete-account'">회원 탈퇴</button>
-      </div>
-    </form>
+        <div class="form-group">
+          <label for="phone">연락처</label>
+          <input type="text" id="phone" name="phone" th:field="*{phoneNo}" />
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">정보 수정</button>
+          <button type="button" class="btn-danger" onclick="location.href='/mypage/delete-account'">회원 탈퇴</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 
