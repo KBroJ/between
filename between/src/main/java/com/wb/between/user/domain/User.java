@@ -1,10 +1,8 @@
 package com.wb.between.user.domain;
 
+import com.wb.between.usercoupon.domain.UserCoupon;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,7 +10,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 //@Table(name = "User") // 매핑할 테이블명 선언 (생략 시 클래스명을 테이블명으로 사용가능)
@@ -20,6 +20,7 @@ import java.util.List;
 @Builder                // 빌더 패턴 클래스 생성
 @NoArgsConstructor      // 인자가 없는 생성자 생성
 @AllArgsConstructor     // 모든 필드를 인자로 받는 생성자 생성
+@EqualsAndHashCode(exclude = "usercoupon") // 양방향 연관관계 시 순환 참조 방지 위해 추가 권장
 public class User implements UserDetails {
 
     @Id                                                                         // PK 필드 선언
@@ -69,6 +70,10 @@ public class User implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities(){
         return List.of(new SimpleGrantedAuthority("user"));
     }
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @ToString.Exclude // Lombok이 생성하는 toString() 메소드에서 이 필드를 제외시킴!
+    private Set<UserCoupon> usercoupon = new HashSet<>(); // 사용자가 가진 쿠폰 목록 (UserCoupon 객체들을 통해 접근)
 
     // 사용자의 id를 반환 (고유한 값)
     @Override
