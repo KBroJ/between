@@ -49,7 +49,7 @@ public class MenuCache {
         for(String role : allRoles) {
             List<MenuListResponseDto> menusForRole = menuListResponseDtoList.stream()
                     .filter(menu -> {
-                        if("user".equals(role)) {
+                        if("user".equals(role) || "일반".equals(role)) {
                             return !menu.getMenuNm().equals("로그인") &&
                                     !menu.getMenuNm().equals("회원가입");
                         } else {
