@@ -86,6 +86,7 @@ logging:
     com.wb.between: debug
 
 redis:
+  # Winbit Redis Setting(회사서버)
   host: 10.1.2.166
   port: 6379
   password: winbit01!

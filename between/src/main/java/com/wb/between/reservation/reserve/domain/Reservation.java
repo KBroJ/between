@@ -68,6 +68,11 @@ public class Reservation {
     public Reservation() {} // 기본 생성자
 
 
+    public Reservation(
+            long l,
+            LocalDateTime localDateTime, String s, LocalDateTime localDateTime1, LocalDateTime localDateTime2, String number, String 예약완료, boolean b
+    ) {
+    }
 }
 
 

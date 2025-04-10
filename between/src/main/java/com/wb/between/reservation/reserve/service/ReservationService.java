@@ -133,7 +133,7 @@ public class ReservationService {
 
             // 7. Reservation Entity 생성 및 저장
             Reservation reservation = new Reservation();
-            reservation.setUserNo(requestDto.getUserId()); // !!! 실제 사용자 ID 설정 !!!
+            reservation.setUserNo(userNo); // !!! 실제 사용자 ID 설정 !!!
             reservation.setSeatNo(requestDto.getItemId());
             reservation.setTotalPrice(finalPriceStr); // 계산된 최종 가격
             reservation.setResPrice(basePriceStr);    // 할인 전 가격

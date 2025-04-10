@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/mypage}">
+
+  <head>
+    <title>나의 예약 내역</title>
+    <link rel="stylesheet" th:href="@{/css/mypage/my-reservations.css}">
+  </head>
+
+  <section layout:fragment="mypage-content">
+    <h1 class="main-title">나의 예약 내역</h1>
+
+    <div class="tab-menu">
+      <a th:href="@{/mypage/reservations(tab='upcoming', startDate=${currentStartDate}, endDate=${currentEndDate})}"
+         th:classappend="${currentTab == 'upcoming' ? 'active' : ''}">예정된 예약</a>
+      <a th:href="@{/mypage/reservations(tab='past', startDate=${currentStartDate}, endDate=${currentEndDate})}"
+         th:classappend="${currentTab == 'past' ? 'active' : ''}">지난 예약</a>
+      <a th:href="@{/mypage/reservations(tab='cancelled', startDate=${currentStartDate}, endDate=${currentEndDate})}"
+         th:classappend="${currentTab == 'cancelled' ? 'active' : ''}">취소된 예약</a>
+    </div>
+
+    <!-- 예약 내역 필터 -->
+    <form th:action="@{/mypage/reservations}" method="GET" class="filter-form">
+      <input type="hidden" name="tab" th:value="${currentTab}">
+      <label for="startDate">예약일:</label>
+      <input type="date" id="startDate" name="startDate" th:value="${currentStartDate}">
+      <span>~</span>
+      <input type="date" id="endDate" name="endDate" th:value="${currentEndDate}">
+      <button type="submit">조회</button>
+    </form>
+
+    <div class="reservation-table-wrapper">
+      <table>
+        <thead>
+        <tr>
+          <th>예약일</th>
+          <th>좌석 정보</th>
+          <th>이용 시간</th>
+          <th>결제 금액</th>
+          <th>상태</th>
+          <th>작업</th>
+        </tr>
+        </thead>
+        <tbody>
+          <tr th:each="reservation : ${reservationsPage.content}" class="data-row"
+              th:data-detail-url="@{/mypage/reservations/detail/{resNo}(resNo=${reservation.resNo})}">
+
+            <td th:text="${#temporals.format(reservation.resDt, 'yyyy.MM.dd HH:mm')}"></td>
+            <td th:text="${reservation.seatNm}"></td>
+            <td>
+              <span th:text="${#temporals.format(reservation.resStart, 'yyyy.MM.dd HH:mm')}"></span>
+              <span>~</span>
+              <span th:text="${#temporals.format(reservation.resEnd, 'yyyy.MM.dd HH:mm')}"></span>
+            </td>
+            <td th:text="${#numbers.formatDecimal(reservation.totalPrice, 0, 'COMMA', 0, 'POINT')} + '원'"></td>
+            <td>
+              <span th:switch="${reservation.resStatus}">
+                  <span th:case="'1'" class="status confirmed" th:text="예약완료"></span>
+                  <span th:case="'2'" class="status completed" th:text="이용완료"></span>
+                  <span th:case="'3'" class="status cancelled" th:text="취소"></span>
+                  <span th:case="*" class="status" th:text="${reservation.resStatus}"></span>
+              </span>
+            </td>
+            <td>
+              <!--
+              <button class="btn btn-sm btn-detail" th:onclick="|location.href='@{/mypage/reservations/detail/{resNo}(resNo=${reservation.resNo})}'|">상세</button>
+              -->
+              <!-- 예약 상태(resStatus)가 예약완료(1)이며 취소 버튼 표시 -->
+              <button th:if="${reservation.resStatus == '1'}" class="btn btn-sm btn-cancel"
+                      th:onclick="'confirmCancel(\'' + ${reservation.resNo} + '\', \'' + @{/mypage/reservations/{resNo}/cancel(resNo=${reservation.resNo})} + '\');'">
+                취소
+              </button>
+            </td>
+          </tr>
+          <tr th:if="${reservationsPage.empty}">
+            <td colspan="6" class="no-data">조회된 예약 내역이 없습니다.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 페이징 버튼 -->
+    <nav th:if="${reservationsPage.totalPages > 0}" class="pagination-nav" aria-label="Page navigation">
+      <ul class="pagination">
+        <li class="page-item" th:classappend="${reservationsPage.first} ? 'disabled' : ''">
+          <a class="page-link" th:href="@{/mypage/reservations(page=0, tab=${currentTab}, startDate=${currentStartDate}, endDate=${currentEndDate})}" aria-label="First"><span>&laquo;</span></a>
+        </li>
+        <li class="page-item" th:classappend="${reservationsPage.first} ? 'disabled' : ''">
+          <a class="page-link" th:href="${reservationsPage.first} ? '#' : @{/mypage/reservations(page=${reservationsPage.number - 1}, tab=${currentTab}, startDate=${currentStartDate}, endDate=${currentEndDate})}" aria-label="Previous"><span>&lt;</span></a>
+        </li>
+        <li class="page-item" th:each="pageNumber : ${#numbers.sequence(0, reservationsPage.totalPages - 1)}"
+            th:classappend="${pageNumber == reservationsPage.number} ? 'active' : ''">
+          <a class="page-link" th:href="@{/mypage/reservations(page=${pageNumber}, tab=${currentTab}, startDate=${currentStartDate}, endDate=${currentEndDate})}"
+             th:text="${pageNumber + 1}"></a>
+        </li>
+        <li class="page-item" th:classappend="${reservationsPage.last} ? 'disabled' : ''">
+          <a class="page-link" th:href="${reservationsPage.last} ? '#' : @{/mypage/reservations(page=${reservationsPage.number + 1}, tab=${currentTab}, startDate=${currentStartDate}, endDate=${currentEndDate})}" aria-label="Next"><span>&gt;</span></a>
+        </li>
+        <li class="page-item" th:classappend="${reservationsPage.last} ? 'disabled' : ''">
+          <a class="page-link" th:href="@{/mypage/reservations(page=${reservationsPage.totalPages - 1}, tab=${currentTab}, startDate=${currentStartDate}, endDate=${currentEndDate})}" aria-label="Last"><span>&raquo;</span></a>
+        </li>
+      </ul>
+    </nav>
+
+    <script th:src="@{/js/mypage/my-reservations.js}"></script>
+
+  </section>
+</html>
