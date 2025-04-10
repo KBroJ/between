@@ -1,6 +1,9 @@
 package com.wb.between.mypage.controller;
 
+import com.wb.between.common.exception.CustomException;
+import com.wb.between.mypage.dto.MypageCouponResDto;
 import com.wb.between.mypage.dto.MypageResponseDto;
+import com.wb.between.mypage.dto.UserInfoEditReqDto;
 import com.wb.between.mypage.service.MypageService;
 import com.wb.between.mypage.dto.MyReservationDto;
 import com.wb.between.user.domain.User;
@@ -11,16 +14,14 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @Controller
@@ -50,7 +51,7 @@ public class MypageController {
      * 마이페이지 > 정보 수정 조회
      */
     @GetMapping("/edit")
-    public String editProfile(@AuthenticationPrincipal User user, Model model) {
+    public String editProfilePage(@AuthenticationPrincipal User user, Model model) {
 
         log.debug("user = {}", user);
         MypageResponseDto mypageResponseDto = mypageService.findUserbyId(user.getUserNo());
@@ -63,30 +64,67 @@ public class MypageController {
     }
 
     /**
+     * 정보 수정 처리
+     */
+    @PutMapping("/edit")
+    public String editProfile(@AuthenticationPrincipal User user,
+                              @ModelAttribute("userInfo") UserInfoEditReqDto userInfoEditReqDto,
+                              Model model) {
+
+        try {
+            //정보 수정
+            MypageResponseDto mypageResponseDto = mypageService.updateUserInfo(user.getUserNo(), userInfoEditReqDto);
+            model.addAttribute("userInfo", mypageResponseDto);
+
+            return "redirect:/mypage/edit";
+        } catch (CustomException ex) {
+            log.error("error = {}", ex.getMessage());
+            return "mypage/edit-profile";
+        } catch (Exception e) {
+            // 예상치 못한 다른 종류의 예외 처리
+            log.error("예상치 못한 오류 발생", e);
+            return "mypage/edit-profile";
+        }
+
+    }
+
+    /**
      * 마이페이지 > 비밀번호 수정 조회
      */
-    @GetMapping("/changePassword")
-    public String changePasswordPage(@AuthenticationPrincipal User user,
-
+    @GetMapping("/editPassword")
+    public String editPasswordPage(@AuthenticationPrincipal User user,
                                  Model model) {
         MypageResponseDto mypageResponseDto = mypageService.findUserbyId(user.getUserNo());
         model.addAttribute("userInfo", mypageResponseDto);
-        return "mypage/change-password";
+        return "mypage/edit-password";
     }
 
     /**
      * 비밀번호 수정 처리
      */
-    @PostMapping("/changePassword")
-    public String changePassword(@AuthenticationPrincipal User user,
+    @PutMapping("/editPassword")
+    public String editPassword(@AuthenticationPrincipal User user,
                                  @RequestParam String currentPassword,
                                  @RequestParam String newPassword,
                                  Model model) {
         log.debug("currentPassword = {}", currentPassword);
         log.debug("newPassword = {}", newPassword);
-        MypageResponseDto mypageResponseDto = mypageService.findUserbyId(user.getUserNo());
-        model.addAttribute("userInfo", mypageResponseDto);
-        return "redirect:/mypage";
+
+        try {
+             mypageService.changePassword(user.getUserNo(),
+                    currentPassword,
+                    newPassword);
+            model.addAttribute("result", "success");
+            return "redirect:/mypage";
+
+        } catch (CustomException ex) {
+            log.error("changePassword|error = {}", ex.getMessage());
+            return "mypage/edit-password";
+        } catch (RuntimeException e) {
+            // 예상치 못한 다른 종류의 예외 처리
+            log.error("예상치 못한 오류 발생", e);
+            return "mypage/edit-password";
+        }
     }
 
     /**
@@ -106,9 +144,36 @@ public class MypageController {
      * @return
      */
     @PostMapping("/resignCheckPassword")
-    public String resignCheckPassword(@RequestParam String currentPassword,Model model) {
-        return "confirmResign";
+    public String resignCheckPassword(@AuthenticationPrincipal User user,
+                                      @RequestParam String currentPassword,
+                                      Model model) {
+
+        try {
+            //비밀번호 확인 요청
+            mypageService.resignCheckPassword(user.getUserNo(), currentPassword);
+            return "mypage/resign";
+        } catch (CustomException ex) {
+            //비밀번호 불일치시 리다이렉트
+            return "redirect:/mypage/confirmResign";
+        } catch (RuntimeException e) {
+            // 예상치 못한 다른 종류의 예외 처리
+            log.error("예상치 못한 오류 발생", e);
+            return "redirect:/mypage/confirmResign";
+        }
+      }
+
+    /**
+     * 마이페이지 > 쿠폰 목록
+     */
+    @GetMapping("/coupon")
+    public String coupon(@AuthenticationPrincipal User user,Model model) {
+
+        List<MypageCouponResDto> userCouponList = mypageService.findCouponListById(user.getUserNo());
+        model.addAttribute("userCouponList", userCouponList);
+        model.addAttribute("couponCount", userCouponList.size());
+        return "/mypage/coupon";
     }
+
 
     /**
      * 탈퇴 처리

@@ -63,18 +63,18 @@
 
     <!-- Action Buttons -->
     <div class="card-footer">
-      <button type="button" class="btn btn-secondary" onclick="location.href='/mypage/change-password'">비밀번호 변경</button> <!-- 비밀번호 변경 페이지 이동 예시 -->
-      <button type="button" class="btn btn-danger" onclick="location.href='/mypage/resign'">회원 탈퇴</button> <!-- 회원 탈퇴 확인 함수 호출 예시 -->
+<!--      <button type="button" class="btn btn-secondary" onclick="location.href='/mypage/change-password'">비밀번호 변경</button> &lt;!&ndash; 비밀번호 변경 페이지 이동 예시 &ndash;&gt;-->
+      <button type="button" class="btn btn-danger" onclick="location.href='/mypage/confirmResign'">회원 탈퇴</button> <!-- 회원 탈퇴 확인 함수 호출 예시 -->
     </div>
     <!-- 회원 탈퇴 확인을 위한 간단한 스크립트 예시 -->
     <script>
-      function confirmWithdrawal() {
-        if (confirm('정말로 회원을 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
-          // 실제 탈퇴 처리 로직 호출 (예: form submit 또는 fetch API 사용)
-          // location.href = '/mypage/withdraw'; // 예시 URL
-          // alert('회원 탈퇴 로직을 구현해야 합니다.');
-        }
-      }
+      // function confirmWithdrawal() {
+      //   if (confirm('정말로 회원을 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+      //     // 실제 탈퇴 처리 로직 호출 (예: form submit 또는 fetch API 사용)
+      //     // location.href = '/mypage/withdraw'; // 예시 URL
+      //     // alert('회원 탈퇴 로직을 구현해야 합니다.');
+      //   }
+      // }
     </script>
   </div>
 </section >
