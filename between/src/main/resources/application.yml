@@ -92,3 +92,7 @@ redis:
  # host: 127.0.0.1
  # port: 6379
  # password: winbit01!
+kakao:
+  pay:
+    admin-key: 
+

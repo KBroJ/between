@@ -1,0 +1,69 @@
+/* 페이지 전체 스타일 */
+html, body {
+    height: 100%;
+    margin: 0;
+}
+body {
+    display: flex; /* Flexbox 사용하여 수직/수평 중앙 정렬 */
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f9ff; /* 연한 하늘색 배경 */
+    font-family: 'Noto Sans KR', sans-serif;
+}
+/* 내용 카드 스타일 */
+.confirmation-card {
+    background-color: #fff;
+    padding: 2.5rem 2rem; /* 내부 여백 */
+    border-radius: 1rem; /* 둥근 모서리 */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+    text-align: center; /* 내부 요소 가운데 정렬 */
+    max-width: 450px; /* 카드 최대 너비 */
+    width: 90%;
+}
+/* 아이콘 스타일 */
+.confirmation-icon {
+    font-size: 4.5rem; /* 아이콘 크기 */
+    color: #28a745; /* 성공 초록색 */
+    margin-bottom: 1.5rem; /* 아래쪽 여백 */
+}
+/* 제목 스타일 */
+.confirmation-card h2 {
+    font-weight: 700; /* 굵은 글씨 */
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+/* 부가 메시지 스타일 */
+.confirmation-card .text-muted {
+    margin-bottom: 2rem;
+}
+/* 버튼 그룹 스타일 */
+.btn-group-actions .btn {
+    margin: 0 0.5rem; /* 버튼 사이 간격 */
+    min-width: 130px; /* 버튼 최소 너비 */
+    font-weight: 500;
+    padding: 0.6rem 1.2rem; /* 버튼 내부 여백 */
+    border-radius: 50px; /* 알약 모양 버튼 */
+    transition: all 0.3s ease; /* 부드러운 효과 */
+}
+/* 예약 내역 버튼 */
+.btn-primary-custom {
+     background-color: #64B5F6; /* 하늘색 계열 */
+     border-color: #64B5F6;
+}
+ .btn-primary-custom:hover {
+     background-color: #42A5F5;
+     border-color: #42A5F5;
+     transform: translateY(-2px); /* 살짝 위로 이동 */
+     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+ /* 메인으로 버튼 */
+ .btn-secondary-custom {
+      background-color: #6c757d; /* 회색 계열 */
+      border-color: #6c757d;
+ }
+  .btn-secondary-custom:hover {
+      background-color: #5a6268;
+      border-color: #545b62;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+ }
