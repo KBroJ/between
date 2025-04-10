@@ -38,20 +38,26 @@ public class MenuService {
         return menuList.stream().map(MenuListResponseDto::from).toList();
     }
 
+    /**
+     * 메뉴 목록 전체 조회
+     * @return
+     */
+    public List<MenuListResponseDto> findByUseAt() {
+        List<Menu> menuList = menuRepository.findByUseAt("Y", Sort.by(Sort.Direction.ASC, "menuNo"));
 
+        return menuList.stream()
+                .map(MenuListResponseDto::from).toList();
+    }
+
+    /**
+     * 메뉴 권한별 조회
+     * @param roles
+     * @return
+     */
     public List<MenuListResponseDto> findByRole(String roles) {
         List<Menu> menuList = menuRepository.findByUseAt("Y", Sort.by(Sort.Direction.ASC, "menuNo"));
 
         return menuList.stream()
-                .filter(menu -> {
-                    if("user".equals(roles)) {
-                        return !menu.getMenuNm().equals("로그인") &&
-                                !menu.getMenuNm().equals("회원가입");
-                    } else {
-                        return !menu.getMenuNm().equals("마이페이지") &&
-                                !menu.getMenuNm().equals("로그아웃");
-                    }
-                })
                 .map(MenuListResponseDto::from).toList();
     }
 }

@@ -21,15 +21,15 @@ import java.util.stream.Collectors;
 @Slf4j
 public class GlobalModelAttributeAdvice {
 
+    //메뉴에 관한 캐시 클래스 호출
     private final MenuCache menuCache;
-
-    @ModelAttribute("menuList")
+    
+    //menuList란 이름으로 전체 모델 설정
+    @ModelAttribute("menuList") 
     public List<MenuListResponseDto> setCommonMenu(Authentication authentication, HttpSession session) {
 
         List<String> roles;
-
-        log.debug("authentication {}", authentication);
-        //인증여부
+        //인증여부에 따른 역할 처리
         if (authentication == null || !authentication.isAuthenticated()) {
             roles = List.of("ROLE_ANONYMOUS");
         } else {
@@ -42,6 +42,7 @@ public class GlobalModelAttributeAdvice {
 
 
         try {
+            //메뉴캐시에서 롤에 따라 메뉴 목록 조회
             List<MenuListResponseDto> menus = roles.stream()
                     .flatMap(role -> menuCache.getMenusByRole(role).stream())
                     .distinct()
