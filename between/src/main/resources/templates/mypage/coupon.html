@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/mypage}">
+<head>
+  <title>수정 화면</title>
+  <link rel="stylesheet" th:href="@{/css/mypage/coupon.css}">
+</head>
+<body>
+
+<div layout:fragment="mypage-content">
+    <h1>쿠폰</h1>
+    <div class="coupon-container">
+
+        <!-- 상단 탭 -->
+        <div class="coupon-tabs">
+            <span class="tab active">사용완료 <strong th:text="${couponCount}"></strong></span>
+            <span class="tab">기간만료 <strong>0</strong></span>
+        </div>
+
+        <!-- 최근 내역 -->
+        <div class="coupon-subtitle">최근 1년 내역</div>
+
+        <!-- 쿠폰 리스트 -->
+        <div id="coupon-content">
+            <ul class="coupon-list">
+                <li class="coupon-card" th:each="coupon : ${userCouponList}">
+                    <div class="coupon-info">
+                        <div class="coupon-title">
+                            <span th:text="${coupon.cpnNm}"></span>
+                            <br>
+                            <strong th:if="${coupon.discountAt == 'W'}"
+                                    th:text="${#numbers.formatInteger(coupon.discount, 3, 'COMMA') + '원 할인'}">3000원 할인</strong>
+                            <strong th:if="${coupon.discountAt == 'R'}"
+                                    th:text="${coupon.discount + '% 할인'}">30% 할인</strong>
+                        </div>
+                    </div>
+                </li>
+
+                <!-- 추가 항목들 생략 가능 -->
+
+            </ul>
+        </div>
+
+
+    </div>
+</div>
+<th:block layout:fragment="page-script">
+    <script>
+        $(document).ready(function () {
+            $('.coupon-tabs').on('click', '.tab', function(e) {
+                const $clickedTab = $(this);
+                const $couponContent = $("#coupon-content");
+            })
+        });
+    </script>
+</th:block>
+</body>
+</html>
