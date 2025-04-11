@@ -114,10 +114,12 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         // httpSession.setAttribute("user", sessionUser); // SessionUser는 직렬화 가능한 별도 DTO 권장
 
         // 6. Spring Security의 OAuth2User 객체 반환
-        return new DefaultOAuth2User(
-                Collections.singleton(new SimpleGrantedAuthority(user.getAuthCd())), // 사용자의 권한 정보
-                attributes.getAttributes(),          // 소셜 서비스에서 받은 원본 속성 맵
-                attributes.getNameAttributeKey());   // 사용자 이름 속성 키 (Naver: "response" 안의 "id")
+//        return new DefaultOAuth2User(
+//                Collections.singleton(new SimpleGrantedAuthority(user.getAuthCd())), // 사용자의 권한 정보
+//                attributes.getAttributes(),          // 소셜 서비스에서 받은 원본 속성 맵
+//                attributes.getNameAttributeKey());   // 사용자 이름 속성 키 (Naver: "response" 안의 "id")
+
+        return user;
     }
 
     // 소셜로그인 시 사용자 존재 유무 파악 후 없으면 신규 생성
@@ -158,24 +160,3 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
     }
 }
-
-// User 엔티티에 update 메소드 추가 예시 (User.java 파일 내부에 추가)
-/*
-@Data // ... 기존 어노테이션들 ...
-public class User implements UserDetails {
-    // ... 기존 필드들 ...
-
-    // 사용자 정보 업데이트 메소드 (이름, 휴대폰 번호)
-    public User update(String name, String mobile) {
-        this.name = name;
-        // 휴대폰 번호가 null이 아니고, '-' 포함 시 제거 후 업데이트
-        if (mobile != null) {
-            this.phoneNo = mobile.replaceAll("-", "");
-        }
-        // this.updateDt = LocalDateTime.now(); // @PreUpdate 사용 시 자동 처리됨
-        return this;
-    }
-
-    // ... 기존 메소드들 ...
-}
-*/

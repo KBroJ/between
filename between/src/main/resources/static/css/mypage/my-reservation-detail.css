@@ -1,0 +1,97 @@
+/* static/css/mypage/reservation-detail.css */
+
+.detail-card {
+    background-color: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 5px;
+    padding: 25px 30px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.detail-section {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+.detail-section:last-of-type {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.section-title {
+    font-size: 1.3em;
+    color: #343a40;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #007bff;
+    display: inline-block;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* 반응형 그리드 */
+    gap: 15px 20px; /* 행/열 간격 */
+}
+
+/* 결제 정보 섹션 그리드는 다르게 설정 가능 */
+.payment-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+
+.info-item {
+    /* 개별 정보 항목 */
+}
+
+.info-label {
+    display: block;
+    font-size: 0.9em;
+    color: #6c757d; /* 레이블 색상 */
+    margin-bottom: 4px;
+}
+
+.info-value {
+    font-size: 1em;
+    color: #212529; /* 값 색상 */
+    font-weight: 500;
+    margin: 0;
+    word-break: break-word; /* 긴 값 줄바꿈 */
+}
+
+/* 상태 뱃지 스타일은 my-reservations.css 재사용 */
+/* .status { ... } */
+
+/* 할인 금액 스타일 */
+.discount-value {
+    color: #dc3545; /* 빨간색 계열 */
+}
+
+/* 최종 결제 금액 강조 */
+.total-price-item {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #ccc;
+}
+.total-price {
+    font-weight: bold;
+    font-size: 1.15em;
+    color: #007bff; /* 파란색 계열 */
+}
+
+
+/* 버튼 영역 스타일 */
+.detail-actions {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    text-align: right; /* 버튼 오른쪽 정렬 */
+}
+
+.detail-actions .btn {
+    margin-left: 10px; /* 버튼 사이 간격 */
+    min-width: 100px; /* 버튼 최소 너비 */
+}
+
+/* 버튼 스타일(btn, btn-secondary, btn-primary, btn-cancel)은
+   my-reservations.css 또는 공통 CSS 에 정의된 스타일 재사용 */

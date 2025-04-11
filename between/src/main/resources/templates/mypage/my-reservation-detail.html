@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/mypage}">
+
+    <head>
+        <title>예약 상세 내역</title>
+        <link rel="stylesheet" th:href="@{/css/mypage/my-reservations.css}">
+        <link rel="stylesheet" th:href="@{/css/mypage/my-reservation-detail.css}">
+    </head>
+
+    <section layout:fragment="mypage-content" th:object="${reservationDetail}"> <h1 class="main-title">예약 상세 내역</h1>
+
+        <div class="detail-card">
+            <div class="detail-section">
+                <h2 class="section-title">예약 정보</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label class="info-label">예약 번호</label>
+                        <p class="info-value" th:text="*{resNo}">[예약 번호]</p>
+                    </div>
+                    <div class="info-item">
+                        <label class="info-label">예약 상태</label>
+                        <p class="info-value">
+                            <span th:switch="*{statusCode}">
+                                <span th:case="'1'" class="status confirmed" th:text="*{displayStatus}"></span>
+                                <span th:case="'2'" class="status completed" th:text="*{displayStatus}"></span>
+                                <span th:case="'3'" class="status cancelled" th:text="*{displayStatus}"></span>
+                                <span th:case="*" class="status" th:text="*{displayStatus}"></span>
+                            </span>
+                        </p>
+                    </div>
+                    <div class="info-item">
+                        <label class="info-label">예약일</label>
+                        <p class="info-value" th:text="${#temporals.format(reservationDetail.resDt, 'yyyy.MM.dd HH:mm')}">[예약 일시]</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <h2 class="section-title">이용 정보</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label class="info-label">좌석 정보</label>
+                        <p class="info-value">
+                            <span th:text="*{seatNm}">[좌석 이름]</span>
+                            <span th:if="*{seatSort != null}" th:text="'(' + *{seatSort} + ')'">[좌석 종류]</span>
+                        </p>
+                    </div>
+                    <div class="info-item">
+                        <label class="info-label">이용 시간</label>
+                        <p class="info-value">
+                            <span th:text="${#temporals.format(reservationDetail.resStart, 'yyyy.MM.dd HH:mm')}">[시작 시간]</span>
+                            <span>~</span>
+                            <span th:text="${#temporals.format(reservationDetail.resEnd, 'yyyy.MM.dd HH:mm')}">[종료 시간]</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <h2 class="section-title">결제 정보</h2>
+                <div class="info-grid payment-grid"> <div class="info-item">
+                    <label class="info-label">상품 금액</label>
+                    <p class="info-value" th:text="${#numbers.formatDecimal(reservationDetail.resPrice ?: 0, 0, 'COMMA', 0, 'POINT')} + '원'">
+                        [상품 금액]
+                    </p>
+                </div>
+                    <div class="info-item">
+                        <label class="info-label">할인 금액</label>
+                        <p class="info-value discount-value" th:text="'-' + ${#numbers.formatDecimal(reservationDetail.dcPrice ?: 0, 0, 'COMMA', 0, 'POINT')} + '원'">
+                            [할인 금액]
+                        </p>
+                    </div>
+                    <div class="info-item total-price-item">
+                        <label class="info-label">최종 결제 금액</label>
+                        <p class="info-value total-price" th:text="${#numbers.formatDecimal(reservationDetail.totalPrice ?: 0, 0, 'COMMA', 0, 'POINT')} + '원'">
+                            [최종 금액]
+                        </p>
+                    </div>
+                    <div class="info-item">
+                        <label class="info-label">결제 수단</label>
+                        <p class="info-value" th:text="*{paymentMethod ?: '-'}">
+                            [결제 수단]
+                        </p>
+                    </div>
+                    <div class="info-item">
+                        <label class="info-label">결제 승인 시각</label>
+                        <p class="info-value" th:text="*{paymentApproveDt != null ? #temporals.format(paymentApproveDt, 'yyyy.MM.dd HH:mm') : '-'}">
+                            [결제 시각]
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-actions">
+                <button type="button" class="btn btn-secondary" onclick="location.href='/mypage/reservations'">목록으로</button>
+
+                <button th:if="*{canModify}" type="button" class="btn btn-primary"
+                        th:onclick="|location.href='@{/reservations/modify/{resNo}(resNo=*{resNo})}'|">
+                    예약 변경
+                </button>
+
+                <button th:if="*{canCancel}" type="button" class="btn btn-cancel"
+                        th:onclick="'confirmCancel(\'' + *{resNo} + '\', \'' + @{/mypage/reservations/{resNo}/cancel(resNo=*{resNo})} + '\');'">
+                    예약 취소
+                </button>
+            </div>
+
+        </div> <script th:src="@{/js/mypage/my-reservations.js}"></script>
+
+    </section>
+
+</html>

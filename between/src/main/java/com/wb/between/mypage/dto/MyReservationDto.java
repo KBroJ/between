@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.time.LocalDateTime;
 
+// 마이페이지 > 예약 내역 조회 DTO
 @Getter
 @Setter
 @NoArgsConstructor // 기본 생성자
@@ -24,6 +25,7 @@ public class MyReservationDto {
     private LocalDateTime resStart;     // 예약 시작일자
     private LocalDateTime resEnd;       // 예약 종료일자
 
+    private String seat;                // 좌석 번호
     private String seatNm;              // Seat 엔티티와 조인해서 가져와야 함 (실제 구현 시)
 
 
