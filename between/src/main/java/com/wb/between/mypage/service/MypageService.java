@@ -114,7 +114,7 @@ public class MypageService {
         User user = userRepository.findById(userNo).orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
         log.debug("MypageService|findCouponListById => {}", user);
         //2. 회원의 쿠폰 목록 조회
-        List<UserCoupon> userCouponList = userCouponRepository.findByUserCoupon(user.getUserNo());
+        List<UserCoupon> userCouponList = userCouponRepository.findByUserCoupon(user.getUserNo(), "Y");
         log.debug("MypageService|findByUserCoupon|size => {}", userCouponList.size());
 
         return userCouponList.stream().map(MypageCouponResDto::from).toList();

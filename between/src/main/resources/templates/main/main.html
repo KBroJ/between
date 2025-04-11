@@ -15,27 +15,51 @@
   <!-- Swiper 컨테이너 -->
   <div class="swiper">
     <div class="swiper-wrapper">
-<!--      <div class="swiper-slide">-->
-<!--        <img th:src="@{/img/slide1.jpg}" alt=""/>-->
-<!--      </div>-->
-<!--      <div class="swiper-slide">-->
-<!--        <img th:src="@{/img/slide2.jpg}" alt=""/>-->
-<!--      </div>-->
-<!--      <div class="swiper-slide">-->
-<!--        <img th:src="@{/img/slide3.jpg}" alt=""/>-->
-<!--      </div>-->
-
       <div class="swiper-slide" th:each="banner : ${bannerList}">
+<!--          <div class="slide-overlay">-->
+<!--              <h1 class="slide-headline">성장을 위한 유연한 공간</h1>-->
+<!--              <p class="slide-subheadline">강남 중심에서 당신의 비즈니스를 시작하세요.</p>-->
+<!--              <a href="#pricing-section" class="btn btn-primary slide-cta">요금제 보기</a>-->
+<!--          </div>-->
         <img th:src="@{${banner.bImageUrl}}" alt=""/>
       </div>
     </div>
-
 
     <!-- 페이지 네비게이션 (옵션) -->
     <div class="swiper-pagination"></div>
     <div class="swiper-button-prev"></div>
     <div class="swiper-button-next"></div>
   </div>
+    <!-- Key Benefits Section -->
+    <section class="section benefits-section">
+        <div class="section-header">
+            <h2>BetWeen을 선택해야 하는 이유</h2>
+            <p>단순한 공간을 넘어, 당신의 성공을 위한 최적의 환경을 제공합니다.</p>
+        </div>
+        <div class="benefits-grid">
+            <div class="benefit-item">
+                <i class="fas fa-map-marker-alt benefit-icon"></i> <!-- Font Awesome 아이콘 예시 -->
+                <h3>최적의 접근성</h3>
+                <p>신논현역 도보 5분 거리의 편리한 교통</p>
+            </div>
+            <div class="benefit-item">
+                <i class="far fa-handshake benefit-icon"></i>
+                <h3>유연한 멤버십</h3>
+                <p>시간제부터 월 단위까지, 필요에 맞춘 요금제</p>
+            </div>
+            <div class="benefit-item">
+                <i class="fas fa-users benefit-icon"></i>
+                <h3>활발한 커뮤니티</h3>
+                <p>다양한 분야의 전문가들과 네트워킹 기회</p>
+            </div>
+            <div class="benefit-item">
+                <i class="fas fa-coffee benefit-icon"></i>
+                <h3>편리한 시설</h3>
+                <p>고속 인터넷, OA 기기, 휴게 공간 완비</p>
+            </div>
+        </div>
+    </section>
+    <!-- // Key Benefits Section -->
 
   <!-- 소개 섹션 (회사 소개) -->
   <section class="section about-section">
@@ -52,6 +76,7 @@
       </div>
     </div>
   </section>
+
 
   <!-- 서비스 안내 -->
   <section class="section service-section">
@@ -85,30 +110,27 @@
           <p>사용자의 시간에 맞춘 합리적인 요금을 제공합니다.</p>
       </div>
       <div class="pricing-cards">
+          <div class="card light-card recommended-card"> <!-- 추천 카드에 클래스 추가 -->
+              <h3 class="card-title">월</h3>
+              <p class="card-price">99,000원 <span>/1개월</span></p>
+              <p class="card-text">월 정기 이용권</p>
+              <ul class="card-features">
+                  <li><i class="fas fa-check-circle feature-icon"></i> 기간 내 무제한 이용</li> <!-- 아이콘 추가 -->
+                  <li><i class="fas fa-check-circle feature-icon"></i> 개인 사물함 제공 (옵션)</li>
+                  <li><i class="fas fa-check-circle feature-icon"></i> 회의실 월 5시간 무료</li>
+              </ul>
+              <a href="/signup?plan=monthly" class="btn card-button solid">지금 시작하기</a> <!-- CTA 버튼 -->
+          </div>
+          <!-- 다른 카드도 유사하게 CTA 및 아이콘 추가 -->
           <div class="card light-card">
               <h3 class="card-title">기본</h3>
               <p class="card-price">2,000원 <span>/1시간</span></p>
               <p class="card-text">시간제 후불 이용</p>
               <ul class="card-features">
-                  <li>기본 1시간 이용</li>
-<!--                  <li>Up to 10,000 subscribers</li>-->
-<!--                  <li>Advanced analytics</li>-->
-<!--                  <li>24-hour support response time</li>-->
+                  <li><i class="fas fa-check-circle feature-icon"></i> 기본 1시간 이용</li>
+                  <li><i class="fas fa-check-circle feature-icon"></i> 공용 라운지 이용 가능</li>
               </ul>
-<!--              <a href="#" class="card-button outline">Get started today</a>-->
-          </div>
-
-          <div class="card light-card">
-              <h3 class="card-title">월</h3>
-              <p class="card-price">99,000원 <span>/1개월</span></p>
-              <p class="card-text">월 정기 이용권</p>
-              <ul class="card-features">
-                  <li>기간내 시간 제한 없이 이용</li>
-<!--                  <li>Up to 10,000 subscribers</li>-->
-<!--                  <li>Advanced analytics</li>-->
-<!--                  <li>24-hour support response time</li>-->
-              </ul>
-<!--              <a href="#" class="card-button outline">Get started today</a>-->
+              <a href="/signup?plan=hourly" class="btn card-button outline">자세히 보기</a>
           </div>
       </div>
   </section>
@@ -127,7 +149,20 @@
 
   <!-- 지도 -->
   <section class="section map-section">
-    <h2>찾아오시는 길</h2>
+      <div class="section-header"> <!-- 섹션 헤더 사용 일관성 -->
+          <h2>찾아오시는 길</h2>
+          <p>신논현역 3번 출구에서 도보 5분 거리에 위치하고 있습니다.</p>
+      </div>
+      <div class="map-area">
+          <div class="map-info">
+              <h3><i class="fas fa-subway"></i> 지하철</h3>
+              <p>9호선/신분당선 신논현역 3번 출구 (300m)</p>
+              <h3><i class="fas fa-bus"></i> 버스</h3>
+              <p>신논현역 정류장 (다수 노선)</p>
+              <h3><i class="fas fa-parking"></i> 주차</h3>
+              <p>건물 내 주차 가능 (유료, 방문 시 문의)</p>
+          </div>
+      </div>
     <div class="map-wrapper">
       <div id="map"></div>
     </div>

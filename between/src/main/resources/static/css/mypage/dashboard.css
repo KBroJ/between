@@ -3,10 +3,11 @@
 
 /* Content Title */
 .main-title {
-    font-size: 2rem; /* 32px */
-    font-weight: 700;
-    margin-bottom: 32px;
-    color: #212529;
+    font-size: 1.8em;
+    margin-bottom: 25px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
 }
 
 /* Card Styles (used within content) */
@@ -86,6 +87,7 @@
     align-items: center;
     gap: 4px;
     white-space: nowrap; /* Prevent wrapping */
+    text-decoration: none;
 }
 .edit-link:hover {
     text-decoration: underline;

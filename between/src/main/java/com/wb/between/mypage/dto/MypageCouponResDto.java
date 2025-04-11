@@ -32,6 +32,13 @@ public class MypageCouponResDto {
 
     private LocalDateTime createDt;
 
+    //---- UserCoupon ------
+    private Long userCpNo;
+
+    private LocalDateTime issueDt;
+
+    private LocalDateTime useDt;
+
 
     public static MypageCouponResDto from(UserCoupon usercoupon) {
         return MypageCouponResDto.builder()
@@ -39,8 +46,10 @@ public class MypageCouponResDto {
                 .cpnNm(usercoupon.getCoupon().getCpnNm())
                 .discount(usercoupon.getCoupon().getDiscount())
                 .discountAt(usercoupon.getCoupon().getDiscountAt())
-//                .phoneNo(user.getPhoneNo())
-//                .createDt(usercoupon.get)
+                .cpnEndDt(usercoupon.getCoupon().getCpnEndDt())
+                .cpnDsc(usercoupon.getCoupon().getCpnDsc())
+                .issueDt(usercoupon.getIssueDt())
+                .useDt(usercoupon.getUseDt())
                 .build();
     }
 

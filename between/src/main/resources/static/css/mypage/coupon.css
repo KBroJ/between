@@ -1,3 +1,11 @@
+.main-title {
+    font-size: 1.8em;
+    margin-bottom: 25px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
 .coupon-container {
     max-width: 640px;
     margin: 0 auto;

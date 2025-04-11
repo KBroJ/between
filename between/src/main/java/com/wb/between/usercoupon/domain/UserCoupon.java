@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @ToString(exclude = "user, coupon")
 @EqualsAndHashCode(of = "userCpNo")
+@Builder
 @Table(name = "usercoupon")
 public class UserCoupon {
 
@@ -29,6 +30,7 @@ public class UserCoupon {
     @JoinColumn(name = "cpNo", nullable = false)
     private Coupon coupon;
 
+    @Column(nullable = false, insertable = false, updatable = false)
     private LocalDateTime issueDt;
 
     @Column(length = 10)

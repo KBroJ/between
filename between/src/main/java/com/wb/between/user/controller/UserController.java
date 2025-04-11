@@ -1,11 +1,13 @@
 package com.wb.between.user.controller;
 
+import com.wb.between.coupon.service.CouponService;
 import com.wb.between.user.domain.User;
 import com.wb.between.user.dto.SignupReqDto;
 import com.wb.between.user.dto.VerificationResult;
 import com.wb.between.user.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,15 +19,19 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Controller
 public class UserController {
 
     private UserService userService;
     private static final String OTP_PREFIX = "OTP_";
 
+    private CouponService couponService;
+
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, CouponService couponService) {
         this.userService = userService;
+        this.couponService = couponService;
     }
 
     // 회원가입 페이지 호출
@@ -89,7 +95,17 @@ public class UserController {
             User user = userService.registerUser(signupReqDto);
             System.out.println("UserController|registerUser|회원가입 진행 후 | user = " + user);
 
-            return "redirect:/main";
+            //쿠폰발급 진행, 쿠폰발급은 회원가입 흐름에 영향을 주지 않아야함
+            if(user != null) {
+                try {
+                    couponService.singupCoupon(user);
+                } catch (Exception e) {
+                    log.error("회원가입 성공 후 쿠폰 발급 실패. 사용자: {}, 에러: {}", user.getUserNo(), e.getMessage(), e);
+                }
+            }
+
+
+            return "redirect:/";
 
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());

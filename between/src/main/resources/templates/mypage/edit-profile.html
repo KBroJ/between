@@ -36,6 +36,18 @@
     </div>
   </div>
 </div>
+<th:block layout:fragment="page-script">
+  <script>
+    $(document).ready(function () {
+      // 비밀번호 유효성 검사 함수
+      function isValidPwd(pwd) {
+        const pwdRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+        return pwdRegex.test(pwd);
+      }
 
+
+    });
+  </script>
+</th:block>
 </body>
 </html>

@@ -1,22 +1,90 @@
-.swiper-slide img{
-    width: 100%;       /* 또는 원하는 고정값 예: 300px */
+h2 {
+    font-size: 1.75rem; /* 28px */
+    font-weight: 600;
+}
+
+h3 {
+    font-size: 1.25rem; /* 20px */
+    font-weight: 600;
+}
+
+.section {
+    padding: 80px 20px; /* Slightly reduced default padding */
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.section-header h2 {
+    font-size: 1.75rem; /* 28px */
+    margin-bottom: 8px;
+}
+
+.section-header p {
+    color: #666;
+    font-size: 1rem; /* 16px */
+    max-width: 600px; /* Limit width for readability */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* --- Swiper Image --- */
+.swiper-slide img {
+    width: 100%;
     height: auto;
-    object-fit: contain; /* 또는 cover: 잘라서 맞춤 */
-    max-height: 500px;   /* 필요시 제한 */
+    object-fit: contain;
+    max-height: 500px;
     display: block;
     margin: 0 auto;
 }
 
-.section {
-    padding: 100px 20px;
+/* --- Benefits Section --- */
+.benefits-section {
+    background-color: #f8f8f8;
 }
 
+.benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px; /* 1.5rem */
+    max-width: 1100px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.benefit-item {
+    padding: 16px; /* 1rem */
+}
+
+.benefit-icon {
+    font-size: 2.5rem;
+    color: #1976d2; /* Primary blue */
+    margin-bottom: 16px; /* 1rem */
+    display: inline-block;
+}
+
+.benefit-item h3 {
+    font-size: 1.125rem; /* 18px */
+    margin-bottom: 8px; /* 0.5rem */
+    color: #333;
+}
+
+.benefit-item p {
+    font-size: 1rem; /* 16px */
+    color: #555;
+    line-height: 1.5;
+}
+
+/* --- About Section --- */
 .about-inner {
     display: flex;
     flex-wrap: wrap;
     gap: 40px;
     align-items: center;
-
+    max-width: 1100px;
+    margin: 0 auto;
 }
 
 .about-image,
@@ -29,85 +97,105 @@
     max-width: 100%;
     border-radius: 12px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    display: block; /* Prevents bottom space */
 }
 
 .about-text h2 {
-    font-size: 28px;
+    font-size: 1.75rem; /* 28px */
     margin-bottom: 16px;
 }
 
 .about-text p {
-    font-size: 16px;
+    font-size: 1rem; /* 16px */
     color: #444;
     line-height: 1.6;
 }
 
-.section-header {
-    text-align: center;
-    margin-bottom: 40px;
-}
-
-.section-header h2 {
-    font-size: 28px;
-    margin-bottom: 8px;
-}
-
-.section-header p {
-    color: #666;
-    font-size: 16px;
+/* --- Services Section --- */
+.services-section {
+    background-color: #ffffff; /* White background */
 }
 
 .service-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 24px;
+    max-width: 1100px;
+    margin: 0 auto;
 }
 
 .service-card {
-    background-color: #f8f8f8;
-    padding: 24px;
+    background-color: #ffffff; /* Light background */
+    padding: 30px; /* Generous padding */
     border-radius: 12px;
     text-align: center;
     transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .service-card:hover {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-    transform: translateY(-4px);
+    transform: translateY(-5px);
 }
 
-.service-card img {
-    width: 64px;
-    height: 64px;
-    margin-bottom: 16px;
+/* Optional icon wrapper */
+.service-icon-wrapper {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background-color: #eef6ff; /* Light primary blue */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 24px; /* 1.5rem */
 }
+.service-icon {
+    font-size: 2rem;
+    color: #1976d2; /* Primary blue */
+}
+/* --- OR --- */
+/* Image style if using images instead of icons */
+.service-image {
+    width: 100%;
+    max-height: 150px;
+    object-fit: cover;
+    border-radius: 8px 8px 0 0; /* Top corners rounded */
+    margin-bottom: 24px; /* 1.5rem */
+}
+
 
 .service-card h3 {
-    font-size: 20px;
-    margin-bottom: 8px;
+    font-size: 1.125rem; /* 18px */
+    margin-bottom: 8px; /* 0.5rem */
+    color: #333;
 }
 
 .service-card p {
     color: #555;
-    font-size: 14px;
+    font-size: 0.95rem; /* ~15px */
+    flex-grow: 1; /* Allows text to push button down in flex */
+    margin-bottom: 16px; /* Space before potential button */
 }
 
-/*가격*/
+
+/* --- Pricing Section --- */
 .pricing-section {
-    background: white;
+    background: #ffffff;
     padding: 80px 20px;
-    position: relative;
-    overflow: hidden;
 }
 
 .pricing-cards {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* Default to single column */
     gap: 40px;
     max-width: 1100px;
     margin: 0 auto;
 }
-@media (min-width: 1024px) {
+/* Media query for larger screens */
+@media (min-width: 768px) { /* Adjusted breakpoint */
     .pricing-cards {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -115,44 +203,56 @@
 
 
 .card {
-    border-radius: 24px;
-    padding: 40px;
+    border-radius: 16px; /* Slightly reduced radius */
+    padding: 32px; /* Adjusted padding */
     border: 1px solid rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
 }
+
 .light-card {
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: #ffffff;
+    color: #333;
 }
 .dark-card {
-    background-color: #111827;
-    color: white;
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    background-color: #111827; /* Dark bg */
+    color: #ffffff; /* White text */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* Slightly stronger shadow */
 }
+
 .card-title {
-    color: inherit;
+    color: inherit; /* Inherits from .light-card or .dark-card */
     font-weight: 600;
-    font-size: 18px;
+    font-size: 1.125rem; /* 18px */
 }
+
 .card-price {
     margin-top: 16px;
-    font-size: 40px;
+    font-size: 2.25rem; /* ~36px */
     font-weight: 600;
     color: inherit;
 }
 .card-price span {
-    font-size: 16px;
-    color: gray;
+    font-size: 1rem; /* 16px */
+    color: #666; /* Subtle color for unit */
+    font-weight: 400;
 }
+.dark-card .card-price span {
+    color: #aaa; /* Lighter gray on dark bg */
+}
+
 .card-text {
     margin-top: 20px;
-    font-size: 16px;
+    font-size: 1rem; /* 16px */
     color: inherit;
+    opacity: 0.9; /* Slightly less emphasis */
 }
+
 .card-features {
-    margin-top: 30px;
+    margin: 24px 0; /* 1.5rem */
     list-style: none;
     padding: 0;
     color: inherit;
@@ -162,92 +262,164 @@
     align-items: center;
     gap: 10px;
     margin-bottom: 12px;
-    font-size: 15px;
+    font-size: 0.95rem; /* ~15px */
+    opacity: 0.85;
 }
+.feature-icon {
+    color: #1976d2; /* Primary blue for check */
+    width: 16px;
+    text-align: center;
+    flex-shrink: 0; /* Prevent icon shrinking */
+}
+.dark-card .feature-icon {
+    color: #6366f1; /* Use accent color on dark bg for contrast */
+}
+.dark-card .card-features li {
+    color: #e5e7eb; /* Light gray text on dark */
+}
+
 .card-button {
     display: inline-block;
     text-align: center;
-    padding: 12px 20px;
-    margin-top: 30px;
-    font-size: 14px;
+    padding: 12px 24px;
+    margin-top: 24px; /* Auto margin pushes to bottom if needed */
+    font-size: 0.9rem; /* 14.4px */
     font-weight: 600;
     border-radius: 8px;
     text-decoration: none;
     transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid transparent; /* Base border */
 }
 .card-button.outline {
-    color: #6366f1;
-    border: 1px solid #c7d2fe;
-    background-color: white;
+    color: #6366f1; /* Accent */
+    border-color: #c7d2fe; /* Light accent border */
+    background-color: #ffffff;
 }
 .card-button.outline:hover {
-    border-color: #a5b4fc;
-    background-color: #f0f4ff;
+    border-color: #a5b4fc; /* Darker accent border */
+    background-color: #f0f4ff; /* Light accent bg */
 }
 .card-button.solid {
-    background-color: #6366f1;
+    background-color: #6366f1; /* Accent */
     color: white;
+    border-color: #6366f1;
 }
 .card-button.solid:hover {
-    background-color: #4f46e5;
+    background-color: #4f46e5; /* Darker Accent */
+    border-color: #4f46e5;
 }
 
+/* Style for the 'recommended' card */
+.recommended-card {
+    border: 2px solid #1976d2; /* Primary blue border */
+    transform: scale(1.02); /* Slightly larger */
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
 
+/* --- Contact Section --- */
 .contact-section {
-    background-color: #eef6ff;
+    background-color: #eef6ff; /* Light primary blue */
     text-align: center;
 }
 
 .contact-section h2 {
-    font-size: 28px;
+    font-size: 1.75rem; /* 28px */
     margin-bottom: 16px;
 }
 
 .contact-intro {
-    font-size: 16px;
-    margin-bottom: 20px;
+    font-size: 1rem; /* 16px */
+    margin-bottom: 24px;
     color: #444;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .contact-info {
     list-style: none;
     padding: 0;
-    margin-bottom: 24px;
+    margin-bottom: 32px;
     color: #333;
 }
 
 .contact-info li {
-    margin-bottom: 8px;
-    font-size: 16px;
+    margin-bottom: 10px;
+    font-size: 1rem; /* 16px */
 }
+/* Optional: Add icons */
+.contact-info li i {
+    margin-right: 8px;
+    color: #1976d2; /* Primary blue */
+    width: 1.2em; /* Align icons */
+    text-align: center;
+}
+
 
 .contact-button {
     display: inline-block;
-    background-color: #1976d2;
+    background-color: #1976d2; /* Primary blue */
     color: white;
-    padding: 12px 24px;
+    padding: 12px 28px;
     border-radius: 8px;
     text-decoration: none;
     transition: background-color 0.3s ease;
+    font-weight: 500;
 }
 
 .contact-button:hover {
-    background-color: #125aaa;
+    background-color: #125aaa; /* Darker primary blue */
 }
 
+/* --- Map Section --- */
 .map-section {
-    text-align: center;
+    padding-bottom: 80px; /* Consistent section padding */
+    background-color: #ffffff;
 }
-.map-section h2 {
-    font-size: 28px;
-    margin-bottom: 16px;
+
+.map-area {
+    display: flex;
+    flex-wrap: wrap; /* Stack on smaller screens */
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    align-items: flex-start; /* Align tops */
+    padding: 0 20px; /* Add horizontal padding for spacing */
+}
+
+.map-info {
+    flex: 1; /* Takes up available space */
+    min-width: 280px; /* Minimum width before wrapping */
+    text-align: left; /* Align text left */
+}
+
+.map-info h3 {
+    font-size: 1.125rem; /* 18px */
+    margin-bottom: 8px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 4px;
+    display: flex; /* Align icon and text */
+    align-items: center;
+}
+.map-info h3 i {
+    margin-right: 10px;
+    color: #1976d2; /* Primary blue */
+    width: 20px; /* Fixed width */
+    font-size: 1.2em; /* Slightly larger icon */
+}
+
+.map-info p {
+    font-size: 1rem; /* 16px */
+    color: #555;
+    margin-bottom: 24px; /* Space between info blocks */
+    padding-left: 30px; /* Indent text under icon */
 }
 
 .map-wrapper {
-    max-width: 1200px;
-    margin: 0 auto;        /* 가운데 정렬 */
-    padding: 0 20px;       /* 반응형 여백 */
-    text-align: center;    /* 내부 요소 가운데 정렬 */
+    flex: 2; /* Map takes more space */
+    min-width: 300px; /* Min width for map */
 }
 
 #map {
@@ -255,4 +427,6 @@
     height: 400px;
     border-radius: 12px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border: 1px solid #eee; /* Subtle border */
 }
+
