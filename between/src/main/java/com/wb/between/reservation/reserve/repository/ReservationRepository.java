@@ -14,9 +14,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     /**
      * 특정 좌석, 특정 날짜에 시작하는 확정된(resStatus=true) 예약을 조회합니다.
-     * @param seatNo 좌석 번호 (Long 타입 가정)
+     *
+     * @param seatNo     좌석 번호 (Long 타입 가정)
      * @param targetDate 조회할 날짜 (LocalDate)
-     * @param status 조회할 예약 상태 (Boolean 타입 가정 - true: 확정)
+     * @param status     조회할 예약 상태 (Boolean 타입 가정 - true: 확정)
      * @return 예약 목록
      */
     @Query("SELECT r FROM Reservation r WHERE r.seatNo = :seatNo AND FUNCTION('DATE', r.resStart) = :targetDate AND r.resStatus = :status")
@@ -30,11 +31,16 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     /**
      * 특정 날짜(LocalDate)에 시작하는 확정된(resStatus=true) 예약을 조회합니다.
      * (resStart 필드의 날짜 부분만 비교)
+     *
      * @param targetDate 조회할 날짜 (LocalDate)
-     * @param status 조회할 예약 상태 (Boolean 타입 가정 - true: 확정)
+     * @param status     조회할 예약 상태 (Boolean 타입 가정 - true: 확정)
      * @return 예약 목록
      */
     @Query("SELECT r FROM Reservation r WHERE FUNCTION('DATE', r.resStart) = :targetDate AND r.resStatus = :status")
     List<Reservation> findByDateAndStatus(@Param("targetDate") LocalDate targetDate, @Param("status") Boolean status);
 
+    // 특정 좌석/시간대에 겹치는 예약 수 조회 (본인 예약 제외)
+    @Query("SELECT count(r) FROM Reservation r WHERE r.resNo <> :excludeResNo AND r.seatNo = :seatId AND r.resStatus = true AND r.resStart < :endTime AND r.resEnd > :startTime")
+    long countOverlappingReservationsExcludingSelf(@Param("seatId") Long seatId, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime, @Param("excludeResNo") Long excludeResNo);
 }
+

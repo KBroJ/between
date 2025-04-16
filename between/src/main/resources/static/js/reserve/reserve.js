@@ -6,6 +6,11 @@
     let selectedPlanType = 'HOURLY'; // HOURLY, DAILY, MONTHLY
     let availableCoupons = [];
     let selectedCoupon = null;
+    let modificationMode = false; // 현재 변경 모드인지 여부
+    let originalResNo = null;    // 변경 대상 예약 번호
+    let originalPlanType = null; // 변경 전 요금제 (변경 불가 확인용)
+    let originalSeatInfo = null; // 변경 전 좌석 정보 { id, name, type }
+    let originalTimes = [];      // 변경 전 시간 정보 (시간제)
 
 
     // --- DOM 요소 캐싱 ---
@@ -22,6 +27,7 @@
     const paymentButton = document.getElementById('payment-button'); // 원래 버튼 ID 사용
     const couponSelect = document.getElementById('couponSelect');
     const discountInfoDiv = document.getElementById('discount-info');
+    const modificationNotice = document.getElementById('modification-notice');
 
 
     // --- 유틸리티 함수 ---
@@ -60,9 +66,56 @@
      }
     function openCalendar() { flatpickrInstance?.open(); }
 
-    // --- 요금제 관련 함수 ---
-     /** 요금제 변경 처리 */
-     function handlePlanChange() { const radio = document.querySelector('input[name="planType"]:checked'); if (!radio) return; selectedPlanType = radio.value; console.log("요금제 변경:", selectedPlanType); if(!timeSelectionCard || !timeSelectionGuide) return; if (selectedPlanType === 'HOURLY') { timeSelectionCard.classList.remove('disabled'); timeSelectionCard.style.display = 'block'; timeSelectionGuide.textContent = '좌석/룸과 날짜를 선택하면 시간이 표시됩니다.'; loadAvailableTimes(); } else { timeSelectionCard.classList.add('disabled'); if (selectedPlanType === 'DAILY') timeSelectionGuide.textContent = '일일권은 당일 운영시간 동안 이용 가능합니다.'; else timeSelectionGuide.textContent = '월정액권은 시간 선택이 불필요합니다.'; clearTimeSelection(); } updateSummary(); calculateTotal(); }
+// --- 요금제 관련 함수 ---
+ /** 요금제 변경 처리 */
+function handlePlanChange() {
+  const selectedRadio = document.querySelector(
+    'input[name="planType"]:checked'
+  );
+  if (!selectedRadio) return;
+  const newlySelectedPlan = selectedRadio.value;
+
+  // 변경 모드이고 원래 요금제가 있는데 다른 것을 선택 시도한 경우
+  if (
+    modificationMode &&
+    originalPlanType &&
+    newlySelectedPlan !== originalPlanType
+  ) {
+    alert(
+      `요금제는 변경할 수 없습니다 (${originalPlanType} 유지). 예약을 취소하고 새로 예약해주세요.`
+    );
+    // 원래 요금제로 라디오 버튼 복원
+    planRadios.forEach((radio) => {
+      radio.checked = radio.value === originalPlanType;
+    });
+    return; // 함수 종료, selectedPlanType 변경 안 함
+  }
+
+  selectedPlanType = newlySelectedPlan; // 전역 변수 업데이트
+  console.log("요금제 설정:", selectedPlanType);
+
+  if (!timeSelectionCard || !timeSelectionGuide) return;
+  if (selectedPlanType === "HOURLY") {
+    timeSelectionCard.classList.remove("disabled");
+    timeSelectionCard.style.display = "block";
+    timeSelectionGuide.textContent =
+      "좌석/룸과 날짜를 선택하면 시간이 표시됩니다.";
+    // 좌석/날짜가 이미 선택되어 있다면 시간 로드
+    if (selectedDate && document.querySelector(".seat-item.selected"))
+      loadAvailableTimes();
+  } else {
+    timeSelectionCard.classList.add("disabled");
+    if (selectedPlanType === "DAILY")
+      timeSelectionGuide.textContent =
+        "일일권은 당일 운영시간 동안 이용 가능합니다.";
+    else
+      timeSelectionGuide.textContent = "월정액권은 시간 선택이 불필요합니다.";
+    clearTimeSelection();
+  }
+  updateSummary();
+  calculateTotal();
+}
+
 
      // --- 쿠폰 관련 함수 ---
      /** 쿠폰 목록 로드 */
@@ -326,6 +379,304 @@
         });
     }
 
+
+    /** (신규) 예약 변경 API 호출 함수 */
+    function proceedToPaymentForUpdate() {
+      console.log(`예약 변경 내용 저장/결제 시도 (ResNo: ${originalResNo})`);
+      if (!originalResNo) {
+        alert("변경할 예약 정보가 없습니다.");
+        return;
+      } // 변경 대상 확인
+      const selectedItem = document.querySelector(".seat-item.selected");
+      const newItemId = selectedItem?.dataset.seatId;
+      const newSelectedTimes = Array.from(
+        document.querySelectorAll('input[name="times"]:checked')
+      ).map((cb) => cb.value);
+      const finalPrice = parseInt(
+        totalPriceSpan?.textContent.replace(/,/g, "") || "0"
+      );
+      const currentSelectedPlan = document.querySelector(
+        'input[name="planType"]:checked'
+      )?.value;
+
+      // --- 유효성 검사 ---
+      if (!newItemId || !selectedDate) {
+        alert("새로운 좌석/룸 또는 날짜를 선택해야 합니다.");
+        return;
+      }
+      if (currentSelectedPlan !== originalPlanType) {
+        alert(`요금제는 변경할 수 없습니다 (${originalPlanType} 유지).`);
+        return;
+      }
+      if (selectedPlanType === "HOURLY" && newSelectedTimes.length === 0) {
+        alert("시간제는 시간을 선택해야 합니다.");
+        return;
+      }
+      const currentUserId = 123; // !!! 임시 사용자 ID !!!
+      if (!currentUserId) {
+        alert("사용자 정보를 가져올 수 없습니다.");
+        return;
+      }
+      // --- ---
+
+      // 백엔드 PUT /api/reservations/{resNo} 로 보낼 데이터
+      const updateRequestData = {
+        itemId: parseInt(newItemId),
+        planType: selectedPlanType,
+        reservationDate: selectedDate,
+        selectedTimes: selectedPlanType === "HOURLY" ? newSelectedTimes : [],
+        couponId: selectedCoupon?.id || null,
+        userId: currentUserId,
+        totalPrice: finalPrice, // 백엔드 검증용
+      };
+
+      console.log(
+        `백엔드로 예약 변경 요청 (ResNo: ${originalResNo}):`,
+        updateRequestData
+      );
+      if (paymentButton) {
+        paymentButton.disabled = true;
+        paymentButton.innerHTML =
+          '<i class="fas fa-spinner fa-spin me-2"></i> 변경 처리 중...';
+      }
+
+      // --- 실제 백엔드 예약 변경 API 호출 ---
+      const apiUrl = `/api/reservations/${originalResNo}`; // !!! PUT 또는 POST, 백엔드 주소 확인 !!!
+      const csrfToken = document
+        .querySelector("meta[name='_csrf']")
+        ?.getAttribute("content");
+      const csrfHeader = document
+        .querySelector("meta[name='_csrf_header']")
+        ?.getAttribute("content");
+      const headers = { "Content-Type": "application/json" };
+      if (csrfToken && csrfHeader) {
+        headers[csrfHeader] = csrfToken;
+      }
+
+      fetch(apiUrl, {
+        method: "PUT",
+        headers: headers,
+        body: JSON.stringify(updateRequestData),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            return response.json().then((err) => {
+              throw new Error(err.message || "변경 실패");
+            });
+          }
+          return response.json();
+        })
+        .then((result) => {
+          console.log("백엔드 예약 변경 성공 응답:", result);
+          if (result.success) {
+            // --- !!! 가격 변동 여부에 따른 처리 (백엔드 응답 기반) !!! ---
+            if (result.paymentRequired) {
+              // 추가 결제 필요
+              alert(
+                "예약 내용이 변경되어 추가 결제가 필요합니다. 카카오페이로 이동합니다."
+              );
+              // 백엔드에서 받은 새 주문 정보로 카카오페이 준비 API 다시 호출
+              callKakaoPayReady(
+                result.newOrderId,
+                result.newOrderName,
+                result.newAmount,
+                result.customerKey
+              );
+            } else {
+              // 가격 변동 없거나 환불 등 (여기선 단순 성공 처리)
+              alert("예약 내용이 성공적으로 변경되었습니다.");
+              window.location.href = "/my/reservations"; // !!! 실제 내역 페이지 경로 !!!
+            }
+          } else {
+            throw new Error(result.message || "알 수 없는 변경 오류");
+          }
+        })
+        .catch((error) => {
+          console.error("예약 변경 처리 중 오류:", error);
+          alert(`예약 변경 실패: ${error.message}`);
+          if (paymentButton) {
+            paymentButton.disabled = false;
+            paymentButton.innerHTML =
+              '<i class="fas fa-check me-2"></i> 변경 내용 저장/결제';
+          }
+        });
+    }
+
+    /** (신규) 카카오페이 준비 API 호출 함수 (변경 건용) */
+    function callKakaoPayReady(orderId, orderName, amount, customerKey) {
+      const paymentReadyData = {
+        partnerOrderId: orderId,
+        partnerUserId: customerKey,
+        itemName: orderName,
+        quantity: 1,
+        totalAmount: amount,
+        taxFreeAmount: 0,
+      };
+      console.log(
+        "백엔드로 카카오페이 결제 준비 요청 (변경 건):",
+        paymentReadyData
+      );
+      const csrfToken = document
+        .querySelector("meta[name='_csrf']")
+        ?.getAttribute("content");
+      const csrfHeader = document
+        .querySelector("meta[name='_csrf_header']")
+        ?.getAttribute("content");
+      const headers = { "Content-Type": "application/json" };
+      if (csrfToken && csrfHeader) {
+        headers[csrfHeader] = csrfToken;
+      }
+
+      fetch("/api/payment/kakao/ready", {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(paymentReadyData),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            return response.json().then((err) => {
+              throw new Error(err.message || "준비 실패");
+            });
+          }
+          return response.json();
+        })
+        .then((result) => {
+          if (result.next_redirect_pc_url) {
+            window.location.href = result.next_redirect_pc_url;
+          } else {
+            throw new Error("URL 수신 오류");
+          }
+        })
+        .catch((error) => {
+          alert(`결제 준비 실패: ${error.message}`);
+          if (paymentButton) {
+            paymentButton.disabled = false;
+            paymentButton.innerHTML =
+              '<i class="fas fa-check me-2"></i> 변경 내용 저장/결제';
+          }
+        });
+    }
+
+ /** (신규) 변경 대상 예약 정보 로드 및 화면 설정 */
+async function loadReservationForModification(resNo) {
+    console.log(`[JS] 수정할 예약 정보 로드 시작 (ResNo: ${resNo})`); // <--- 1. 함수 호출 확인
+    const apiUrl = `/api/reservations/details/${resNo}`;
+
+    try {
+        const reservationData = await fetchData(apiUrl);
+        console.log("[JS] API 호출 성공, 받은 데이터:", reservationData); // <--- 2. 데이터 수신 확인
+
+        if (!reservationData /* ... 필요한 데이터 검증 ... */) {
+            throw new Error("필수 예약 정보가 누락되었습니다.");
+        }
+
+        // --- 데이터 적용 전 확인 ---
+        console.log("[JS] 전역 변수 설정 시도:", reservationData.planType, reservationData.seatInfo, reservationData.selectedTimes);
+        originalPlanType = reservationData.planType;
+        originalSeatInfo = reservationData.seatInfo;
+        originalTimes = reservationData.selectedTimes || [];
+        const originalDate = reservationData.reservationDate;
+
+        // --- 요금제 설정 확인 ---
+        console.log("[JS] 요금제 라디오 버튼 설정 시도:", originalPlanType);
+        planRadios.forEach(radio => {
+            radio.checked = (radio.value === originalPlanType);
+            // console.log(`[JS] Radio ${radio.value} checked: ${radio.checked}`); // 상세 확인
+        });
+        selectedPlanType = originalPlanType;
+        // handlePlanChange(); // 여기서 호출하면 비동기 문제 발생 가능성 있음
+
+        // --- 달력 설정 확인 ---
+        console.log("[JS] 달력 초기화 시도:", originalDate);
+        const initialYear = parseInt(originalDate.substring(0, 4));
+        const initialMonth = parseInt(originalDate.substring(5, 7));
+        // ★★★ loadCalendarDataAndInitialize 함수 자체가 비동기일 수 있으므로 주의 ★★★
+        loadCalendarDataAndInitialize(initialYear, initialMonth, originalDate);
+
+        // --- 쿠폰 로드 및 설정 확인 ---
+        console.log("[JS] 쿠폰 로드 및 설정 시도");
+        await loadAvailableCoupons(); // await 사용 확인
+        if (reservationData.couponId && couponSelect) {
+            couponSelect.value = reservationData.couponId;
+             console.log("[JS] 기존 쿠폰 선택됨:", reservationData.couponId);
+            handleCouponChange();
+        }
+
+        // --- 원본 선택 항목 표시 함수 호출 전 확인 ---
+        console.log("[JS] highlightOriginalSelection 함수 호출 예정");
+        // ★★★ 좌석 맵과 시간 슬롯 로드가 완료된 후에 호출하는 것이 안전 ★★★
+        // 임시 setTimeout 대신, 좌석/시간 로드 완료 콜백이나 Promise 사용 권장
+        setTimeout(() => {
+            highlightOriginalSelection();
+        }, 1500); // 시간 약간 늘려서 테스트
+
+        // updateSummary(); // highlightOriginalSelection 내부 또는 완료 후 호출 권장
+
+
+    } catch (error) {
+        console.error("[JS] 예약 정보 로드 실패:", error);
+        alert(`예약 정보를 불러오는 중 오류가 발생했습니다: ${error.message}`);
+    }
+}
+
+
+ /** (신규) 원본 선택 항목 시각적 표시 및 선택 처리 */
+ function highlightOriginalSelection() {
+   console.log("원본 선택 항목 표시 시도");
+   if (!modificationMode || !originalSeatInfo) return;
+
+   // 1. 원본 좌석 찾기 및 선택
+   const originalSeatElement = document.querySelector(
+     `.seat-item[data-seat-id="${originalSeatInfo.id}"]`
+   );
+   if (originalSeatElement) {
+     console.log("원본 좌석 찾음:", originalSeatElement);
+     // 기존 선택 해제 및 원본 선택
+     const currentSelected = document.querySelector(".seat-item.selected");
+     if (currentSelected) currentSelected.classList.remove("selected");
+     originalSeatElement.classList.add("selected");
+     originalSeatElement.classList.add("originally-selected"); // 식별용 클래스 추가 (CSS 스타일링 필요)
+     originalSeatElement.scrollIntoView({ behavior: "smooth", block: "center" }); // 해당 좌석으로 스크롤 (선택적)
+
+     // 2. 원본 시간 선택 (시간제일 경우)
+     if (originalPlanType === "HOURLY" && originalTimes.length > 0) {
+       // 시간 슬롯 로드가 완료되었는지 확인 후 실행 필요
+       // renderTimeSlots 완료 시점 확인 필요
+       console.log("원본 시간 선택 시도:", originalTimes);
+       loadAvailableTimes()
+         .then(() => {
+           // 시간 로드가 완료된 후 실행 (loadAvailableTimes가 Promise 반환 가정)
+           originalTimes.forEach((timeValue) => {
+             const timeCheckbox = document.getElementById(
+               `time-${timeValue.replace(":", "")}`
+             );
+             const timeSpan = timeCheckbox?.nextElementSibling;
+             if (timeCheckbox && !timeCheckbox.disabled) {
+               timeCheckbox.checked = true;
+               if (timeSpan) {
+                 // 스타일 업데이트
+                 timeSpan.classList.add("btn-primary");
+                 timeSpan.classList.remove("btn-outline-primary");
+               }
+             } else {
+               console.warn(
+                 `원본 시간(${timeValue})을 선택할 수 없거나 찾을 수 없습니다.`
+               );
+             }
+           });
+           updateSummary(); // 시간 선택 후 요약 업데이트
+         })
+         .catch((e) => console.error("시간 로드 후 원본 선택 중 오류", e));
+     } else {
+       updateSummary(); // 좌석만 선택하고 요약 업데이트
+     }
+   } else {
+     console.warn("원본 좌석 요소를 찾을 수 없습니다.");
+     updateSummary(); // 좌석 못찾아도 일단 업데이트
+   }
+ }
+
+
     // --- 초기화 및 이벤트 리스너 설정 ---
     document.addEventListener('DOMContentLoaded', function() {
         console.log("DOM 로드 완료. 초기화 시작.");
@@ -333,15 +684,47 @@
         calendarIcon?.addEventListener('click', openCalendar);
         planRadios.forEach(radio => { radio.addEventListener('change', handlePlanChange); });
         couponSelect?.addEventListener('change', handleCouponChange);
-        paymentButton?.addEventListener('click', proceedToPayment); // 결제 버튼에 카카오페이 준비 함수 연결
+       paymentButton?.addEventListener('click', () => {
+            if (modificationMode) { proceedToPaymentForUpdate(); } // 변경 모드일 때
+            else { proceedToPayment(); } // 신규 예약일 때
+        });
 
-        // 초기화 함수 호출
-        const initialYear = new Date().getFullYear();
-        const initialMonth = new Date().getMonth() + 1;
-        loadCalendarDataAndInitialize(initialYear, initialMonth, new Date().toISOString().split('T')[0]); // 오늘 날짜 기본 선택
-        loadAvailableCoupons(); // 쿠폰 로드
-        handlePlanChange(); // 초기 요금제 반영
-        updateSummary();
-        console.log("초기화 로직 완료.");
-        // 토스 위젯 초기화 로직 제거됨
-    });
+       // 초기화 로직 (변경 모드 감지 강화)
+      const urlParams = new URLSearchParams(window.location.search);
+      const isModificationMode = urlParams.get('mode') === 'modify';
+      const resNoToModify = urlParams.get('resNo');
+
+      if (isModificationMode && resNoToModify) { // --- 예약 변경 모드 ---
+          modificationMode = true; // 전역 변수 설정
+          originalResNo = resNoToModify; // 전역 변수 설정
+          console.log(`예약 변경 모드 시작 (ResNo: ${originalResNo})`);
+
+          if (modificationNotice) { // Requirement 2: 변경 안내 문구 표시
+              modificationNotice.classList.remove('d-none');
+          }
+          if (paymentButton) { // 버튼 텍스트 변경
+              paymentButton.innerHTML = '<i class="fas fa-check me-2"></i> 좌석 변경 선택';
+          }
+          // 백엔드에서 변경 대상 예약 정보 로드 및 화면 설정 함수 호출
+          loadReservationForModification(originalResNo);
+
+      } else { // --- 일반 예약 모드 ---
+          modificationMode = false; // 전역 변수 설정
+          originalResNo = null;     // 전역 변수 설정
+          console.log("일반 예약 모드 시작");
+
+          if (modificationNotice) { // 변경 안내 문구 숨김
+              modificationNotice.classList.add('d-none');
+          }
+           if (paymentButton) { // 버튼 텍스트 기본값
+              paymentButton.innerHTML = '<i class="fas fa-credit-card me-2"></i> 결제하기';
+          }
+
+          // 일반 예약 시 초기화
+          loadCalendarDataAndInitialize(currentYear, currentMonth, new Date().toISOString().split('T')[0]);
+          loadAvailableCoupons();
+          handlePlanChange(); // 초기 요금제 설정
+          updateSummary();
+      }
+      console.log("초기화 로직 완료.");
+  });

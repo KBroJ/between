@@ -67,10 +67,11 @@
               <button class="btn btn-sm btn-detail" th:onclick="|location.href='@{/mypage/reservations/detail/{resNo}(resNo=${reservation.resNo})}'|">상세</button>
               -->
               <!-- 예약 상태(resStatus)가 예약완료(1)이며 취소 버튼 표시 -->
-              <button th:if="${reservation.resStatus == '1'}" class="btn btn-sm btn-cancel"
-                      th:onclick="'confirmCancel(\'' + ${reservation.resNo} + '\', \'' + @{/mypage/reservations/{resNo}/cancel(resNo=${reservation.resNo})} + '\');'">
-                취소
+              <button th:if="${reservation.resStatus == '1'}" type="button" class="btn btn-cancel"
+                      th:onclick="'confirmCancel(\'' + ${reservation.resNo} + '\', \'' + @{/api/reservations/{resNo}/cancel(resNo=${reservation.resNo})} + '\');'">
+                예약 취소
               </button>
+
             </td>
           </tr>
           <tr th:if="${reservationsPage.empty}">

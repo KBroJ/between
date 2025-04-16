@@ -97,12 +97,12 @@
                 <button type="button" class="btn btn-secondary" onclick="location.href='/mypage/reservations'">목록으로</button>
 
                 <button th:if="*{canModify}" type="button" class="btn btn-primary"
-                        th:onclick="|location.href='@{/reservations/modify/{resNo}(resNo=*{resNo})}'|">
+                        th:onclick="|location.href='@{/reservation(mode='modify', resNo=*{resNo})}'|">
                     예약 변경
                 </button>
 
                 <button th:if="*{canCancel}" type="button" class="btn btn-cancel"
-                        th:onclick="'confirmCancel(\'' + *{resNo} + '\', \'' + @{/mypage/reservations/{resNo}/cancel(resNo=*{resNo})} + '\');'">
+                        th:onclick="'confirmCancel(\'' + *{resNo} + '\', \'' + @{/api/reservations/{resNo}/cancel(resNo=${resNo})} + '\');'">
                     예약 취소
                 </button>
             </div>

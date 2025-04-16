@@ -1,44 +1,48 @@
-/**
- * 예약 취소 확인 함수
- * @param {string} resNo - 예약 번호
- * @param {string} cancelUrl - 취소를 처리할 서버 URL
- */
-function confirmCancel(resNo, cancelUrl) {
-    if (confirm('예약 번호 ' + resNo + ' 예약을 정말로 취소하시겠습니까?\n취소 후에는 복구할 수 없습니다.')) {
-        // 사용자가 '확인'을 누르면 취소 URL로 이동 (또는 fetch API로 POST 요청 전송)
-        // 여기서는 간단하게 페이지 이동 방식으로 구현
-        // POST 방식으로 변경하려면 아래 주석 참고
-        location.href = cancelUrl;
+// 예약 취소 확인 함수
+async function confirmCancel(resNo, cancelUrl) {
+    console.log(`예약 취소 시도: resNo=${resNo}, url=${cancelUrl}`);
 
-        /* // fetch API를 사용하여 POST 방식으로 취소 요청 보내는 예시
-        fetch(cancelUrl, {
-            method: 'POST', // 또는 'DELETE' 등 서버에서 정의한 메소드
-            headers: {
-                // 필요시 CSRF 토큰 등 헤더 추가
-                // 'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').getAttribute('content')
-            }
-        })
-        .then(response => {
-            if (response.ok) {
-                alert('예약이 성공적으로 취소되었습니다.');
-                location.reload(); // 페이지 새로고침하여 변경사항 반영
-            } else {
-                // 서버 응답에서 에러 메시지 추출 시도
-                response.json().then(data => {
-                    alert('예약 취소 중 오류가 발생했습니다: ' + (data.message || '서버 오류'));
-                }).catch(() => {
-                    alert('예약 취소 중 오류가 발생했습니다.');
-                });
-            }
-        })
-        .catch(error => {
-            console.error('Error during cancellation:', error);
-            alert('네트워크 오류 또는 처리 중 문제가 발생하여 예약을 취소할 수 없습니다.');
+    // 사용자에게 정말 취소할지 확인
+    if (!confirm("정말 예약을 취소하시겠습니까?")) {
+        console.log("사용자 취소");
+        return; // 사용자가 '취소' 누르면 함수 종료
+    }
+
+    // 확인을 누르면 백엔드에 취소 요청 보내기 (POST 방식 권장)
+    try {
+        // CSRF 토큰 가져오기 (Spring Security 사용 시)
+        const token = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
+        const header = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
+        const headers = {
+            'Content-Type': 'application/json'
+            // 필요시 다른 헤더 추가
+        };
+        if (token && header) {
+            headers[header] = token;
+            console.log("CSRF Header Included for cancel request.");
+        }
+
+        // fetch API 사용하여 POST 요청 보내기 (URL은 Thymeleaf에서 생성된 cancelUrl 사용)
+        const response = await fetch(cancelUrl, {
+            method: 'POST',
+            headers: headers
+            // body: JSON.stringify({ resNo: resNo }) // 필요시 body에 데이터 추가
         });
-        */
-    } else {
-        // 사용자가 '취소'를 누르면 아무 작업도 하지 않음
-        console.log('Reservation cancellation cancelled by user.');
+
+        // 백엔드 응답 처리
+        const result = await response.json(); // 백엔드가 JSON 응답 보낸다고 가정
+
+        if (response.ok && result.success) { // 응답 상태 OK 이고, 백엔드 결과가 success일 때
+            alert('예약이 성공적으로 취소되었습니다.');
+            location.reload(); // 페이지 새로고침하여 목록 갱신
+        } else {
+            // 백엔드에서 보낸 에러 메시지 표시
+            throw new Error(result.message || `예약 취소 중 오류가 발생했습니다. (상태: ${response.status})`);
+        }
+
+    } catch (error) {
+        console.error("예약 취소 처리 중 오류:", error);
+        alert(`예약 취소 실패: ${error.message}`);
     }
 }
 

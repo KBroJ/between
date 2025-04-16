@@ -15,6 +15,15 @@
 <body>
 <div class="container mt-4">
   <h1 class="text-center mb-5"><i class="fas fa-calendar-alt me-2"></i>실시간 좌석 예약</h1>
+
+  <!-- 예약 변경 모드 -->
+  <div id="modification-notice" class="alert alert-warning d-flex align-items-center d-none" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    <div>
+      <strong>현재 예매 정보 변경 중입니다.</strong> (요금제는 변경할 수 없습니다.)
+    </div>
+  </div>
+
   <div class="row">
     <div class="col-lg-8">
       <div class="card-common seat-map-card">
