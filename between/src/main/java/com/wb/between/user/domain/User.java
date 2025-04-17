@@ -64,15 +64,6 @@ public class User implements UserDetails, OAuth2User {
     @Column(name = "loginM", length = 10, nullable = false)
     private String loginM;
 
-// === 소셜로그인(OAuth2) 정보 저장을 위한 필드 추가 ===
-    @Transient // DB 컬럼으로 만들지 않음 (DB에 저장할 필요 없는 임시 데이터)
-    private Map<String, Object> attributes;
-
-    @Transient // DB 컬럼으로 만들지 않음
-    private String nameAttributeKey; // 사용자 이름(고유 식별자)을 찾기 위한 키값 (예: naver="response")
-// === 소셜로그인(OAuth2) 정보 저장을 위한 필드 추가 끝 ===
-
-
     @Override   // 권한
     public Collection<? extends GrantedAuthority> getAuthorities(){
         return List.of(new SimpleGrantedAuthority("user"));
@@ -112,6 +103,12 @@ public class User implements UserDetails, OAuth2User {
     }
 
 
+// === 소셜로그인(OAuth2) 정보 저장을 위한 필드 추가 ===
+    @Transient // DB 컬럼으로 만들지 않음 (DB에 저장할 필요 없는 임시 데이터)
+    private Map<String, Object> attributes;
+
+    @Transient // DB 컬럼으로 만들지 않음
+    private String nameAttributeKey; // 사용자 이름(고유 식별자)을 찾기 위한 키값 (예: naver="response")
 
     // === OAuth2User 인터페이스 메소드 구현 ===
     @Override
@@ -155,6 +152,6 @@ public class User implements UserDetails, OAuth2User {
         this.nameAttributeKey = nameAttributeKey;
         return this;
     }
-
+// === 소셜로그인(OAuth2) 정보 저장을 위한 필드 추가 끝 ===
 
 }

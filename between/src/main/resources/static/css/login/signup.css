@@ -4,8 +4,9 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh; /* 스크롤 생길 경우 대비 */
     margin: 0;
+    padding: 20px 0; /* 위아래 여백 추가 */
 }
 
 .signup-container {
@@ -13,7 +14,9 @@ body {
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     padding: 30px;
-    width: 450px;
+    width: 100%; /* 너비 조정 */
+    max-width: 450px; /* 최대 너비 설정 */
+    box-sizing: border-box; /* 패딩 포함 크기 계산 */
 }
 
 h2 {
@@ -30,6 +33,7 @@ label {
     display: block;
     margin-bottom: 8px;
     font-size: 14px;
+    font-weight: 500; /* 라벨 약간 굵게 */
 }
 
 input[type="email"],
@@ -40,11 +44,22 @@ input[type="tel"] {
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    box-sizing: border-box;
+    box-sizing: border-box; /* 패딩 포함 크기 계산 */
+    height: 40px; /* 높이 고정 */
+    font-size: 14px; /* 폰트 크기 일관성 */
 }
+
+/* input 포커스 시 테두리 강조 */
+input:focus {
+    outline: none;
+    border-color: #2374e1;
+    box-shadow: 0 0 0 2px rgba(35, 116, 225, 0.2);
+}
+
 
 .email-group {
     display: flex;
+    align-items: center; /* 세로 중앙 정렬 */
 }
 
 .email-group input {
@@ -52,21 +67,51 @@ input[type="tel"] {
     margin-right: 10px;
 }
 
-.phone-group {
-    display: flex;
-    align-items: center;
-}
-
-.phone-group input {
-    flex: 1;
-}
-
 .countdown {
-    margin-left: 10px;
+    position: absolute; /* 입력칸 기준 절대 위치 */
+    right: 10px;        /* 오른쪽에서 10px */
+    top: 50%;           /* 상단에서 50% */
+    transform: translateY(-50%); /* Y축으로 -50% 이동하여 수직 중앙 정렬 */
     font-weight: bold;
     color: #dc3545;
-    min-width: 60px;
+    font-size: 13px;    /* 폰트 크기 약간 작게 조정 */
+    white-space: nowrap; /* 시간 만료 시 줄바꿈 방지 */
+    pointer-events: none; /* 카운트다운 위로 마우스 이벤트 통과 (입력 방해 방지) */
 }
+
+.verification-group {
+    display: flex;
+    align-items: center; /* 세로 중앙 정렬 */
+}
+
+.verification-input-wrapper {
+    position: relative; /* 카운트다운의 absolute positioning 기준 */
+    flex: 1; /* 남는 공간 차지 */
+    margin-right: 10px; /* 재전송 버튼과의 간격 */
+}
+
+.verification-group input {
+    flex: 1; /* 남는 공간 차지 */
+    margin-right: 10px; /* 버튼과의 간격 */
+}
+
+.resend-btn {
+    background-color: #6c757d; /* 회색 계열 */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0 12px; /* 좌우 패딩 */
+    cursor: pointer;
+    font-size: 14px;
+    height: 40px; /* 입력칸 높이와 동일하게 */
+    white-space: nowrap; /* 버튼 텍스트 줄바꿈 방지 */
+}
+
+.resend-btn:hover {
+    background-color: #5a6268;
+}
+/* *** 추가/수정된 CSS 끝 *** */
+
 
 .check-btn {
     background-color: #2374e1;
@@ -76,7 +121,8 @@ input[type="tel"] {
     padding: 0 15px;
     cursor: pointer;
     font-size: 14px;
-    height: 40px;
+    height: 40px; /* 입력칸 높이와 동일하게 */
+    white-space: nowrap; /* 버튼 텍스트 줄바꿈 방지 */
 }
 
 .verify-btn {
@@ -89,6 +135,7 @@ input[type="tel"] {
     cursor: pointer;
     font-size: 16px;
     margin-top: 10px;
+    font-weight: 500;
 }
 
 .check-btn:hover, .verify-btn:hover {
@@ -98,15 +145,49 @@ input[type="tel"] {
 .message {
     display: block;
     font-size: 12px;
-    color: #dc3545;
+    color: #dc3545; /* 기본 에러 색상 */
     margin-top: 5px;
+    min-height: 1em; /* 메시지 공간 확보 (레이아웃 떨림 방지) */
 }
 
-.verification-group {
+.password-wrapper {
+    position: relative;
     display: flex;
     align-items: center;
 }
 
-.verification-group input {
+.password-wrapper input[type="password"],
+.password-wrapper input[type="text"] {
     flex: 1;
+    padding-right: 40px;
+}
+
+.toggle-password-btn {
+    position: absolute;
+    right: 1px; /* 테두리 안쪽으로 약간 이동 */
+    top: 1px;
+    bottom: 1px;
+    width: 38px; /* 버튼 너비 고정 */
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0; /* 내부 패딩 제거 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    border-radius: 0 4px 4px 0; /* 오른쪽 모서리만 input과 맞춤 */
+}
+
+.toggle-password-btn:hover {
+    color: #333;
+}
+
+/* input 포커스 시 버튼은 영향받지 않도록 */
+.password-wrapper input:focus + .toggle-password-btn {
+    /* 기존 스타일 유지 */
+    color: #888;
+}
+.password-wrapper input:focus {
+     padding-right: 40px; /* 포커스 시에도 패딩 유지 */
 }

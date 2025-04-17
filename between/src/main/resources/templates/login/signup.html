@@ -21,13 +21,43 @@
 
             <div class="form-group">
                 <label for="password">비밀번호</label>
-                <input type="password" id="password" th:field="*{password}" required>
+                <!--
+                <input type="password" id="password" th:field="*{password}"  required>
+                -->
+                <div class="password-wrapper">
+                    <input type="password" id="password" th:field="*{password}" required>
+                    <button type="button" id="togglePassword" class="toggle-password-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
+                            <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/>
+                            <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>
+                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-slash-fill" viewBox="0 0 16 16" style="display: none;">
+                            <path d="m10.79 12.912-1.614-1.615a3.5 3.5 0 0 1-4.474-4.474l-2.06-2.06C.938 6.278 0 8 0 8s3 5.5 8 5.5a7.029 7.029 0 0 0 2.79-.588M5.21 3.088A7.028 7.028 0 0 1 8 2.5c5 0 8 5.5 8 5.5s-.939 1.721-2.641 3.238l-2.062-2.062a3.5 3.5 0 0 0-4.474-4.474L5.21 3.089z"/>
+                            <path d="M5.525 7.646a2.5 2.5 0 0 0 2.829 2.829l-2.83-2.829zm4.95.708-2.829-2.83a2.5 2.5 0 0 1 2.829 2.829zm3.171 6-12-12 .708-.708 12 12z"/>
+                        </svg>
+                    </button>
+                </div>
                 <span id="passwordMessage" class="message"></span>
             </div>
 
             <div class="form-group">
                 <label for="confirmPassword">비밀번호 확인</label>
+                <!--
                 <input type="password" id="confirmPassword" required>
+                -->
+                <div class="password-wrapper">
+                    <input type="password" id="confirmPassword" required>
+                    <button type="button" id="toggleConfirmPassword" class="toggle-password-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
+                            <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/>
+                            <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>
+                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-slash-fill" viewBox="0 0 16 16" style="display: none;">
+                            <path d="m10.79 12.912-1.614-1.615a3.5 3.5 0 0 1-4.474-4.474l-2.06-2.06C.938 6.278 0 8 0 8s3 5.5 8 5.5a7.029 7.029 0 0 0 2.79-.588M5.21 3.088A7.028 7.028 0 0 1 8 2.5c5 0 8 5.5 8 5.5s-.939 1.721-2.641 3.238l-2.062-2.062a3.5 3.5 0 0 0-4.474-4.474L5.21 3.089z"/>
+                            <path d="M5.525 7.646a2.5 2.5 0 0 0 2.829 2.829l-2.83-2.829zm4.95.708-2.829-2.83a2.5 2.5 0 0 1 2.829 2.829zm3.171 6-12-12 .708-.708 12 12z"/>
+                        </svg>
+                    </button>
+                </div>
                 <span id="confirmPasswordMessage" class="message"></span>
             </div>
 
@@ -46,8 +76,13 @@
             <div id="verificationSection" class="form-group" style="display: none;">
                 <label for="verificationCode">인증번호</label>
                 <div class="verification-group">
-                    <input type="text" id="verificationCode" required>
-                    <span id="countdown" class="countdown" style="display: none;"></span>
+                    <div class="verification-input-wrapper">
+                        <input type="text" id="verificationCode">
+                        <span id="countdown" class="countdown" style="display: none;"></span>
+                    </div>
+                    <button type="button" id="resendVerificationBtn" class="resend-btn" style="display: none;">
+                        재전송
+                    </button>
                 </div>
                 <span id="verificationMessage" class="message"></span>
             </div>
