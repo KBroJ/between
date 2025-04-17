@@ -46,8 +46,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // 실제 구현에서는 서버에 요청을 보내야 합니다
-//        fetch('/checkEmail?email=' + encodeURIComponent(email))   // GET 방식
         fetch('/checkEmail', {  // POST 방식
             method: 'POST',
             headers: {
@@ -76,10 +74,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(error => {
-            // 테스트용 코드 (실제로는 서버 통신 필요)
-//            emailMessage.textContent = '사용 가능한 이메일입니다.';
-//            emailMessage.style.color = 'green';
-//            isEmailVerified = true;
         });
     });
 
@@ -110,51 +104,6 @@ document.addEventListener('DOMContentLoaded', function() {
             phoneMessage.textContent = '';
         }
     });
-
-// 휴대폰 번호 인증번호 발송
-/*
-    sendVerificationBtn.addEventListener('click', function() {
-        // 모든 필수 입력값 입력 여부 검증
-        if (!validateAllInputs()) {
-            return;
-        }
-
-        // 이메일 중복 확인 여부 검증
-        if (!isEmailVerified) {
-            emailMessage.textContent = '이메일 중복 확인이 필요합니다.';
-            emailMessage.style.color = '#dc3545';
-            return;
-        }
-
-        // 실제 구현에서는 서버에 요청을 보내야 합니다
-        fetch('/send-verification', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(
-                { phoneNo: phoneNumberInput.value.replace(/[^0-9]/g, '') }  // 하이픈 제거
-            )
-        })
-        .then(response => response.json())
-        .then(() => {
-            verificationSection.style.display = 'block';
-            registerBtn.style.display = 'block';
-            sendVerificationBtn.style.display = 'none';
-            startCountdown(180); // 3분 카운트다운
-
-            alert('인증번호가 발송되었습니다.');
-        })
-        .catch(() => {
-            // 테스트용 코드 (실제로는 서버 통신 필요)
-//            verificationSection.style.display = 'block';
-//            registerBtn.style.display = 'block';
-//            sendVerificationBtn.style.display = 'none';
-//            startCountdown(180); // 3분 카운트다운
-
-//            alert('인증번호가 발송되었습니다.');
-            alert('오류발생');
-        });
-    });
-*/
 
     // '인증하기' 버튼 클릭 이벤트
     sendVerificationBtn.addEventListener('click', function() {
@@ -437,18 +386,7 @@ document.addEventListener('DOMContentLoaded', function() {
             phoneMessage.textContent = '유효한 휴대폰 번호 형식이 아닙니다.';
             isValid = false;
         }
-/*
-        // 인증번호 검증
-        const verificationCode = verificationCodeInput.value;
-        verificationMessage.textContent = '';
-        if (!verificationCode) {
-            verificationMessage.textContent = '인증번호를 입력해주세요.';
-            isValid = false;
-        } else if (isVerificationExpired) {
-            verificationMessage.textContent = '인증 시간이 만료되었습니다. 인증번호를 다시 받아주세요.';
-            isValid = false;
-        }
-*/
+        
         return isValid;
     }
 
