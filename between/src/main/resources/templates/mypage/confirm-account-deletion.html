@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/mypage}">
+<head>
+  <title>수정 화면</title>
+    <!-- ✅ 페이지 전용 스타일 삽입 -->
+    <link rel="stylesheet" th:href="@{/css/mypage/confirm-account-deletion.css}">
+</head>
+<body>
+
+<div layout:fragment="mypage-content">
+  <h1 class="main-title">회원 탈퇴</h1>
+  <div class="card withdraw-check-card">
+    <h2 class="withdraw-title">비밀번호 확인</h2>
+    <p class="description">
+      고객님의 소중한 개인 정보 보호를 위해
+      비밀번호를 다시 한번 입력해 주시기 바랍니다
+    </p>
+
+    <form th:action="@{/mypage/verifyPasswordDeletion}" method="post" class="withdraw-form">
+      <div class="form-group">
+        <label for="currentPassword">현재 비밀번호</label>
+        <input type="password" name="currentPassword" id="currentPassword" placeholder="현재 비밀번호" />
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-danger">확인</button>
+        <button type="button" class="btn btn-secondary" onclick="history.back()">취소</button>
+      </div>
+    </form>
+  </div>
+<!--  <form th:action="@{/mypage/verifyPasswordDeletion}" method="post">-->
+<!--    <input type="password" name="currentPassword" placeholder="현재 비밀번호" />-->
+<!--    <button type="submit">확인</button>-->
+<!--  </form>-->
+</div>
+
+</body>
+</html>

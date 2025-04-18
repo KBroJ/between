@@ -95,10 +95,9 @@
 
 
 .info-grid {
-    display: grid;
-    /* Start with 1 column, switch to more columns on larger screens */
-    grid-template-columns: 1fr;
-    gap: 16px 24px; /* Row gap, Column gap */
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* 항목 간 간격 */
 }
 
 /* Apply multi-column layout only on wider screens */

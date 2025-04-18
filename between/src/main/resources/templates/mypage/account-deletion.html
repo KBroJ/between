@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/mypage}">
+<head>
+  <title>수정 화면</title>
+    <!-- ✅ 페이지 전용 스타일 삽입 -->
+    <link rel="stylesheet" th:href="@{/css/mypage/account-deletion.css}">
+</head>
+<body>
+
+<div layout:fragment="mypage-content">
+  <h1 class="main-title">회원 탈퇴</h1>
+<!--  <p>탈퇴 시 예약 이력 및 쿠폰이 모두 삭제됩니다.</p>-->
+<!--  <form th:action="@{/mypage/accountDeletion}" method="post">-->
+<!--    &lt;!&ndash; 실제 HTTP 메소드를 지정하는 숨겨진 필드 &ndash;&gt;-->
+<!--    <input type="hidden" name="_method" value="DELETE" />-->
+<!--    <button type="submit">확인</button>-->
+<!--  </form>-->
+
+  <div class="card withdraw-card">
+    <h2 class="withdraw-title">정말로 탈퇴하시겠습니까?</h2>
+    <p class="withdraw-message">
+      탈퇴 시 회원님의 계정 정보와 예약 기록 등 모든 정보가 삭제되며, 복구가 불가능합니다.<br>
+      탈퇴를 원하실 경우 아래 버튼을 눌러주세요.
+    </p>
+
+    <div class="card-footer">
+      <form th:action="@{/mypage/accountDeletion}" method="post">
+        <!-- 실제 HTTP 메소드를 지정하는 숨겨진 필드 -->
+        <input type="hidden" name="_method" value="DELETE" />
+        <button type="submit" class="btn btn-danger">회원 탈퇴</button>
+        <button type="button" class="btn btn-secondary" onclick="history.back()">취소</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

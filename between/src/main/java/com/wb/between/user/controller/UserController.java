@@ -98,7 +98,7 @@ public class UserController {
             //쿠폰발급 진행, 쿠폰발급은 회원가입 흐름에 영향을 주지 않아야함
             if(user != null) {
                 try {
-                    couponService.singupCoupon(user);
+                    couponService.signUpCoupon(user);
                 } catch (Exception e) {
                     log.error("회원가입 성공 후 쿠폰 발급 실패. 사용자: {}, 에러: {}", user.getUserNo(), e.getMessage(), e);
                 }

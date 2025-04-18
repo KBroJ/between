@@ -1,3 +1,38 @@
+.main-title {
+    font-size: 1.8em;
+    margin-bottom: 25px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+/* Card Styles (used within content) */
+.card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 32px; /* Space between cards */
+    padding: 24px;
+}
+
+/* Info Card Specifics */
+.info-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* Allow wrapping */
+    gap: 16px; /* Add gap for wrapped items */
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #e9ecef; /* Separator line */
+}
+
+.info-card .card-title {
+    font-size: 1.25rem; /* 20px */
+    font-weight: 600;
+    color: #212529;
+}
+
 /* 전체 영역 */
 .profile-edit-wrapper {
     background-color: #ffffff;

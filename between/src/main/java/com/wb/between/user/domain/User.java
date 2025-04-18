@@ -71,6 +71,7 @@ public class User implements UserDetails, OAuth2User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @ToString.Exclude // Lombok이 생성하는 toString() 메소드에서 이 필드를 제외시킴!
+    @Builder.Default
     private Set<UserCoupon> usercoupon = new HashSet<>(); // 사용자가 가진 쿠폰 목록 (UserCoupon 객체들을 통해 접근)
 
     // 사용자의 id를 반환 (고유한 값)
@@ -124,7 +125,7 @@ public class User implements UserDetails, OAuth2User {
     @Override
     public String getName() {
         if (this.nameAttributeKey == null || this.attributes == null) {
-            return null; // 또는 userNo.toString() 등 대체 식별자 반환 고려
+            return this.name; // 또는 userNo.toString() 등 대체 식별자 반환 고려
         }
         // Naver 특정 처리 (userNameAttributeName이 'response'일 경우)
         if ("response".equals(this.nameAttributeKey) && this.attributes.containsKey("response")) {

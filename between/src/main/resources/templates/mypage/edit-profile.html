@@ -10,41 +10,108 @@
 <body>
 
 <div layout:fragment="mypage-content">
-  <div class="profile-edit-wrapper">
-    <h2>회원정보 수정</h2>
+  <h1 class="main-title">회원정보 수정</h1>
+  <div class="card info-card" th:object="${userInfo}">
+    <div class="card-header">
+
+    </div>
     <div th:object="${userInfo}">
       <form th:action="@{/mypage/edit}" method="post" class="profile-form">
+        <!-- put 처리 -->
+        <input type="hidden" name="_method" value="put" />
         <div class="form-group">
           <label for="name">이름</label>
           <input type="text" id="name" name="name" th:field="*{name}" />
+          <div th:if="${#fields.hasErrors('phoneNo')}"
+               th:errors="*{phoneNo}">이름 에러 메시지</div>
+          <!-- 클라이언트 측 오류 메시지 표시용 (JavaScript) -->
+          <div class="error-message js-error" id="name-js-error" style="display: none;"></div>
         </div>
-
-        <div class="form-group">
-          <label for="email">이메일</label>
-          <input type="email" id="email" name="email" th:field="*{email}" readonly />
-        </div>
-
         <div class="form-group">
           <label for="phone">연락처</label>
           <input type="text" id="phone" name="phone" th:field="*{phoneNo}" />
+          <div th:if="${#fields.hasErrors('phoneNo')}"
+               th:errors="*{phoneNo}">전화번호 에러 메시지</div>
         </div>
+        <div class="error-message js-error" id="phone-js-error" style="display: none;"></div>
         <div class="form-actions">
           <button type="submit" class="btn-primary">정보 수정</button>
-          <button type="button" class="btn-danger" onclick="location.href='/mypage/delete-account'">회원 탈퇴</button>
         </div>
       </form>
     </div>
+
   </div>
 </div>
 <th:block layout:fragment="page-script">
   <script>
     $(document).ready(function () {
-      // 비밀번호 유효성 검사 함수
-      function isValidPwd(pwd) {
-        const pwdRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
-        return pwdRegex.test(pwd);
+      //입력 제한
+      const $nameInput = $('#name');
+      const $phoneInput = $('#phone');
+      const $nameError = $('#name-js-error');
+      const $phoneError = $('#phone-js-error');
+      const $form = $('.profile-form'); // 폼 선택
+
+      // 유효성 검사 함수 (예시)
+      function validateName() {
+        const nameValue = $nameInput.val().trim();
+        if (nameValue === '') {
+          showError($nameError, '이름을 입력해주세요.');
+          return false;
+        } else {
+          clearError($nameError);
+          return true;
+        }
       }
 
+      function validatePhone() {
+        const phoneValue = $phoneInput.val().trim();
+        // 예시: 간단한 숫자 형식 검사 (실제로는 더 정교한 정규식 필요)
+        const phoneRegex = /^[0-9]{10,11}$/; // 예: 10~11자리 숫자
+        if (phoneValue === '') {
+          showError($phoneError, '연락처를 입력해주세요.');
+          return false;
+        } else if (!phoneRegex.test(phoneValue)) {
+          showError($phoneError, '올바른 연락처 형식이 아닙니다 (숫자 10~11자리).');
+          return false;
+        } else {
+          clearError($phoneError);
+          return true;
+        }
+      }
+
+      // 오류 메시지 표시 함수
+      function showError($errorElement, message) {
+        $errorElement.text(message).show();
+        // 해당 입력 필드에 오류 스타일 추가 (선택 사항)
+        $errorElement.prev('input').addClass('input-error');
+      }
+
+      // 오류 메시지 제거 함수
+      function clearError($errorElement) {
+        $errorElement.text('').hide();
+        // 해당 입력 필드의 오류 스타일 제거 (선택 사항)
+        $errorElement.prev('input').removeClass('input-error');
+      }
+
+      // 이벤트 리스너: 사용자가 입력 필드를 벗어날 때(blur) 검사
+      $nameInput.on('blur', validateName);
+      $phoneInput.on('blur', validatePhone);
+
+      // 이벤트 리스너: 폼 제출 시 최종 검사
+      $form.on('submit', function (event) {
+        // 각 필드 유효성 검사 실행
+        const isNameValid = validateName();
+        const isPhoneValid = validatePhone();
+
+        // 하나라도 유효하지 않으면 폼 제출 막기
+        if (!isNameValid || !isPhoneValid) {
+          event.preventDefault(); // 폼 제출 중단
+          alert('입력 내용을 확인해주세요.'); // 또는 다른 방식의 알림
+          return false;
+        }
+        // 모든 검증 통과 시 폼 제출 진행 (기본 동작)
+      });
 
     });
   </script>

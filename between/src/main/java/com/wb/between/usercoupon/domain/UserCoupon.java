@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = "user, coupon")
+//@ToString(exclude = "user, coupon")
 @EqualsAndHashCode(of = "userCpNo")
 @Builder
 @Table(name = "usercoupon")

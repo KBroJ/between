@@ -42,10 +42,12 @@ public class MypageCouponResDto {
 
     public static MypageCouponResDto from(UserCoupon usercoupon) {
         return MypageCouponResDto.builder()
+                .userCpNo(usercoupon.getUserCpNo())
                 .cpNo(usercoupon.getCoupon().getCpNo())
                 .cpnNm(usercoupon.getCoupon().getCpnNm())
                 .discount(usercoupon.getCoupon().getDiscount())
                 .discountAt(usercoupon.getCoupon().getDiscountAt())
+                .cpnStartDt(usercoupon.getCoupon().getCpnStartDt())
                 .cpnEndDt(usercoupon.getCoupon().getCpnEndDt())
                 .cpnDsc(usercoupon.getCoupon().getCpnDsc())
                 .issueDt(usercoupon.getIssueDt())

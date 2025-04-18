@@ -5,22 +5,22 @@ import com.wb.between.mypage.dto.*;
 import com.wb.between.mypage.service.MyReservationService;
 import com.wb.between.mypage.service.MypageService;
 import com.wb.between.user.domain.User;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
-import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 
 @Slf4j
 @Controller
@@ -44,9 +44,10 @@ public class MypageController {
     ) {
 
         log.debug("user = {}", user);
-        MypageResponseDto mypageResponseDto = mypageService.findUserbyId(user.getUserNo());
+        MypageUserInfoResDto mypageUserInfoResDto = mypageService.findUserbyId(user.getUserNo());
+        log.debug("mypageResponseDto.getName = {}", mypageUserInfoResDto.getName());
 
-        model.addAttribute("userInfo", mypageResponseDto);
+        model.addAttribute("userInfo", mypageUserInfoResDto);
 
         return "mypage/dashboard";
     }
@@ -58,11 +59,10 @@ public class MypageController {
     public String editProfilePage(@AuthenticationPrincipal User user, Model model) {
 
         log.debug("user = {}", user);
-        MypageResponseDto mypageResponseDto = mypageService.findUserbyId(user.getUserNo());
-        log.debug("mypageResponseDto = {}", mypageResponseDto);
-        log.debug("mypageResponseDto.getEmail = {}", mypageResponseDto.getEmail());
+        //1. 회원정보 조회
+        MypageUserInfoResDto mypageUserInfoResDto = mypageService.findUserbyId(user.getUserNo());
 
-        model.addAttribute("userInfo", mypageResponseDto);
+        model.addAttribute("userInfo", mypageUserInfoResDto);
 
         return "mypage/edit-profile";
     }
@@ -72,13 +72,20 @@ public class MypageController {
      */
     @PutMapping("/edit")
     public String editProfile(@AuthenticationPrincipal User user,
-                              @ModelAttribute("userInfo") UserInfoEditReqDto userInfoEditReqDto,
+                              @Valid @ModelAttribute("userInfo") UserInfoEditReqDto userInfoEditReqDto,
+                              BindingResult bindingResult,
                               Model model) {
 
+        if(bindingResult.hasErrors()) {
+            return "mypage/edit-profile";
+        }
+
         try {
+            log.debug("editProfile|userName = {}", user.getName());
+            log.debug("editProfile|userInfoEditReqDto = {}", userInfoEditReqDto);
             //정보 수정
-            MypageResponseDto mypageResponseDto = mypageService.updateUserInfo(user.getUserNo(), userInfoEditReqDto);
-            model.addAttribute("userInfo", mypageResponseDto);
+            MypageUserInfoResDto mypageUserInfoResDto = mypageService.updateUserInfo(user.getUserNo(), userInfoEditReqDto);
+            model.addAttribute("userInfo", mypageUserInfoResDto);
 
             return "redirect:/mypage/edit";
         } catch (CustomException ex) {
@@ -97,9 +104,8 @@ public class MypageController {
      */
     @GetMapping("/editPassword")
     public String editPasswordPage(@AuthenticationPrincipal User user,
-                                 Model model) {
-        MypageResponseDto mypageResponseDto = mypageService.findUserbyId(user.getUserNo());
-        model.addAttribute("userInfo", mypageResponseDto);
+                                   Model model) {
+        model.addAttribute("passwordEditInfo", new UserPasswordEditReqDto());
         return "mypage/edit-password";
     }
 
@@ -108,21 +114,29 @@ public class MypageController {
      */
     @PutMapping("/editPassword")
     public String editPassword(@AuthenticationPrincipal User user,
-                                 @RequestParam String currentPassword,
-                                 @RequestParam String newPassword,
-                                 Model model) {
-        log.debug("currentPassword = {}", currentPassword);
-        log.debug("newPassword = {}", newPassword);
+                               @Valid @ModelAttribute("passwordEditInfo") UserPasswordEditReqDto userPasswordEditReqDto,
+                               BindingResult bindingResult,
+                               Model model) {
+        log.debug("currentPassword = {}", userPasswordEditReqDto.getCurrentPassword());
+        log.debug("newPassword = {}", userPasswordEditReqDto.getNewPassword());
+
+        if(!userPasswordEditReqDto.getNewPassword().equals(userPasswordEditReqDto.getConfirmNewPassword())) {
+            bindingResult.rejectValue("confirmNewPassword", "mismatch", "비밀번호가 일치하지 않습니다.");
+        }
+
+        if(bindingResult.hasErrors()) {
+            return "mypage/edit-password";
+        }
 
         try {
-             mypageService.changePassword(user.getUserNo(),
-                    currentPassword,
-                    newPassword);
+            mypageService.changePassword(user.getUserNo(),
+                    userPasswordEditReqDto);
             model.addAttribute("result", "success");
             return "redirect:/mypage";
 
         } catch (CustomException ex) {
             log.error("changePassword|error = {}", ex.getMessage());
+            model.addAttribute("result", "fail");
             return "mypage/edit-password";
         } catch (RuntimeException e) {
             // 예상치 못한 다른 종류의 예외 처리
@@ -133,56 +147,124 @@ public class MypageController {
 
     /**
      * 마이페이지 > 탈퇴 비밀번호 확인 화면 이동
+     *
      * @param model
      * @return
      */
-    @GetMapping("/confirmResign")
-    public String confirmResign(Model model) {
-        return "mypage/confirmResign";
+    @GetMapping("/confirmAccountDeletion")
+    public String confirmAccountDeletion(Model model) {
+        return "mypage/confirm-account-deletion";
     }
 
     /**
      * 탈퇴 비밀번호 확인 처리
-     * @param currentPassword
-     * @param model
-     * @return
      */
-    @PostMapping("/resignCheckPassword")
-    public String resignCheckPassword(@AuthenticationPrincipal User user,
-                                      @RequestParam String currentPassword,
-                                      Model model) {
+    @PostMapping("/verifyPasswordDeletion")
+    public String verifyPasswordDeletion(@AuthenticationPrincipal User user,
+                                         @RequestParam String currentPassword,
+                                         Model model) {
+        //로그인 여부 판단
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        //비밀번호 일치 여부
+        boolean passwordMatches = mypageService.verifyPassword(user.getUserNo(), currentPassword);
+
+        if (passwordMatches) {
+            return "redirect:/mypage/accountDeletion";
+        } else {
+            // 비밀번호 불일치
+            return "redirect:/mypage/confirmAccountDeletion";
+        }
+
+    }
+
+    /**
+     * 회퉌 탈퇴
+     */
+    @GetMapping("/accountDeletion")
+    public String accountDeletionPage(@AuthenticationPrincipal User user,Model model) {
+
+        //로그인 여부 판단
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        return "mypage/account-deletion";
+    }
+
+
+
+    /**
+     * 회퉌 탈퇴
+     */
+    @DeleteMapping("/accountDeletion")
+    public String accountDeletion(@AuthenticationPrincipal User user,Model model) {
+
+        //로그인 여부 판단
+        if (user == null) {
+            return "redirect:/login";
+        }
 
         try {
-            //비밀번호 확인 요청
-            mypageService.resignCheckPassword(user.getUserNo(), currentPassword);
-            return "mypage/resign";
-        } catch (CustomException ex) {
-            //비밀번호 불일치시 리다이렉트
-            return "redirect:/mypage/confirmResign";
-        } catch (RuntimeException e) {
-            // 예상치 못한 다른 종류의 예외 처리
-            log.error("예상치 못한 오류 발생", e);
-            return "redirect:/mypage/confirmResign";
+            //탈퇴 요청
+            mypageService.accountDeletion(user.getUserNo());
+
+            return "redirect:/";
+        } catch (Exception e) {
+            return "redirect:/mypage/confirm-account-deletion";
         }
-      }
+    }
 
     /**
      * 마이페이지 > 쿠폰 목록
      */
     @GetMapping("/coupon")
-    public String coupon(@AuthenticationPrincipal User user,Model model) {
+    public String coupon(@AuthenticationPrincipal User user,
+                         // defaultValue 설정으로 파라미터가 없어도 오류 방지
+                         @RequestParam(required = false, defaultValue = "available") String tab,
+                         // 날짜 파라미터 (필수가 아님)
+                         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+                         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+                         @RequestParam(defaultValue = "0") int page,
+                         Model model) {
 
-        List<MypageCouponResDto> userCouponList = mypageService.findCouponListById(user.getUserNo());
+        if (user == null) {
+            return "redirect:/login"; // 비로그인 시 로그인 페이지로
+        }
+
+        Pageable pageable = PageRequest.of(page, 10); // 예: 페이지당 10개
+
+//        List<MypageCouponResDto> userCouponList = mypageService.findCouponListById(
+//                user.getUserNo(),
+//                tab,
+//                startDate,
+//                endDate
+//                );
+
+        Page<MypageCouponResDto> userCouponList = mypageService.findCouponListByIdPage(
+                user.getUserNo(),
+                tab,
+                startDate,
+                endDate,
+                pageable
+        );
+
+        log.debug("MypageController|findCouponListByIdPage|userCouponList => {}", userCouponList);
+
         model.addAttribute("userCouponList", userCouponList);
-        model.addAttribute("couponCount", userCouponList.size());
+//        model.addAttribute("couponCount", userCouponList.size());
+        // 현재 필터 값들을 View에 전달 (탭 활성화 및 날짜 필드 값 유지를 위해)
+        model.addAttribute("currentTab", tab);
+        model.addAttribute("currentStartDate", startDate);
+        model.addAttribute("currentEndDate", endDate);
+
         return "/mypage/coupon";
     }
 
     /**
      * 탈퇴 처리
-     * @param currentPassword
-     * @param model
-     * @return
      */
     @GetMapping("/resign")
     public String resign(@RequestParam String currentPassword,Model model) {

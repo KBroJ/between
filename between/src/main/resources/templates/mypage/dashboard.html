@@ -11,26 +11,10 @@
 <section  layout:fragment="mypage-content">   <!-- Main Content -->
 
   <h1 class="main-title">회원 정보</h1>
-
-  <!-- Profile Summary Card -->
-  <!-- th:object를 사용하면 내부에서 *{}로 필드 접근 가능 -->
-<!--  <div class="card profile-card" th:object="${user}"> &lt;!&ndash; 컨트롤러에서 'user' 객체 전달 가정 &ndash;&gt;-->
-<!--    <div class="profile-summary">-->
-<!--      &lt;!&ndash; 프로필 이미지 URL이 없다면 기본 이미지 사용 &ndash;&gt;-->
-<!--      <img class="profile-pic" alt="프로필 사진">-->
-<!--      <div class="profile-info">-->
-<!--&lt;!&ndash;        <h2 class="profile-name" th:text="*{name}">[사용자 이름]</h2>&ndash;&gt;-->
-<!--&lt;!&ndash;        <p class="profile-email" th:text="*{email}">[이메일 주소]</p>&ndash;&gt;-->
-<!--        &lt;!&ndash; 회원 등급 등 추가 정보 &ndash;&gt;-->
-<!--&lt;!&ndash;        <span class="status-badge" th:text="*{membershipLevel ?: '일반회원'}">정회원</span>&ndash;&gt;-->
-<!--      </div>-->
-<!--    </div>-->
-<!--  </div>-->
-
   <!-- Detailed Information Card -->
   <div class="card info-card" th:object="${userInfo}">
     <div class="card-header">
-      <h3 class="card-title">상세 정보</h3>
+      <h3 class="card-title">회원 기본 정보</h3>
 <!--      <a th:href="@{/mypage/edit}" class="edit-link"> &lt;!&ndash; 정보 수정 페이지 링크 &ndash;&gt;-->
         <button type="button" class="btn btn-secondary" onclick="location.href='/mypage/edit'">정보수정</button>
 <!--      </a>-->
@@ -63,7 +47,7 @@
     <!-- Action Buttons -->
     <div class="card-footer">
 <!--      <button type="button" class="btn btn-secondary" onclick="location.href='/mypage/change-password'">비밀번호 변경</button> &lt;!&ndash; 비밀번호 변경 페이지 이동 예시 &ndash;&gt;-->
-      <button type="button" class="btn btn-danger" onclick="location.href='/mypage/confirmResign'">회원 탈퇴</button> <!-- 회원 탈퇴 확인 함수 호출 예시 -->
+      <button type="button" class="btn btn-danger" onclick="location.href='/mypage/confirmAccountDeletion'">회원 탈퇴</button> <!-- 회원 탈퇴 확인 함수 호출 예시 -->
     </div>
     <!-- 회원 탈퇴 확인을 위한 간단한 스크립트 예시 -->
     <script>

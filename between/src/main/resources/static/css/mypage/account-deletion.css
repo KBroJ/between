@@ -1,0 +1,73 @@
+/* 메인 타이틀 (공통 스타일과 통일) */
+.main-title {
+    font-size: 1.8em;
+    margin-bottom: 25px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+/* 카드 박스 */
+.withdraw-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    padding: 32px 24px;
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+/* 제목 */
+.withdraw-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #e03131; /* 강조 빨강 */
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+/* 안내 메시지 */
+.withdraw-message {
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.6;
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+/* 버튼 하단 정렬 */
+.card-footer {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+/* 버튼 기본 스타일 (재사용) */
+.btn {
+    padding: 10px 20px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-danger {
+    background-color: #e03131;
+    color: #fff;
+    border-color: #e03131;
+}
+.btn-danger:hover {
+    background-color: #c92a2a;
+}
+
+.btn-secondary {
+    background-color: #fff;
+    color: #495057;
+    border: 1px solid #ced4da;
+}
+.btn-secondary:hover {
+    background-color: #f1f3f5;
+    border-color: #adb5bd;
+}

@@ -1,17 +1,14 @@
 package com.wb.between.mypage.dto;
 
-import com.wb.between.menu.domain.Menu;
-import com.wb.between.menu.dto.MenuListResponseDto;
 import com.wb.between.user.domain.User;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Getter
 @Builder
-public class MypageResponseDto {
+public class MypageUserInfoResDto {
 
     private Long userNo;
 
@@ -23,8 +20,8 @@ public class MypageResponseDto {
 
     private LocalDateTime createDt;
 
-    public static MypageResponseDto from(User user) {
-        return MypageResponseDto.builder()
+    public static MypageUserInfoResDto from(User user) {
+        return MypageUserInfoResDto.builder()
                 .userNo(user.getUserNo())
                 .email(user.getEmail())
                 .name(user.getName())

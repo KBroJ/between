@@ -26,7 +26,7 @@ html, body {
 .status-code {
     font-size: 1rem;
     font-weight: 600;
-    color: #4f46e5; /* indigo-600 */
+    color: #1976d2; /* indigo-600 */
     margin: 0;
 }
 
@@ -69,7 +69,7 @@ html, body {
 
 /* 홈 버튼 */
 .btn-primary {
-    background-color: #4f46e5;
+    background-color: #1976d2;
     color: white;
     padding: 10px 20px;
     font-size: 0.875rem;
@@ -79,13 +79,14 @@ html, body {
     transition: background-color 0.2s;
 }
 
-.btn-primary:hover {
-    background-color: #6366f1; /* hover:bg-indigo-500 */
-}
+/*.btn-primary:hover {*/
+/*    background-color: #6366f1; !* hover:bg-indigo-500 *!*/
+/*}*/
 
 /* 서포트 링크 */
 .btn-link {
     color: #111827;
+    padding: 10px 20px;
     font-size: 0.875rem;
     font-weight: 600;
     text-decoration: none;
