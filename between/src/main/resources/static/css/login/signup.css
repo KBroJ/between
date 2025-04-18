@@ -1,13 +1,15 @@
+/*
 body {
     background-color: #f0f2f5;
     font-family: 'Noto Sans KR', sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh; /* 스크롤 생길 경우 대비 */
+    min-height: 100vh;
     margin: 0;
-    padding: 20px 0; /* 위아래 여백 추가 */
+    padding: 20px 0;
 }
+*/
 
 .signup-container {
     background-color: white;
@@ -17,6 +19,7 @@ body {
     width: 100%; /* 너비 조정 */
     max-width: 450px; /* 최대 너비 설정 */
     box-sizing: border-box; /* 패딩 포함 크기 계산 */
+    margin: 40px auto; /* 상하 여백 및 가로 중앙 정렬 */
 }
 
 h2 {

@@ -386,7 +386,7 @@ document.addEventListener('DOMContentLoaded', function() {
             phoneMessage.textContent = '유효한 휴대폰 번호 형식이 아닙니다.';
             isValid = false;
         }
-        
+
         return isValid;
     }
 
