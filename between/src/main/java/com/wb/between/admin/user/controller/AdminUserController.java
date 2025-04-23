@@ -1,8 +1,7 @@
-package com.wb.between.admin.controller;
+package com.wb.between.admin.user.controller;
 
-import com.wb.between.admin.dto.UserDetailDto;
-import com.wb.between.admin.service.AdminService;
-import com.wb.between.user.domain.User;
+import com.wb.between.admin.user.dto.UserDetailDto;
+import com.wb.between.admin.user.service.AdminUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -15,15 +14,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequiredArgsConstructor // final 필드(AdminUserService)에 대한 생성자 자동 생성 및 주입
 @RequestMapping("/admin")
-public class AdminController {
+public class AdminUserController {
 
-    private final AdminService adminService; // 주입받은 서비스 객체
+    private final AdminUserService adminUserService; // 주입받은 서비스 객체
 
-    @GetMapping("/userDetail")
+    // 회원 관리 - 회원 목록 페이지
+    @GetMapping("/users")
     public String userManagement(Model model) {
 
 
-        return "admin/user/user-detail";
+        return "admin/user/users";
     }
 
     /**
@@ -38,7 +38,7 @@ public class AdminController {
         try {
 
             // userNo로 사용자 상세 정보 DTO 가져오기
-            UserDetailDto userDetail = adminService.getUserDetail(userNo);
+            UserDetailDto userDetail = adminUserService.getUserDetail(userNo);
             log.info("userDetail={}", userDetail); // 로그 추가
 
             // 모델에 "user"라는 이름으로 DTO 추가

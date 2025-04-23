@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/mypage}">
+      layout:decorate="~{layout/admin/admin}">
 
     <head>
         <title>회원 상세 정보</title>
@@ -12,8 +12,8 @@
     </head>
 
     <body>
-        <main layout:fragment="content">
-
+<!--        <main layout:fragment="content">-->
+        <section layout:fragment="admin-content">
             <div class="detail-card">
                 <h2 class="card-title">
                     <i class="fa-solid fa-user-circle card-title-icon"></i>
@@ -118,7 +118,8 @@
                     <button type="button" class="btn btn-primary" id="updateUserBtn">수정</button>
                 </div>
             </div>
-        </main>
+        </section>
+<!--        </main>-->
 
         <th:block layout:fragment="page-script">
             <script th:src="@{/js/admin/user/user-detail.js}"></script>

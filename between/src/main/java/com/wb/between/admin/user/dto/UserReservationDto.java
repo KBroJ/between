@@ -1,6 +1,5 @@
-package com.wb.between.admin.dto;
+package com.wb.between.admin.user.dto;
 
-import jakarta.persistence.Column;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,7 +10,7 @@ import java.time.LocalDateTime;
 */
 @Data
 @Builder
-public class ReservationDto {
+public class UserReservationDto {
 
     private Long resNo;
     private LocalDateTime resDt;    // 예약시간

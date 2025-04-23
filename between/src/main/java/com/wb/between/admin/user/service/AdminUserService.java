@@ -1,7 +1,7 @@
-package com.wb.between.admin.service;
+package com.wb.between.admin.user.service;
 
-import com.wb.between.admin.dto.ReservationDto;
-import com.wb.between.admin.dto.UserDetailDto;
+import com.wb.between.admin.user.dto.UserReservationDto;
+import com.wb.between.admin.user.dto.UserDetailDto;
 import com.wb.between.reservation.reserve.domain.Reservation;
 import com.wb.between.reservation.reserve.repository.ReservationRepository;
 import com.wb.between.reservation.seat.domain.Seat;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor // final 필드 생성자 주입
 @Transactional(readOnly = true) // 조회 중심 서비스이므로 readOnly 설정
-public class AdminService {
+public class AdminUserService {
 
     private final UserRepository userRepository; // 사용자 레포지토리 주입
     private final ReservationRepository reservationRepository; // 예약 레포지토리 주입
@@ -44,17 +44,17 @@ public class AdminService {
         List<Reservation> recentReservations = reservationRepository.findByUserNoOrderByResDtDesc(userNo, pageable);
 
         // 3. 예약 엔티티 목록 -> 예약 목록 변환
-        List<ReservationDto> reservationDtos = recentReservations.stream()
+        List<UserReservationDto> userReservationDtos = recentReservations.stream()
                 .map(this::mapToReservationDto)
                 .collect(Collectors.toList());
 
         // 4. 사용자 엔티티와 예약 DTO 목록 -> 최종 UserDetailDTO 변환 및 반환
-        return mapToUserDetailDTO(user, reservationDtos);
+        return mapToUserDetailDTO(user, userReservationDtos);
     }
 
 
 // --- 데이터 변환 메소드 ---
-    private UserDetailDto mapToUserDetailDTO(User user, List<ReservationDto> reservations) {
+    private UserDetailDto mapToUserDetailDTO(User user, List<UserReservationDto> reservations) {
         // DB 상태값("일반") -> 화면 표시값("정상") 매핑
         String mappedStatus = "일반".equals(user.getUserStts()) ? "정상" : user.getUserStts();
 
@@ -70,7 +70,7 @@ public class AdminService {
                 .build();
     }
 
-    private ReservationDto mapToReservationDto(Reservation reservation) {
+    private UserReservationDto mapToReservationDto(Reservation reservation) {
 
         // 예약 상태(Boolean) -> 문자열("완료", "취소") 변환
         String statusString;
@@ -81,7 +81,7 @@ public class AdminService {
             statusString = Boolean.TRUE.equals(reservation.getResStatus()) ? "완료" : "취소";
         }
 
-        return ReservationDto.builder()
+        return UserReservationDto.builder()
                 .resNo(reservation.getResNo())
                 .resDt(reservation.getResDt())
                 .seatNm(mapSeatNoToSeatNoNm(reservation.getSeatNo())) // 좌석번호 -> 좌석명 변환
