@@ -14,5 +14,5 @@ public interface AdminPermissionRepository extends JpaRepository<Permission, Lon
 
     @Query("SELECT p FROM Permission p WHERE p.permissionName LIKE CONCAT('%', :searchPermissionName, '%')")
     Page<Permission> findPermissionWithFilter(Pageable pageable,
-                                       @Param("searchCpnNm") String searchPermissionName);
+                                       @Param("searchPermissionName") String searchPermissionName);
 }
