@@ -26,7 +26,7 @@ public class Reservation {
     private Long seatNo; // 예약된 좌석 번호 (Seat 테이블의 PK 타입과 일치해야 함)
 
     @Column(nullable = false, length = 10)
-    private String totalPrice; // 최종 결제 금액 (!!! DB 스키마상 String, 숫자 타입 권장 !!!)
+    private String totalPrice; // 최종 결제 금액
 
     @Column(nullable = false, length = 10)
     private String resPrice; // 쿠폰/할인 전 좌석 가격 (String)
@@ -52,9 +52,8 @@ public class Reservation {
     @Column(nullable = false)
     private LocalDateTime resEnd; // 예약 종료 시각 (날짜 + 시간)
 
-    // --- 추가될 수 있는 필드 ---
-    // @Column(nullable = false)
-    // private String planType; // HOURLY, DAILY, MONTHLY - DTO에는 있지만 DB 스키마에는 없음! 추가 필요?
+    @Column(nullable = false)
+     private String planType; // 요금제
 
     // @Column(length = 50)
     // private String orderId; // 토스페이먼츠용 주문 ID 저장 필드
@@ -68,7 +67,7 @@ public class Reservation {
     public Reservation() {} // 기본 생성자
 
 
-    public Reservation(
+   public Reservation(
             long l,
             LocalDateTime localDateTime, String s, LocalDateTime localDateTime1, LocalDateTime localDateTime2, String number, String 예약완료, boolean b
     ) {

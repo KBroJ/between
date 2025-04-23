@@ -87,4 +87,38 @@ input[type="text"]:disabled {
     opacity: 0.5;
 }
 
+/* 기존 예약 좌석/룸 표시 */
+.seat-item.originally-booked {
+    border: 2px solid var(--accent-color) !important; /* 예: 노란색 강조 테두리 */
+    box-shadow: 0 0 8px rgba(246, 174, 45, 0.5) !important; /* 예: 노란색 그림자 */
+    position: relative; /* 아이콘 표시 위해 */
+}
+.seat-item.originally-booked::after { /* 예: 작은 별표 아이콘 추가 */
+    content: "\f005"; /* Font Awesome 별 아이콘 */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    font-size: 0.7em;
+    color: var(--accent-color);
+}
+
+/* 기존 예약 시간 버튼 표시 */
+#time-slots span.originally-booked-time {
+     border-style: dashed !important; /* 예: 점선 테두리 */
+     border-color: var(--accent-color) !important;
+     color: var(--accent-color) !important; /* 글자색도 변경 */
+     background-color: #fff !important; /* 배경은 기본으로 */
+}
+/* 이미 예약 완료된 기존 시간 (선택 불가) */
+ #time-slots span.originally-booked-time.booked {
+     border-style: solid !important;
+     border-color: var(--booked-bg) !important;
+     background-color: var(--booked-bg) !important;
+     color: var(--booked-text) !important;
+     text-decoration: line-through;
+     opacity: 0.7;
+ }
+
 

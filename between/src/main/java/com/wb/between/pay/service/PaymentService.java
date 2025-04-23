@@ -15,7 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // 트랜잭션 사용
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class PaymentService {
@@ -100,14 +103,47 @@ public class PaymentService {
             System.out.println("[PaymentService] 모든 DB 작업 성공, 트랜잭션 커밋 예정");
             return updatedReservation;
 
-        } catch (Exception e) { // try 블록 내 모든 종류의 예외 잡기
-            // !!! 중요: 어떤 종류의 예외든 여기서 잡아서 로그 출력 !!!
+        } catch (Exception e) {
             System.err.println("[PaymentService] !!! DB 작업 중 심각한 오류 발생 !!! - ResNo: " + resNo + ", Error: " + e.getMessage());
             e.printStackTrace(); // <<<--- 전체 에러 내용 확인 위해 꼭 필요!
             // 에러 발생 시 @Transactional에 의해 롤백됨
             throw new RuntimeException("결제 정보 처리 중 오류 발생 [" + e.getMessage() + "]", e); // 예외 다시 던지기
         }
     }
+
+    /*
+    * 임직원 0원 결제 저장 로직
+    * */
+    @Transactional
+    public Payment zeroPricePayment(Reservation reservation){
+        System.out.println("임직원 결제 (0원) 결제 로직 실행");
+
+        // 해당 좌석 예약 중복 방지 로직
+        Optional<Payment> exisPayment = paymentRepository.findByResNo(reservation.getResNo());
+        if(exisPayment.isPresent()){
+             System.out.println("이미 해당 예약에 대한 결제 기록 존재. 건너<0xEB><0x9B><0x84>니다.");
+             return exisPayment.get();
+        }
+
+        // paymeny Entity 생성
+        Payment payment = Payment.builder()
+                .paymentKey("ZERO_" + reservation.getResNo() + System.currentTimeMillis())
+                .resNo(reservation.getResNo())
+                .payPrice("0") // 결제 금액 0원
+                .payStatus("DONE") // 결제 처리 완료
+                .payApproveDt(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME))
+                .registDt(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME))
+                .method("DISCOUNT") // 결제 수단 대신 '할인' 또는 'INTERNAL', 'EMPLOYEE' 등 내부 처리 구분 값
+                .payProvider("SYSTEM") // 카카오페이/토스 등이 아닌 시스템 내부 처리
+                .errCode("") // 성공 시 빈 값
+                .errMsg("")  // 성공 시 빈 값
+                .build();
+
+        Payment savedPayment = paymentRepository.save(payment);
+        System.out.println("Payment 테이블에 0원 결제 기록 저장 완료: " + savedPayment.getPaymentKey());
+        return savedPayment;
+    }
+
 
     private Long extractResNoFromPartnerOrderId(String partnerOrderId) {
         // !!! 중요: Controller에서 생성한 partnerOrderId 형식과 정확히 일치해야 함 !!!

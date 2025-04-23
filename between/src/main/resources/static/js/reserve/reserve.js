@@ -12,7 +12,6 @@
     let originalSeatInfo = null; // 변경 전 좌석 정보 { id, name, type }
     let originalTimes = [];      // 변경 전 시간 정보 (시간제)
 
-
     // --- DOM 요소 캐싱 ---
     const calendarInput = document.getElementById('calendar-input');
     const calendarIcon = document.querySelector('.calendar-icon');
@@ -34,8 +33,6 @@
     /** 서버 API 호출 함수 */
     async function fetchData(url, options = {}) {
         try {
-            // 백엔드 주소 접두사 (필요시)
-            // const baseUrl = "http://localhost:8080"; url = baseUrl + url;
             const response = await fetch(url, options);
             if (!response.ok) { throw new Error(`HTTP ${response.status}`); }
             if (response.status === 204) return null;
@@ -53,7 +50,7 @@
     function loadCalendarDataAndInitialize(year, month, initialDateToSelect = null) {
          console.log(`달력 로드 요청: ${year}-${month}`);
          if(calendarInput) calendarInput.placeholder = "로딩 중...";
-         const apiUrl = `/api/calendar?year=${year}&month=${month}`; // 백엔드 주소 확인!
+         const apiUrl = `/api/calendar?year=${year}&month=${month}`;
          fetchData(apiUrl).then(data => {
              console.log("받은 달력 데이터:", data); let enabled = [];
              try { if (data?.weeks?.length) { enabled = data.weeks.flatMap(w => w.days || []).filter(d => d?.selectable === true).map(d => d.dateString); } else { console.error("달력 구조 오류"); }
@@ -129,51 +126,54 @@ function handlePlanChange() {
      /** 좌석 상태 로드 */
      function loadSeatStatus() { const date = selectedDate; clearTimeSelection(); if(!seatMapView) return; seatMapView.innerHTML = '<p class="text-muted small p-3">...</p>'; if (!date) { seatMapView.innerHTML = '<p>날짜를 선택해주세요.</p>'; return; } console.log(`좌석 로드: ${date}`); const apiUrl = `/api/seats?date=${date}`; fetchData(apiUrl).then(d => renderSeats(d)).catch(e => { if(seatMapView) seatMapView.innerHTML = '<p>좌석 로드 실패</p>'; }); }
      /** 좌석 정보 렌더링  */
-       /** 좌석 정보 렌더링 (DB 위치 정보 사용 - 2x3 배치 기준) */
          function renderSeats(seats = []) {
-             if (!seatMapView) return;
+             if (!seatMapView) {
+                 console.error("좌석 배치도 영역(seatMapView)을 찾을 수 없습니다!");
+                 return;
+             }
              seatMapView.innerHTML = ''; // 이전 좌석 비우기
 
-
+             // --- Grid 컨테이너 스타일은 CSS에서 설정하는 것을 권장 ---
+             // seatMapView.style.display = 'grid';
+             // seatMapView.style.gridTemplateColumns = 'repeat(12, 1fr)'; // 예: 기본 12 컬럼
+             // seatMapView.style.gridAutoRows = 'minmax(45px, auto)';
+             // seatMapView.style.gap = '8px';
+             // ------------------------------------------------------
 
              if (!seats || seats.length === 0) {
                  seatMapView.innerHTML = '<p class="text-muted small p-3">등록된 좌석 정보가 없습니다.</p>';
                  return;
              }
-             console.log("좌석 렌더링 시작 (DB 위치 정보 사용)");
+             console.log("좌석 렌더링 시작 (변경 모드:", isModificationMode);
+
+             // 변경 모드일 경우 원본 좌석 ID 가져오기 (문자열)
+             const originalSeatIdStr = isModificationMode ? String(originalReservationData?.itemId) : null;
 
              seats.forEach(item => {
-                 // 좌석 요소 생성 및 기본 정보 설정
+                 // 1. 좌석 div 요소 생성 및 기본 정보 설정
                  const div = document.createElement('div');
-                 div.textContent = item.name;
-                 const typeClass = item.type?.toLowerCase() || 'seat';
-                 const statusClass = item.status ? item.status.toLowerCase() : 'unavailable';
-                 div.className = `${typeClass} ${statusClass} seat-item`; // CSS 클래스
+                 div.textContent = item.name; // 좌석 이름
+                 const typeClass = item.type?.toLowerCase() || 'seat'; // 타입 클래스
+                 const statusClass = item.status ? item.status.toLowerCase() : 'unavailable'; // 상태 클래스
+                 div.className = `${typeClass} ${statusClass} seat-item`; // 기본 클래스 설정
                  div.dataset.seatId = item.id; // 데이터 속성
                  div.dataset.seatName = item.name;
                  div.dataset.seatType = item.type;
 
-                 // --- DB에서 가져온 위치 정보 적용 ---
-                 const rowVal = item?.gridRow;
-                 const colVal = item?.gridColumn;
-                 // 로그로 값 확인 (디버깅 시 주석 해제)
-                 // console.log(`Seat ${item.name}: DB 값 -> gridRow='${rowVal}', gridColumn='${colVal}' (타입: row=${typeof rowVal}, col=${typeof colVal})`);
-
+                 // 2. DB 위치 정보(gridRow, gridColumn) 스타일 적용
                  const isValidGridValue = (val) => val && typeof val === 'string' && val.trim() !== '' && val.toLowerCase() !== 'null';
-
-                 if (isValidGridValue(rowVal)) {
-                     div.style.gridRow = rowVal; // 예: '1', '2'
-                 } else {
-                     console.warn(`  -> Seat ${item.name}: 유효하지 않은 gridRow ('${rowVal}')`);
+                 if (isValidGridValue(item.gridRow)) {
+                     div.style.gridRow = item.gridRow;
+                 } else if (item.gridRow != null && item.gridRow !== '') {
+                      console.warn(`  -> Seat ${item.name}: 유효하지 않은 gridRow ('${item.gridRow}')`);
                  }
-                 if (isValidGridValue(colVal)) {
-                     div.style.gridColumn = colVal; // 예: '1', '2', '3'
-                 } else {
-                      console.warn(`  -> Seat ${item.name}: 유효하지 않은 gridColumn ('${colVal}')`);
+                 if (isValidGridValue(item.gridColumn)) {
+                     div.style.gridColumn = item.gridColumn;
+                 } else if (item.gridColumn != null && item.gridColumn !== '') {
+                      console.warn(`  -> Seat ${item.name}: 유효하지 않은 gridColumn ('${item.gridColumn}')`);
                  }
-                 // ---------------------------------
 
-                 // 상태에 따른 이벤트 및 스타일 설정
+                 // 3. 상태에 따른 이벤트 리스너 및 커서 설정
                  if (statusClass === 'available' && typeClass !== 'area') {
                      div.style.cursor = 'pointer';
                      div.addEventListener('click', () => selectSeat(div));
@@ -183,15 +183,26 @@ function handlePlanChange() {
                      if(statusClass === 'static') div.style.opacity = '0.8';
                  }
 
-                 // 최종적으로 좌석판에 추가
+                 // 4. 변경 모드일 때, 기존 예약 좌석 특별 표시
+                 if (isModificationMode && item.id === originalSeatIdStr) {
+                     div.classList.add('originally-booked'); // CSS 클래스 추가
+                     console.log(`[renderSeats] 기존 예약 좌석 발견! ID: ${item.id}, 클래스 추가 시도.`);
+                     console.log(`기존 예약 좌석(${item.name}) 특별 표시 적용됨`);
+                 }
+
+                 // 5. 생성된 좌석 div를 좌석판에 추가
                  seatMapView.appendChild(div);
              });
+
+             // 변경 모드이고 초기 선택 상태 로직을 추가했다면 관련 함수 호출
+             // 예: if (isModificationMode && originalSeatIdStr) { updateSummary(); }
          }
+
      /** 좌석 선택 (단일) */
      function selectSeat(seatElement) { if (seatElement.classList.contains('unavailable') || seatElement.classList.contains('static')) return; const current = document.querySelector('.seat-item.selected'); if (current === seatElement) { seatElement.classList.remove('selected'); clearTimeSelection(); updateSummary(); calculateTotal(); return; } if (current) current.classList.remove('selected'); seatElement.classList.add('selected'); if (selectedPlanType === 'HOURLY') loadAvailableTimes(); else clearTimeSelection(); updateSummary(); }
      /** 시간 선택 초기화 */
      function clearTimeSelection() { if(timeSlotsDiv) timeSlotsDiv.innerHTML = ''; document.querySelectorAll('input[name="times"]:checked').forEach(cb => cb.checked = false); if(timeSelectionGuide) timeSelectionGuide.textContent = '시간제 선택 시...'; }
-      /** !!! 예약 가능 시간 로드 (지난 시간 비활성화 로직 추가) !!! */
+
          function loadAvailableTimes() {
              if(!timeSlotsDiv || !timeSelectionGuide) return;
              timeSlotsDiv.innerHTML = '';
@@ -218,7 +229,7 @@ function handlePlanChange() {
              console.log(`선택일이 오늘인가? ${isSelectedDateToday}, 현재 시간(시): ${currentHour}`);
              // ------------------------------------------
 
-             const apiUrl = `/api/times?date=${date}&seatId=${seatId}`; // !!! 백엔드 주소 확인 !!!
+             const apiUrl = `/api/times?date=${date}&seatId=${seatId}`;
 
              fetchData(apiUrl)
                  .then(times => {
@@ -229,70 +240,117 @@ function handlePlanChange() {
                  .finally(updateSummary); // 시간 로드 후 항상 요약 업데이트
          }
 
-        /** 시간 슬롯 렌더링 (상태 기반 - AVAILABLE, BOOKED, PAST) */
-        function renderTimeSlots(timeSlots = []) { // 파라미터 이름 변경 (times -> timeSlots)
-            if(!timeSlotsDiv) return;
-            timeSlotsDiv.innerHTML = ''; // 이전 내용 클리어
 
-            if (!timeSlots?.length) {
-                // API 호출은 성공했으나 데이터가 없는 경우 (백엔드 오류 등)
-                timeSlotsDiv.innerHTML = '<p class="text-warning small">시간 정보를 조회할 수 없습니다.</p>';
-                return;
+/** 시간 슬롯 렌더링 */
+function renderTimeSlots(timeSlots = [], isSelectedDateToday, currentHour) {
+    console.log("--- renderTimeSlots 함수 시작 ---"); // 로그 추가
+    if(!timeSlotsDiv) {
+        console.error("renderTimeSlots 오류: timeSlotsDiv 요소를 찾을 수 없습니다!");
+        return;
+    }
+    timeSlotsDiv.innerHTML = ''; // 이전 내용 클리어
+
+    // 받은 데이터 로깅
+    console.log("renderTimeSlots 가 받은 데이터:", timeSlots);
+    console.log(`오늘 날짜 여부: ${isSelectedDateToday}, 현재 시간(시): ${currentHour}`);
+
+    // 데이터 유효성 검사
+    if (!timeSlots) {
+        timeSlotsDiv.innerHTML = '<p class="text-warning small">시간 정보가 없습니다 (null/undefined).</p>';
+        console.log("renderTimeSlots 종료: timeSlots 데이터 없음");
+        return;
+    }
+    if (!Array.isArray(timeSlots)) {
+        timeSlotsDiv.innerHTML = '<p class="text-danger small">시간 정보 형식이 잘못되었습니다 (배열 아님).</p>';
+        console.error("renderTimeSlots 종료: timeSlots 데이터가 배열이 아님:", timeSlots);
+        return;
+    }
+    if (timeSlots.length === 0) {
+        timeSlotsDiv.innerHTML = '<p class="text-warning small">예약 가능한 시간이 없습니다.</p>';
+        console.log("renderTimeSlots 종료: timeSlots 배열이 비어있음");
+        return;
+    }
+
+    let hasAvailableSlot = false; // 선택 가능한 슬롯 확인용 플래그
+    try { // 렌더링 로직 전체를 try-catch로 감싸 에러 확인
+        console.log("시간 슬롯 렌더링 루프 시작...");
+        timeSlots.forEach((slot, index) => {
+            console.log(`  [${index}] 처리 시작:`, slot); // 각 슬롯 객체 확인
+
+            // 슬롯 데이터 유효성 검사
+            if (!slot || typeof slot !== 'object') {
+                console.warn(`  [${index}] 잘못된 슬롯 데이터 발견, 건너<0xEB><0x9B><0x84>니다:`, slot);
+                return; // continue to next iteration
             }
 
-            let hasAvailableSlot = false; // 예약 가능한 슬롯이 하나라도 있는지 확인용
+            const timeValue = slot.startTime;
+            const slotStatus = slot.status; // status 값 미리 가져오기
 
-            timeSlots.forEach(slot => { // 각 TimeSlotDto 객체 순회
-                const timeValue = slot.startTime; // "HH:mm"
-                // 종료 시간은 시작 시간 + 1시간으로 가정하여 표시
-                const timeDisplay = `${timeValue} - ${String(parseInt(timeValue.split(':')[0]) + 1).padStart(2,'0')}:00`;
-                const label = document.createElement('label'); label.classList.add('me-2', 'mb-2');
-                const input = document.createElement('input'); input.type = 'checkbox'; input.name = 'times'; input.value = timeValue; input.id = `time-${timeValue.replace(':', '')}`; input.classList.add('d-none');
-                const span = document.createElement('span'); span.textContent = timeDisplay; // 기본 텍스트는 시간 표시
+            // timeValue 유효성 검사
+            if (!timeValue || typeof timeValue !== 'string' || !/^\d{2}:\d{2}$/.test(timeValue)) {
+                 console.warn(`  [<span class="math-inline">\{index\}\] 잘못된 startTime 형식 \('</span>{timeValue}'), 건너<0xEB><0x9B><0x84>니다.`);
+                 return; // continue
+             }
+            // status 유효성 검사 (선택 사항)
+            if (!slotStatus || typeof slotStatus !== 'string') {
+                 console.warn(`  [<span class="math-inline">\{index\}\] 잘못된 status 값 \('</span>{slotStatus}'), 기본값으로 처리합니다.`);
+                 // status = 'UNAVAILABLE'; // 예: 기본적으로 비활성화 처리
+             }
 
-                // --- !!! 상태(status)에 따라 스타일 및 동작 결정 !!! ---
-                switch(slot.status) {
-                    case 'AVAILABLE':
-                        hasAvailableSlot = true; // 예약 가능 슬롯 있음!
-                        span.classList.add('btn', 'btn-outline-primary', 'btn-sm', 'available');
-                        input.disabled = false;
-                        label.style.cursor = 'pointer';
-                        // 활성화된 슬롯에만 이벤트 리스너 추가
-                        input.addEventListener('change', (e) => {
-                            span.classList.toggle('btn-primary', input.checked);
-                            span.classList.toggle('btn-outline-primary', !input.checked);
-                            updateSummary();
-                        });
-                        break;
-                    case 'BOOKED':
-                        span.classList.add('btn', 'btn-secondary', 'btn-sm', 'booked'); // 'booked' 클래스 추가
-                        span.textContent = "예약 완료"; // !!! 텍스트 변경 !!!
-                        input.disabled = true;
-                        label.style.cursor = 'not-allowed';
-                        break;
-                    case 'PAST':
-                    default: // PAST 또는 알 수 없는 상태
-                        span.classList.add('btn', 'btn-light', 'btn-sm', 'disabled'); // 기존 'disabled' 스타일 활용
-                        span.style.textDecoration = 'line-through';
-                        input.disabled = true;
-                        label.style.cursor = 'not-allowed';
-                        break;
-                }
-                // ----------------------------------------------------
+            const timeDisplay = `${timeValue} - ${String(parseInt(timeValue.split(':')[0]) + 1).padStart(2,'0')}:00`;
+            const label = document.createElement('label'); label.classList.add('me-2', 'mb-2');
+            const input = document.createElement('input'); input.type = 'checkbox'; input.name = 'times'; input.value = timeValue; input.id = `time-${timeValue.replace(':', '')}`; input.classList.add('d-none');
+            const span = document.createElement('span'); span.textContent = timeDisplay;
 
-                label.appendChild(input); label.appendChild(span); timeSlotsDiv.appendChild(label);
-            });
+            let isDisabled = false; // 최종 비활성화 여부
+            let isOriginallyBooked = isModificationMode && (originalReservationData?.selectedTimes || []).includes(timeValue); // 기존 예약 시간 여부
 
-            // 만약 AVAILABLE 슬롯이 하나도 없다면 안내 문구 표시
-            if (!hasAvailableSlot) {
-                 // timeSlotsDiv.innerHTML = '<p class="text-warning small">선택하신 좌석은 현재 예약 가능한 시간이 없습니다.</p>';
-                 // 또는 기존 버튼들을 그대로 두되, 안내 문구만 추가
-                 const noTimeMsg = document.createElement('p');
-                 noTimeMsg.className = 'text-warning small w-100'; // 전체 너비 차지
-                 noTimeMsg.textContent = '예약 가능한 시간이 없습니다.';
-                 timeSlotsDiv.appendChild(noTimeMsg);
+            // 오늘이고 지난 시간인지 확인
+            if (isSelectedDateToday) {
+                try { const slotHour = parseInt(timeValue.split(':')[0]); if (slotHour < currentHour) isDisabled = true; }
+                catch(e) { console.error(`  [${index}] 시간 비교 오류:`, e); isDisabled = true; }
             }
-        }
+
+            // 백엔드 상태 기반 처리
+            switch(slotStatus) { // slot.status 사용
+                case 'AVAILABLE':
+                    if (!isDisabled) { // 과거 시간이 아니라면
+                        hasAvailableSlot = true; span.classList.add('btn', 'btn-outline-primary', 'btn-sm', 'available'); input.disabled = false; label.style.cursor = 'pointer';
+                        input.addEventListener('change', (e) => { span.classList.toggle('btn-primary', input.checked); span.classList.toggle('btn-outline-primary', !input.checked); updateSummary(); });
+                    } else { /* 과거 시간이면 PAST 스타일 적용 */ span.classList.add('btn', 'btn-light', 'btn-sm', 'disabled'); span.style.textDecoration = 'line-through'; label.style.cursor = 'not-allowed'; input.disabled = true; }
+                    break;
+                case 'BOOKED':
+                    span.classList.add('btn', 'btn-secondary', 'btn-sm', 'booked'); span.textContent = "예약 완료"; isDisabled = true; label.style.cursor = 'not-allowed'; input.disabled = true;
+                    break;
+                case 'PAST':
+                default:
+                    span.classList.add('btn', 'btn-light', 'btn-sm', 'disabled'); span.style.textDecoration = 'line-through'; isDisabled = true; label.style.cursor = 'not-allowed'; input.disabled = true;
+                    break;
+            }
+
+            // 변경 모드 시 기존 예약 시간 표시
+            if (isOriginallyBooked) {
+            console.log(`[renderTimeSlots] 기존 예약 시간 발견! 시간: ${timeValue}, 클래스 추가 시도.`);
+            span.classList.add('originally-booked-time'); }
+
+            label.appendChild(input); label.appendChild(span); timeSlotsDiv.appendChild(label);
+            console.log(`  [${index}] 처리 완료: ${timeValue}, Status: ${slotStatus}, Disabled: ${isDisabled}`);
+        }); // End of forEach
+        console.log("시간 슬롯 렌더링 루프 종료.");
+
+    } catch (renderError) { // 렌더링 루프 중 에러 발생 시
+         console.error("renderTimeSlots 실행 중 오류 발생:", renderError);
+         timeSlotsDiv.innerHTML = '<p class="text-danger small">시간 표시에 오류가 발생했습니다.</p>';
+    }
+
+    // 선택 가능한 슬롯 없을 시 메시지 표시
+    if (!hasAvailableSlot && timeSlots.some(s => s?.status === 'AVAILABLE')) {
+         const msg = document.createElement('p'); msg.className='text-warning small w-100 mt-2'; msg.textContent='현재 선택 가능한 시간이 없습니다.'; timeSlotsDiv.appendChild(msg);
+    }
+
+    console.log("--- renderTimeSlots 함수 종료 ---");
+}
+
      // --- 요약 및 금액 계산 함수 ---
      /** 할인 전 기본 가격 */
      function calculateBasePrice() { const c=document.querySelectorAll('input[name="times"]:checked').length; const i=document.querySelector('.seat-item.selected'); let p=0; if(i){ switch(selectedPlanType){ case 'HOURLY': p=c*2000;break; case 'DAILY': p=10000;break; case 'MONTHLY': p=99000;break; }} return p; }
@@ -301,16 +359,59 @@ function handlePlanChange() {
      /** 예약 요약 업데이트 */
      function updateSummary() { const item=document.querySelector('.seat-item.selected'); const date=selectedDate||'-'; const times=Array.from(document.querySelectorAll('input[name="times"]:checked')).map(cb=>cb.nextElementSibling.textContent.trim()); let plan='', duration='', itemType='좌석', name='-'; if(item){name=item.dataset.seatName||'-';itemType=item.dataset.seatType==='ROOM'?'룸':'좌석';} switch(selectedPlanType){case 'HOURLY':plan='시간제';break;case 'DAILY':plan='일일권';duration=`(${date})`;break;case 'MONTHLY':plan='월정액권';if(selectedDate){try{const s=new Date(selectedDate);const e=new Date(s);e.setMonth(s.getMonth()+1);e.setDate(s.getDate());duration=`(${date} ~ ${e.toISOString().split('T')[0]})`;}catch(e){duration='(기간오류)';}}break;} let discTxt=''; const base=calculateBasePrice(); let disc=calculateDiscount(base); if(selectedCoupon&&item&&base>0&&disc>0)discTxt=`<p class="mb-2 text-danger"><strong><i class="fas fa-tags fa-fw me-2"></i>쿠폰 할인:</strong> <span class="fw-medium ms-1">- ${disc.toLocaleString()}원 (${selectedCoupon.name})</span></p>`; if(reservationDetailsDiv) reservationDetailsDiv.innerHTML = `<p class="mb-2"><strong><i class="fas fa-tags fa-fw me-2 text-secondary"></i>요금제:</strong> <span class="text-primary fw-medium ms-1">${plan} ${duration}</span></p><p class="mb-2"><strong><i class="fas fa-calendar-day fa-fw me-2 text-secondary"></i>${selectedPlanType==='MONTHLY'?'시작일':'날짜'}:</strong> <span class="text-primary fw-medium ms-1">${date}</span></p><p class="mb-2"><strong><i class="fas fa-check-circle fa-fw me-2 text-secondary"></i>선택:</strong> <span class="text-primary fw-medium ms-1">${item?`${itemType} ${name}`:'-'}</span></p>${selectedPlanType==='HOURLY'&&item?(times.length>0?`<p class="mb-2"><strong><i class="fas fa-clock fa-fw me-2 text-secondary"></i>시간 (${times.length}시간):</strong> <span class="text-primary fw-medium ms-1">${times.join(', ')}</span></p>`:'<p class="text-muted small mb-2">시간 선택 필요</p>'):''}${discTxt}`; calculateTotal(); }
      /** 총 금액 계산 */
-     function calculateTotal() { const item=document.querySelector('.seat-item.selected'); let price=0; let count=0; if(item){count=1; const base=calculateBasePrice(); const disc=calculateDiscount(base); price=base-disc; if(selectedPlanType==='HOURLY'&&document.querySelectorAll('input[name="times"]:checked').length===0)count=0;} if(totalCountSpan)totalCountSpan.textContent=count; if(totalPriceSpan)totalPriceSpan.textContent=price.toLocaleString(); }
+     function calculateTotal() {
+             const selectedItem = document.querySelector('.seat-item.selected');
+             let totalPrice = 0; // 최종 결제 금액
+             let totalCount = 0; // 예약 건수
+
+             if (selectedItem) { // 좌석/룸이 선택된 경우에만 계산 시작
+                 totalCount = 1; // 기본 1건
+                 const basePrice = calculateBasePrice(); // 할인 전 기본 요금 계산
+                 const couponDiscount = calculateDiscount(basePrice); // 쿠폰 할인액 계산
+                 let priceAfterCoupon = basePrice - couponDiscount; // 쿠폰 적용 후 가격
+
+                 if (typeof LOGGED_IN_USER_AUTH !== 'undefined' && LOGGED_IN_USER_AUTH === "임직원") {
+                     console.log("임직원 확인됨 -> 최종 가격 0원 처리");
+                     finalPrice = 0; // 최종 가격을 0으로 설정
+
+                     if (selectedPlanType === 'HOURLY' && document.querySelectorAll('input[name="times"]:checked').length === 0) {
+                         totalCount = 0; // 시간 미선택 시 0건
+                     }
+                 } else {
+                     // 임직원이 아니면 쿠폰 적용된 가격 사용
+                     finalPrice = priceAfterCoupon;
+                     // 시간제이고 시간 미선택 시 0건 처리
+                     if (selectedPlanType === 'HOURLY' && document.querySelectorAll('input[name="times"]:checked').length === 0) {
+                         totalCount = 0;
+                     }
+                 }
+
+             } else {
+                 // 선택된 좌석/룸이 없으면 0건, 0원
+                 totalCount = 0;
+                 finalPrice = 0;
+             }
+
+             // 최종 계산된 건수와 금액을 화면에 업데이트
+             if(totalCountSpan) totalCountSpan.textContent = totalCount;
+             if(totalPriceSpan) totalPriceSpan.textContent = finalPrice.toLocaleString(); // 0 또는 실제 금액
+         }
+
 
 
     // --- 결제 관련 함수 (카카오페이 준비 호출) ---
     function proceedToPayment() {
-     // --- !!! 버튼 즉시 비활성화 및 재진입 방지 !!! ---
+        console.log(`proceedToPayment 호출됨 (현재 변경 모드: ${isModificationMode})`);
+         if (!paymentButton) {
+             console.error("결제 버튼 요소를 찾을 수 없습니다.");
+             return;
+         }
+
         if (paymentButton.disabled) {
             console.log("이미 처리 중인 요청입니다."); // 중복 클릭 시 로그 확인
             return; // 함수 종료
         }
+        const originalButtonText = isModificationMode ? '<i class="fas fa-save me-2"></i> 변경 저장하기' : '<i class="fas fa-credit-card me-2"></i> 예약 및 결제하기';
         paymentButton.disabled = true; // 클릭 즉시 비활성화
         paymentButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> 예약 처리 중...';
 
@@ -325,9 +426,12 @@ function handlePlanChange() {
 
         if (!itemId || !selectedDate) { alert('항목 또는 시작 날짜가 선택되지 않았습니다.'); return; }
         if (selectedPlanType === 'HOURLY' && selectedTimeValues.length === 0) { alert('시간제는 시간을 선택해야 합니다.'); return; }
-        if (finalPrice <= 0 && selectedPlanType !== 'FREE_PLAN') { alert('결제할 금액이 없습니다.'); return; }
-        const currentUserId = 123; // !!! 임시 사용자 ID, 실제 연동 필요 !!!
-        if (!currentUserId) { alert('사용자 정보를 가져올 수 없습니다.'); return; }
+        /*if (finalPrice <= 0 && selectedPlanType !== 'FREE_PLAN') { alert('결제할 금액이 없습니다.'); return; }*/
+         const currentUserId = (typeof LOGGED_IN_USER_ID !== 'undefined') ? LOGGED_IN_USER_ID : null;
+        if (!currentUserId) { // null 또는 0 등 falsy 값 체크
+            alert('사용자 정보를 가져올 수 없습니다. 다시 로그인해주세요.');
+            paymentButton.disabled = false; paymentButton.innerHTML = originalButtonText; return;
+        }
 
         // 백엔드 /api/payment/kakao/ready 로 보낼 데이터
         const paymentReadyData = {
@@ -345,39 +449,122 @@ function handlePlanChange() {
         console.log("백엔드로 카카오페이 결제 준비 요청:", paymentReadyData);
         if(paymentButton) { paymentButton.disabled = true; paymentButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> 결제 준비 중...'; }
 
-        // --- 백엔드 '결제 준비' API 호출 ---
-        // !!! CSRF 토큰 필요시 헤더 추가 !!!
         const csrfToken = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
         const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
         const headers = { 'Content-Type': 'application/json' };
         if (csrfToken && csrfHeader) { headers[csrfHeader] = csrfToken; }
 
-        fetch('/api/payment/kakao/ready', { // !!! 백엔드 주소 확인 !!!
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(paymentReadyData)
-        })
-        .then(response => {
-            if (!response.ok) { return response.json().then(err => { throw new Error(err.message || `결제 준비 실패 (${response.status})`); }); }
-            return response.json();
-        })
-        .then(result => {
-            console.log('백엔드 결제 준비 성공 응답:', result);
-            if (result.next_redirect_pc_url) { // PC 리다이렉트 URL 확인
-                // --- 성공 시 카카오페이 결제 페이지로 이동 ---
-                console.log('카카오페이 결제 페이지로 이동:', result.next_redirect_pc_url);
-                // 현재 창에서 이동
-                 window.location.href = result.next_redirect_pc_url;
-                 // 새 창 또는 팝업으로 열기 (브라우저 차단 가능성 있음)
-                 // window.open(result.next_redirect_pc_url, 'kakaopay', 'width=800,height=600');
-            } else { throw new Error('카카오페이 URL 수신 오류'); }
-        })
-        .catch(error => {
-            console.error('결제 준비 오류:', error);
-            alert(`결제 준비 중 오류: ${error.message}`);
-            if(paymentButton) { paymentButton.disabled = false; paymentButton.innerHTML = '<i class="fas fa-credit-card me-2"></i> 결제하기'; }
-        });
-    }
+        // --- 모드에 따른 분기 처리 ---
+       if (isModificationMode) {
+           console.log("예약 변경 API 호출 준비");
+           // 원본 예약 정보 확인 (originalReservationData는 인라인 스크립트에서 생성)
+           if (!originalReservationData?.resNo) {
+                alert("변경할 원본 예약 정보를 찾을 수 없습니다. 페이지를 새로고침 해주세요.");
+                paymentButton.disabled = false; paymentButton.innerHTML = originalButtonText; return;
+           }
+
+           // 백엔드 변경 API(@RequestBody)로 보낼 데이터
+           const modificationData = {
+               itemId: parseInt(itemId),        // 변경된 좌석 ID (Long)
+               // itemType: itemType,         // 백엔드 DTO에 필요시 포함
+               planType: selectedPlanType,       // 요금제 (변경 안 되지만 검증용)
+               reservationDate: selectedDate,    // 변경된 날짜
+               selectedTimes: selectedPlanType === 'HOURLY' ? selectedTimeValues : [], // 변경된 시간
+               couponId: selectedCoupon?.id || null // 변경된 쿠폰
+               // userId는 백엔드에서 Security Context로 확인하므로 보낼 필요 없음
+               // totalPrice는 백엔드에서 재계산
+           };
+
+           const originalResNo = originalReservationData.resNo;
+           const updateApiUrl = `/api/reservations/${originalResNo}`;
+           console.log("백엔드로 예약 변경 요청:", updateApiUrl, modificationData);
+
+           fetch(updateApiUrl, {
+               method: 'PUT', // 변경은 PUT 또는 PATCH 사용
+               headers: headers, // CSRF 헤더 포함
+               body: JSON.stringify(modificationData)
+           })
+           .then(response => {
+                // 에러 응답 처리
+                if (response.status === 409) { return response.json().then(err => { throw new Error(err.message || '변경하려는 시간에 이미 예약이 있습니다.'); }); }
+                else if (response.status === 403) { throw new Error('예약을 변경할 권한이 없습니다.'); }
+                else if (response.status === 404) { throw new Error('변경할 예약 정보를 찾을 수 없습니다.'); }
+                else if (!response.ok) { return response.json().then(err => { throw new Error(err.message || `변경 실패 (${response.status})`); }); }
+                // 성공 응답 처리
+                if (response.status === 204) return null; // No Content
+                return response.json(); // 내용 있는 성공 응답 (optional)
+           })
+           .then(result => {
+                console.log("예약 변경 성공:", result);
+                alert("예약이 성공적으로 변경되었습니다!");
+                window.location.href = "/mypage/reservations";
+           })
+           .catch(error => {
+                console.error("예약 변경 오류:", error);
+                alert(`예약 변경 실패: ${error.message}`);
+                // 오류 시 버튼 다시 활성화
+                if(paymentButton) { paymentButton.disabled = false; paymentButton.innerHTML = originalButtonText; }
+           });
+
+       } else {
+           // ====================================
+           // === 신규 예약 처리 (카카오페이 준비) ===
+           // ====================================
+           // 백엔드 /api/payment/kakao/ready 로 보낼 데이터
+           const paymentReadyData = {
+                itemId: parseInt(itemId), // 백엔드 DTO 타입에 맞게 (Long)
+                itemName: `${itemType} ${itemName}`, // 카카오페이 표시용 상품명
+                quantity: 1, // 수량
+                totalAmount: finalPrice, // 최종 결제 금액
+                userId: String(currentUserId), // 카카오페이 partner_user_id (String)
+                // --- 예약 정보도 함께 전달 (백엔드 /ready에서 예약 생성 위해) ---
+                planType: selectedPlanType,
+                reservationDate: selectedDate,
+                selectedTimes: selectedPlanType === 'HOURLY' ? selectedTimeValues : [],
+                couponId: selectedCoupon?.id || null
+                // ---------------------------------------------------
+            };
+
+              console.log("백엔드로 카카오페이 결제 준비 요청:", paymentReadyData);
+              if(paymentButton) { paymentButton.disabled = true; paymentButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> 결제 준비 중...'; }
+
+
+              const csrfToken = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
+              const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
+              const headers = { 'Content-Type': 'application/json' };
+              if (csrfToken && csrfHeader) { headers[csrfHeader] = csrfToken; }
+
+              fetch('/api/payment/kakao/ready', {
+                  method: 'POST',
+                  headers: headers,
+                  body: JSON.stringify(paymentReadyData)
+              })
+              .then(response => {
+                  if (!response.ok) { return response.json().then(err => { throw new Error(err.message || `결제 준비 실패 (${response.status})`); }); }
+                  return response.json();
+              })
+              .then(result => {
+                  console.log('백엔드 결제 준비 성공 응답:', result);
+                  if (result.success) {
+                        if (result.paymentSkipped == true) {
+                            alert('임직원 할인 적용으로 예약 처리가 완료되었습니다.');
+                            const orderId = result.orderId || ("RESERVE_" + result.reservationId);
+                            const successPageUrl = `/payment-success?orderId=${encodeURIComponent(orderId)}`;
+                            window.location.href = successPageUrl;
+                        } else if (result.next_redirect_pc_url) { // <<<--- 카카오 URL 확인
+                            window.location.href = result.next_redirect_pc_url; // 이동
+                        } else {
+                            throw new Error('카카오페이 URL 수신 오류');
+                        }
+                    } else { throw new Error('카카오페이 URL 수신 오류'); }
+              })
+              .catch(error => {
+                  console.error('결제 준비 오류:', error);
+                  alert(`결제 준비 중 오류: ${error.message}`);
+                  if(paymentButton) { paymentButton.disabled = false; paymentButton.innerHTML = '<i class="fas fa-credit-card me-2"></i> 결제하기'; }
+              });
+          }
+      }
 
 
     /** (신규) 예약 변경 API 호출 함수 */
@@ -412,7 +599,7 @@ function handlePlanChange() {
         alert("시간제는 시간을 선택해야 합니다.");
         return;
       }
-      const currentUserId = 123; // !!! 임시 사용자 ID !!!
+
       if (!currentUserId) {
         alert("사용자 정보를 가져올 수 없습니다.");
         return;
@@ -441,7 +628,7 @@ function handlePlanChange() {
       }
 
       // --- 실제 백엔드 예약 변경 API 호출 ---
-      const apiUrl = `/api/reservations/${originalResNo}`; // !!! PUT 또는 POST, 백엔드 주소 확인 !!!
+      const apiUrl = `/api/reservations/${originalResNo}`;
       const csrfToken = document
         .querySelector("meta[name='_csrf']")
         ?.getAttribute("content");
@@ -469,9 +656,7 @@ function handlePlanChange() {
         .then((result) => {
           console.log("백엔드 예약 변경 성공 응답:", result);
           if (result.success) {
-            // --- !!! 가격 변동 여부에 따른 처리 (백엔드 응답 기반) !!! ---
             if (result.paymentRequired) {
-              // 추가 결제 필요
               alert(
                 "예약 내용이 변경되어 추가 결제가 필요합니다. 카카오페이로 이동합니다."
               );
@@ -485,7 +670,7 @@ function handlePlanChange() {
             } else {
               // 가격 변동 없거나 환불 등 (여기선 단순 성공 처리)
               alert("예약 내용이 성공적으로 변경되었습니다.");
-              window.location.href = "/my/reservations"; // !!! 실제 내역 페이지 경로 !!!
+              window.location.href = "/my/reservations";
             }
           } else {
             throw new Error(result.message || "알 수 없는 변경 오류");
@@ -559,14 +744,14 @@ function handlePlanChange() {
 
  /** (신규) 변경 대상 예약 정보 로드 및 화면 설정 */
 async function loadReservationForModification(resNo) {
-    console.log(`[JS] 수정할 예약 정보 로드 시작 (ResNo: ${resNo})`); // <--- 1. 함수 호출 확인
+    console.log(`[JS] 수정할 예약 정보 로드 시작 (ResNo: ${resNo})`);
     const apiUrl = `/api/reservations/details/${resNo}`;
 
     try {
         const reservationData = await fetchData(apiUrl);
-        console.log("[JS] API 호출 성공, 받은 데이터:", reservationData); // <--- 2. 데이터 수신 확인
+        console.log("[JS] API 호출 성공, 받은 데이터:", reservationData);
 
-        if (!reservationData /* ... 필요한 데이터 검증 ... */) {
+        if (!reservationData) {
             throw new Error("필수 예약 정보가 누락되었습니다.");
         }
 
@@ -590,7 +775,6 @@ async function loadReservationForModification(resNo) {
         console.log("[JS] 달력 초기화 시도:", originalDate);
         const initialYear = parseInt(originalDate.substring(0, 4));
         const initialMonth = parseInt(originalDate.substring(5, 7));
-        // ★★★ loadCalendarDataAndInitialize 함수 자체가 비동기일 수 있으므로 주의 ★★★
         loadCalendarDataAndInitialize(initialYear, initialMonth, originalDate);
 
         // --- 쿠폰 로드 및 설정 확인 ---
@@ -604,13 +788,10 @@ async function loadReservationForModification(resNo) {
 
         // --- 원본 선택 항목 표시 함수 호출 전 확인 ---
         console.log("[JS] highlightOriginalSelection 함수 호출 예정");
-        // ★★★ 좌석 맵과 시간 슬롯 로드가 완료된 후에 호출하는 것이 안전 ★★★
-        // 임시 setTimeout 대신, 좌석/시간 로드 완료 콜백이나 Promise 사용 권장
         setTimeout(() => {
             highlightOriginalSelection();
-        }, 1500); // 시간 약간 늘려서 테스트
+        }, 1500);
 
-        // updateSummary(); // highlightOriginalSelection 내부 또는 완료 후 호출 권장
 
 
     } catch (error) {
@@ -620,7 +801,7 @@ async function loadReservationForModification(resNo) {
 }
 
 
- /** (신규) 원본 선택 항목 시각적 표시 및 선택 처리 */
+
  function highlightOriginalSelection() {
    console.log("원본 선택 항목 표시 시도");
    if (!modificationMode || !originalSeatInfo) return;
@@ -677,54 +858,46 @@ async function loadReservationForModification(resNo) {
  }
 
 
-    // --- 초기화 및 이벤트 리스너 설정 ---
     document.addEventListener('DOMContentLoaded', function() {
         console.log("DOM 로드 완료. 초기화 시작.");
+
+        if (typeof isModificationMode !== 'undefined' && isModificationMode === true) {
+            console.log("예약 변경 모드로 페이지 로드");
+            if (typeof originalReservationData !== 'undefined' && originalReservationData) {
+                 console.log("원본 예약 데이터 확인됨:", originalReservationData);
+
+                 selectedDate = originalReservationData.reservationDate;
+                 selectedPlanType = originalReservationData.planType;
+                // --------------------------------------------------------------
+            } else {
+                console.error("예약 변경 페이지에 기존 예약한 정보가 없습니다.");
+                alert("예약 정보를 불러오는 데 실패했습니다. 다시 시도해주세요.");
+                window.location.href = "/";
+                return; // 초기화 중단
+            }
+            // 버튼 텍스트 변경
+            if(paymentButton) paymentButton.innerHTML = '<i class="fas fa-save me-2"></i> 변경 저장하기';
+
+        } else {
+                console.log("신규 예약 모드로 페이지 로드");
+        }
+
         // 이벤트 리스너 등록
         calendarIcon?.addEventListener('click', openCalendar);
         planRadios.forEach(radio => { radio.addEventListener('change', handlePlanChange); });
         couponSelect?.addEventListener('change', handleCouponChange);
-       paymentButton?.addEventListener('click', () => {
-            if (modificationMode) { proceedToPaymentForUpdate(); } // 변경 모드일 때
-            else { proceedToPayment(); } // 신규 예약일 때
-        });
+        paymentButton?.addEventListener('click', proceedToPayment);
 
-       // 초기화 로직 (변경 모드 감지 강화)
-      const urlParams = new URLSearchParams(window.location.search);
-      const isModificationMode = urlParams.get('mode') === 'modify';
-      const resNoToModify = urlParams.get('resNo');
+        // ------------------------------------------
 
-      if (isModificationMode && resNoToModify) { // --- 예약 변경 모드 ---
-          modificationMode = true; // 전역 변수 설정
-          originalResNo = resNoToModify; // 전역 변수 설정
-          console.log(`예약 변경 모드 시작 (ResNo: ${originalResNo})`);
-
-          if (modificationNotice) { // Requirement 2: 변경 안내 문구 표시
-              modificationNotice.classList.remove('d-none');
-          }
-          if (paymentButton) { // 버튼 텍스트 변경
-              paymentButton.innerHTML = '<i class="fas fa-check me-2"></i> 좌석 변경 선택';
-          }
-          // 백엔드에서 변경 대상 예약 정보 로드 및 화면 설정 함수 호출
-          loadReservationForModification(originalResNo);
-
-      } else { // --- 일반 예약 모드 ---
-          modificationMode = false; // 전역 변수 설정
-          originalResNo = null;     // 전역 변수 설정
-          console.log("일반 예약 모드 시작");
-
-          if (modificationNotice) { // 변경 안내 문구 숨김
-              modificationNotice.classList.add('d-none');
-          }
-           if (paymentButton) { // 버튼 텍스트 기본값
-              paymentButton.innerHTML = '<i class="fas fa-credit-card me-2"></i> 결제하기';
-          }
-
-          // 일반 예약 시 초기화
-          loadCalendarDataAndInitialize(currentYear, currentMonth, new Date().toISOString().split('T')[0]);
-          loadAvailableCoupons();
-          handlePlanChange(); // 초기 요금제 설정
-          updateSummary();
-      }
-      console.log("초기화 로직 완료.");
-  });
+        // --- 초기화 함수 호출 ---
+        const initialYear = new Date().getFullYear();
+        const initialMonth = new Date().getMonth() + 1;
+        // 변경 모드면 원본 날짜, 아니면 오늘 날짜 기본 선택
+        const dateToSelect = isModificationMode ? originalReservationData.reservationDate : new Date().toISOString().split('T')[0];
+        loadCalendarDataAndInitialize(initialYear, initialMonth, dateToSelect);
+        loadAvailableCoupons();
+        handlePlanChange(); // 초기 요금제 UI 반영
+        updateSummary();
+        console.log("초기화 로직 완료.");
+    });

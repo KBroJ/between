@@ -17,11 +17,40 @@
   <h1 class="text-center mb-5"><i class="fas fa-calendar-alt me-2"></i>실시간 좌석 예약</h1>
 
   <!-- 예약 변경 모드 -->
-  <div id="modification-notice" class="alert alert-warning d-flex align-items-center d-none" role="alert">
-    <i class="fas fa-exclamation-triangle me-2"></i>
-    <div>
-      <strong>현재 예매 정보 변경 중입니다.</strong> (요금제는 변경할 수 없습니다.)
-    </div>
+  <div th:if="${isModificationMode}" class="alert alert-info alert-dismissible fade show" role="alert">
+    <i class="fas fa-info-circle me-2"></i>
+    <strong>현재 예매 정보 변경 중입니다.</strong>
+    (
+    좌석: <span class="fw-bold" th:text="${originalReservation?.seatName}">Seat Name</span>,
+    <th:block th:switch="${originalReservation?.planType}">
+            <span th:case="'HOURLY'">
+                , 시간:
+                <span class="fw-bold" th:if="${originalReservation?.selectedTimes != null && !#lists.isEmpty(originalReservation.selectedTimes)}"
+                      th:text="${#strings.listJoin(originalReservation.selectedTimes, ', ')}">HH:mm, ...</span>
+                <span class="fw-bold" th:if="${originalReservation?.selectedTimes == null || #lists.isEmpty(originalReservation.selectedTimes)}">정보 없음</span>
+            </span>
+      <span th:case="'DAILY'">
+                , 구분: <span class="fw-bold">일일권</span>
+            </span>
+      <span th:case="'MONTHLY'">
+                 , 구분: <span class="fw-bold">월정액권</span>
+                 </span>
+      <span th:case="*">
+                 , 구분: <span class="fw-bold" th:text="${originalReservation?.planType}"></span>
+            </span>
+    </th:block>
+    )
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
+
+  <script th:inline="javascript">
+    const isModificationMode = /*[[${isModificationMode ?: false}]]*/ false;
+     const originalReservationData = /*[[${originalReservation}]]*/ null;
+     const LOGGED_IN_USER_ID = /*[[${currentUserId}]]*/ null;
+     const LOGGED_IN_USER_AUTH = /*[[${currentUserAuth}]]*/ null;
+     console.log('페이지 로드 모드:', isModificationMode ? "변경" : "신규", ', 원본:', originalReservationData, ', 사용자ID:', LOGGED_IN_USER_ID, ', 권한:', LOGGED_IN_USER_AUTH);
+  </script>
   </div>
 
   <div class="row">
@@ -49,16 +78,19 @@
         <h5 class="fw-bold"><i class="fas fa-tags me-1"></i>요금제 선택</h5>
         <hr class="my-3">
         <div class="form-check">
-          <input class="form-check-input" type="radio" name="planType" id="hourlyPlan" value="HOURLY" checked>
-          <label class="form-check-label" for="hourlyPlan">시간제 <span class="text-muted small">(1시간당 2,000원)</span></label>
+          <input class="form-check-input" type="radio" name="planType" id="hourlyPlan" value="HOURLY"
+                 th:checked="${originalReservation?.planType == 'HOURLY'}"
+                 th:disabled="${isModificationMode}"> <label class="form-check-label" for="hourlyPlan">시간제 <span class="text-muted small">(1시간당 2,000원)</span></label>
         </div>
         <div class="form-check">
-          <input class="form-check-input" type="radio" name="planType" id="dailyPlan" value="DAILY">
-          <label class="form-check-label" for="dailyPlan">일일권 <span class="text-muted small">(10,000원 / 당일)</span></label>
+          <input class="form-check-input" type="radio" name="planType" id="dailyPlan" value="DAILY"
+                 th:checked="${originalReservation?.planType == 'DAILY'}"
+                 th:disabled="${isModificationMode}"> <label class="form-check-label" for="dailyPlan">일일권 <span class="text-muted small">(10,000원 / 당일)</span></label>
         </div>
         <div class="form-check">
-          <input class="form-check-input" type="radio" name="planType" id="monthlyPlan" value="MONTHLY">
-          <label class="form-check-label" for="monthlyPlan">월정액권 <span class="text-muted small">(99,000원 / 1개월)</span></label>
+          <input class="form-check-input" type="radio" name="planType" id="monthlyPlan" value="MONTHLY"
+                 th:checked="${originalReservation?.planType == 'MONTHLY'}"
+                 th:disabled="${isModificationMode}"> <label class="form-check-label" for="monthlyPlan">월정액권 <span class="text-muted small">(99,000원 / 1개월)</span></label>
         </div>
       </div>
       <div class="card-common coupon-card">

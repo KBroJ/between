@@ -5,6 +5,8 @@ import com.wb.between.reservation.reserve.dto.ReservationModificationDetailDto;
 import com.wb.between.reservation.reserve.dto.ReservationRequestDto;
 import com.wb.between.reservation.reserve.dto.ReservationUpdateRequestDto;
 import com.wb.between.reservation.reserve.service.ReservationService;
+import com.wb.between.user.domain.User;
+import com.wb.between.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -27,6 +30,9 @@ public class ReservationAPIController {
 
     @Autowired
     private ReservationService reservationService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     /**
      * 새로운 예약을 생성하는 API (결제 전 단계)
@@ -126,52 +132,50 @@ public class ReservationAPIController {
     }
 
     /**
-     * 예약 변경 사항을 처리하는 API.
-     * 프론트엔드 JavaScript(proceedToPaymentForUpdate)가 호출합니다.
-     *
-     * @param resNo 변경할 원본 예약 번호
-     * @param updateDto 변경 요청 정보 DTO
+     * 기존 예약을 변경하는 API
+     * @param resNo 변경할 예약 번호 (URL 경로 변수)
+     * @param modificationDto 변경할 내용 DTO (요청 본문)
      * @param userDetails 현재 로그인 사용자 정보
-     * @return ResponseEntity<Map<String, Object>> 처리 결과 (성공, 실패, 추가 결제 정보 등)
+     * @return 성공 시 업데이트된 정보 또는 메시지, 실패 시 에러 메시지
      */
-    @PutMapping("/{resNo}") // PUT 메서드 사용
-    public ResponseEntity<Map<String, Object>> updateReservationApi( // 메서드 이름 변경, 반환 타입 명시
-                                                                     @PathVariable("resNo") Long resNo,
-                                                                     @RequestBody ReservationUpdateRequestDto updateDto, // 요청 본문 받기
-                                                                     @AuthenticationPrincipal UserDetails userDetails) {
+    @PutMapping("/{resNo}") // HTTP PUT 메소드 사용, 경로 변수로 예약 번호 받음
+    public ResponseEntity<?> updateReservation(
+            @PathVariable Long resNo, // URL 경로의 {resNo} 값을 Long 타입으로 받음
+            @RequestBody ReservationUpdateRequestDto modificationDto, // 요청 본문의 JSON을 DTO로 변환
+            @AuthenticationPrincipal UserDetails userDetails // 현재 사용자 정보
+    ) {
 
-        log.info("[API] 예약 변경 요청 수신 - ResNo: {}, User: {}");
+
+        if (userDetails == null) { return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("success", false, "message", "로그인 필요")); }
 
 
-        if (userDetails == null) {
-            // 응답 형식을 Map으로 통일
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("success", false, "message", "로그인이 필요합니다."));
+        Long currentUserId;
+        try {
+            String username = userDetails.getUsername();
+            User user = userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("DB 사용자 정보 없음: " + username));
+            currentUserId = user.getUserNo(); // User Entity의 getUserNo() 사용
+            if (currentUserId == null) throw new IllegalStateException("userNo 없음");
+            System.out.println("[Controller Update] 사용자 정보 확인: userNo=" + currentUserId);
+        } catch (Exception e) {
+            System.err.println("[Controller Update] 사용자 ID 처리 실패: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(Map.of("success", false, "message", "사용자 정보 처리 오류"));
         }
-        String username = userDetails.getUsername();
 
         try {
-            Map<String, Object> updateResult = reservationService.updateReservation(resNo, updateDto, username);
-            log.info("[API] 예약 변경 처리 완료 - ResNo: {}, 결과: {}");
+            // 서비스 호출하여 예약 변경 시도
+            Reservation updatedReservation = reservationService.updateReservation(resNo, modificationDto, currentUserId);
 
-            // 서비스 결과에 따라 성공 상태 코드(200 OK) 또는 다른 상태 코드 반환 가능
-            // 예: 추가 결제 필요시 202 Accepted 등을 고려해볼 수 있으나, 여기서는 200 OK로 통일
-            return ResponseEntity.ok(updateResult);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "예약이 성공적으로 변경되었습니다.");
+            response.put("reservationId", updatedReservation.getResNo());
+            return ResponseEntity.ok(response);
 
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "message", "변경할 예약을 찾을 수 없습니다."));
-        } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("success", false, "message", "예약을 변경할 권한이 없습니다."));
-        } catch (IllegalArgumentException | IllegalStateException e) { // 유효성, 상태 오류 등 (400 Bad Request)
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
-        } catch (RuntimeException e) { // 중복 예약 등 충돌 (409 Conflict) 또는 그 외 서버 오류 (500)
-            if (e.getMessage().contains("다른 사용자") || e.getMessage().contains("이미 예약")) {
-                return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("success", false, "message", e.getMessage()));
-            }
-            // 그 외 RuntimeException은 내부 서버 오류로 간주
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", "예약 변경 처리 중 오류 발생: " + e.getMessage()));
-        } catch (Exception e) { // 예상치 못한 모든 오류 (500 Internal Server Error)
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", "예기치 않은 오류 발생"));
-        }
+        } catch (EntityNotFoundException e) { return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "message", e.getMessage())); }
+        catch (SecurityException e) { return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("success", false, "message", e.getMessage())); }
+        catch (IllegalArgumentException e) { return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage())); }
+        catch (RuntimeException e) { if (e.getMessage().contains("다른 사용자") || e.getMessage().contains("이미 다른 예약")) { return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("success", false, "message", e.getMessage())); } return ResponseEntity.internalServerError().body(Map.of("success", false, "message", "예약 변경 중 오류 발생: " + e.getMessage())); }
+        catch (Exception e) { e.printStackTrace(); return ResponseEntity.internalServerError().body(Map.of("success", false, "message", "예기치 않은 오류 발생")); }
     }
 
 
@@ -198,17 +202,16 @@ public class ReservationAPIController {
                     .body(Map.of("success", false, "message", "로그인이 필요합니다."));
         }
 
+        Long currentUserId;
         try {
 
             String username = userDetails.getUsername();
-            if (username == null || username.isEmpty()) {
-                throw new IllegalStateException("사용자 식별 정보를 가져올 수 없습니다.");
-            }
+            User user = userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("..."));
+            currentUserId = user.getUserNo();
+            if (currentUserId == null) throw new IllegalStateException("userNo 없음");
 
-            // 서비스 호출하여 예약 취소 진행
-            reservationService.cancelReservation(resNo, username);
-            // 성공 응답
-            return ResponseEntity.ok(Map.of("success", true, "message", "예약이 정상적으로 취소되었습니다."));
+            reservationService.cancelReservation(resNo, currentUserId); // Service 메소드 호출
+            return ResponseEntity.ok(Map.of("success", true, "message", "예약이 성공적으로 취소되었습니다."));
 
         } catch (EntityNotFoundException | IllegalStateException | SecurityException e) {
             // 예상 가능한 오류 (예약 없음, 취소 불가 상태, 권한 없음 등)

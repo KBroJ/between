@@ -19,6 +19,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -49,6 +50,10 @@ public class PaymentController {
             @AuthenticationPrincipal UserDetails userDetails, // 사용자 정보 가져오기 (Spring Security)
             HttpSession session // <<<--- HttpSession 객체 주입 받기
     ) {
+
+        String partnerOrderId = null;
+        Reservation pendingReservation = null;
+
         try {
              String username = userDetails.getUsername();
 
@@ -68,42 +73,57 @@ public class PaymentController {
             reserveDto.setSelectedTimes(requestDto.getSelectedTimes());
             reserveDto.setCouponId(requestDto.getCouponId());
             reserveDto.setUserId(Long.parseLong(partnerUserId)); // 서비스는 Long 타입 userId 기대
-
-            Reservation pendingReservation = reservationService.createReservationWithLock(reserveDto, username);
+            
+            // 임직원이면 카카오페이 생략하게 처리
+            pendingReservation = reservationService.createReservationWithLock(reserveDto, username);
             Long resNo = pendingReservation.getResNo(); // 생성된 예약 번호 가져오기
             if (resNo == null) {
                 throw new IllegalStateException("예약 정보 저장 후 예약 번호를 가져올 수 없습니다.");
             }
+            boolean reservationConfirmed = Boolean.TRUE.equals(pendingReservation.getResStatus());
+            int finalAmount = Integer.parseInt(pendingReservation.getTotalPrice());
+            
+            if(reservationConfirmed && finalAmount == 0){
+                System.out.println("임직원 및 결제 0원 처리 실행");
+                try{
+                    paymentService.zeroPricePayment(pendingReservation);
+                } catch (Exception exception){
+                    System.err.println("!!! 0원 결제 기록 저장 실패 ResNo: " + resNo + ", Error: " + exception.getMessage());
+                }
+
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", true);
+                response.put("message", "0원 결제 (임직원 결제) 처리가 완료되었습니다.");
+                response.put("reservationId", resNo);
+                response.put("paymentSkipped", true); // 결제 건너뜀
+                return ResponseEntity.ok(response);
+
+            } else if (reservationConfirmed && finalAmount > 0){
+                System.err.println("[Controller] 오류: 예약은 확정 상태이나 금액이 0보다 큽니다. ResNo: " + resNo);
+                throw new IllegalStateException("잘못된 예약 상태입니다(확정/금액있음).");
+            } else {
+                // 주문 고유번호 생성
+                partnerOrderId = "RESERVE_" + resNo + "_" + System.currentTimeMillis();
 
 
-            // !!! 중요: 고유 주문번호 생성 (DB 예약 저장 후 ID 활용 등) !!!
-            String partnerOrderId = "RESERVE_" + resNo + "_" + System.currentTimeMillis();
+                System.out.printf("결제 준비 시작: 주문번호=%s, 사용자ID=%s, 금액=%d%n",
+                        partnerOrderId, partnerUserId, requestDto.getTotalAmount());
 
-            // ------------------------------------------------
+                // === 2. KakaoPayService 호출 ===
+                KakaoPayReadyResponseDto readyResponse = kakaoPayService.readyPayment(requestDto, partnerOrderId, partnerUserId);
+                // -----------------------------
 
-            // !!! 중요: 요청된 금액(requestDto.getTotalAmount()) 검증 로직 필요 !!!
-            // int validatedAmount = ...;
-            // requestDto.setTotalAmount(validatedAmount); // 검증된 금액 설정
-            // ------------------------------------------------
+                // === 3. 중요 정보 세션에 저장 (approve 단계에서 사용) ===
+                session.setAttribute("kakaoTid", readyResponse.getTid());
+                session.setAttribute("kakaoPartnerOrderId", partnerOrderId);
+                session.setAttribute("kakaoPartnerUserId", partnerUserId);
+                System.out.printf("세션 저장: tid=%s, orderId=%s, userId=%s%n", readyResponse.getTid(), partnerOrderId, partnerUserId);
+                // =============================================
 
-            System.out.printf("결제 준비 시작: 주문번호=%s, 사용자ID=%s, 금액=%d%n",
-                    partnerOrderId, partnerUserId, requestDto.getTotalAmount());
-
-            // === 2. KakaoPayService 호출 ===
-            KakaoPayReadyResponseDto readyResponse = kakaoPayService.readyPayment(requestDto, partnerOrderId, partnerUserId);
-            // -----------------------------
-
-            // === 3. 중요 정보 세션에 저장 (approve 단계에서 사용) ===
-            session.setAttribute("kakaoTid", readyResponse.getTid());
-            session.setAttribute("kakaoPartnerOrderId", partnerOrderId);
-            session.setAttribute("kakaoPartnerUserId", partnerUserId);
-            System.out.printf("세션 저장: tid=%s, orderId=%s, userId=%s%n", readyResponse.getTid(), partnerOrderId, partnerUserId);
-            // =============================================
-
-            // 4. 성공 응답 (리다이렉트 URL 포함) 프론트엔드로 전달
-            System.out.println("카카오페이 준비 성공, 리다이렉트 URL 전달: " + readyResponse.getNextRedirectPcUrl());
-            return ResponseEntity.ok(readyResponse);
-
+                // 4. 성공 응답 (리다이렉트 URL 포함) 프론트엔드로 전달
+                System.out.println("카카오페이 준비 성공, 리다이렉트 URL 전달: " + readyResponse.getNextRedirectPcUrl());
+                return ResponseEntity.ok(readyResponse);
+            }
         } catch (Exception e) {
             System.err.println("카카오페이 준비 실패: " + e.getMessage());
             e.printStackTrace();

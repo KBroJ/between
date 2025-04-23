@@ -40,9 +40,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("SELECT r FROM Reservation r WHERE FUNCTION('DATE', r.resStart) = :targetDate AND r.resStatus = :status")
     List<Reservation> findByDateAndStatus(@Param("targetDate") LocalDate targetDate, @Param("status") Boolean status);
 
-    // 특정 좌석/시간대에 겹치는 예약 수 조회 (본인 예약 제외)
-    @Query("SELECT count(r) FROM Reservation r WHERE r.resNo <> :excludeResNo AND r.seatNo = :seatId AND r.resStatus = true AND r.resStart < :endTime AND r.resEnd > :startTime")
-    long countOverlappingReservationsExcludingSelf(@Param("seatId") Long seatId, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime, @Param("excludeResNo") Long excludeResNo);
+    @Query("SELECT COUNT(r) FROM Reservation r WHERE r.seatNo = :seatNo AND r.resStatus = true AND r.resEnd > :newResStart AND r.resStart < :newResEnd AND r.resNo != :excludeResNo")
+    long countOverlappingReservationsExcludingSelf(
+            @Param("seatNo") Long seatNo,
+            @Param("newResStart") LocalDateTime newResStart,
+            @Param("newResEnd") LocalDateTime newResEnd,
+            @Param("excludeResNo") Long excludeResNo // 제외할 예약 번호 추가
+    );
 
 
     // 특정 사용자의 예약을 'resDt'(예약 생성일시) 기준 내림차순으로 조회하는 메소드

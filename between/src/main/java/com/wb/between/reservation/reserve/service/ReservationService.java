@@ -74,7 +74,8 @@ public class ReservationService {
         // --- !!! 사용자 정보 조회 로직 추가 !!! ---
         User user = userRepository.findByEmail(username) // 이메일로 사용자 조회
                 .orElseThrow(() -> new UsernameNotFoundException("예약 서비스에서 사용자를 찾을 수 없습니다: " + username));
-        Long userNo = user.getUserNo(); // User Entity에서 userNo 가져오기 (getUserNo() 메소드 필요)
+        Long userNo = user.getUserNo();
+        String authCd = user.getAuthCd();   // 권한 관리
         if (userNo == null) {
             throw new IllegalStateException("사용자 번호(userNo)를 가져올 수 없습니다.");
         }
@@ -141,6 +142,17 @@ public class ReservationService {
             String discountPriceStr = calculateDiscount(basePriceStr, requestDto.getCouponId());
             String finalPriceStr = calculateFinalPrice(basePriceStr, discountPriceStr);
 
+            // 임직원 0원 무료 처리 로직
+            boolean isAuth = "임직원".equals(authCd);
+            if(isAuth){
+                System.out.println("임직원 권한 유저 확인 0원으로 계산 처리 합시다.");
+                finalPriceStr = "0";
+                discountPriceStr = basePriceStr;
+            }
+            boolean isZeroPrice = "0".equals(finalPriceStr); // 0원 확인
+            boolean isConfirmedImmediately = isAuth && isZeroPrice;
+            Boolean statusToSet = isConfirmedImmediately ? Boolean.TRUE : null;
+
             // 7. Reservation Entity 생성 및 저장
             Reservation reservation = new Reservation();
             reservation.setUserNo(userNo);
@@ -151,23 +163,16 @@ public class ReservationService {
             // reservation.setUserCpNo(...); // 사용된 쿠폰 ID 저장 필요시
             reservation.setResStart(startDateTime);
             reservation.setResEnd(endDateTime);
-            // reservation.setPlanType(requestDto.getPlanType()); // Entity에 필드 추가 시
-            reservation.setResStatus(null); // 초기 상태: 보류 (결제 전)
+            reservation.setPlanType(requestDto.getPlanType()); // Entity에 필드 추가 시
             // resDt, moDt는 @CreationTimestamp, @UpdateTimestamp로 자동 관리
-
-
-            // --- !!! 테스트를 위해 임시로 바로 '확정' 상태로 저장 !!! ---
-            // 실제 결제 연동 시에는 null 또는 "PENDING"으로 저장 후, 결제 성공 시 업데이트 필요
-            reservation.setResStatus(true); // Boolean 타입일 경우 (true=완료)
-            // 또는 reservation.setStatus("CONFIRMED"); // String 타입이고 "CONFIRMED"를 완료 상태로 쓴다면
+            // 임직원 0원 처리
+            reservation.setResStatus(statusToSet); // 상태 설정
+            System.out.println("[Service] DB 저장 직전 reservation 객체 상태: " + reservation.getResStatus()); // <<<--- 로그 1: 저장 직전 상태
 
             Reservation savedReservation = reservationRepository.save(reservation);
-            System.out.println("!!! 임시: DB에 예약 정보 저장 성공 (상태: 확정) !!!: " + savedReservation.getResNo());
+            System.out.println("[Service] >>> DB Reservation 저장 완료! ResNo: " + savedReservation.getResNo() + ", Status: " + savedReservation.getResStatus());
             /*Reservation savedReservation = reservationRepository.save(reservation);
             System.out.println("DB에 예약 정보 저장 성공 (상태: 보류): " + savedReservation.getResNo());*/
-
-            // --- !!! CRITICAL SECTION END !!! ---
-
             return savedReservation; // 생성된 예약 정보 반환
 
         } finally {
@@ -211,68 +216,79 @@ public class ReservationService {
     /**
      * 예약을 취소하고 관련된 카카오페이 결제를 취소합니다.
      * @param resNo 취소할 예약 번호
-     * @param username 요청한 사용자 ID (본인 확인용)
+     * @param currentUserId 요청한 사용자 ID (본인 확인용)
      * @throws RuntimeException 예약 정보를 찾을 수 없거나, 취소 권한이 없거나, 카카오페이 취소 실패 시
      */
     @Transactional // DB 업데이트와 API 호출을 묶어서 처리
-    public void cancelReservation(Long resNo, String username) {
-        System.out.printf("[Service] 예약 취소 요청 수신 - ResNo: %d, Username: %s%n", resNo, username);
-
-
-        User user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("서비스에서 사용자를 찾을 수 없습니다: " + username));
-        Long userId = user.getUserNo();
-
+    public void cancelReservation(Long resNo, Long currentUserId) {
+        System.out.printf("[Service] 예약 취소 요청 수신 - ResNo: %d, Username: %s%n", resNo, currentUserId);
         // 1. 예약 정보 조회 및 유효성 검사
         Reservation reservation = reservationRepository.findById(resNo)
                 .orElseThrow(() -> new EntityNotFoundException("취소할 예약 정보를 찾을 수 없습니다: " + resNo));
 
-        // 2. 사용자 권한 확인 (본인 예약만 취소 가능)
-        if (!Objects.equals(reservation.getUserNo(), userId)) {
-            // 실제 User 객체 비교 또는 권한 비교 로직 필요시 추가
+
+        // 2. 본인 예약만 취소할 수 있게
+        if (!reservation.getUserNo().equals(currentUserId)) {
             throw new SecurityException("해당 예약을 취소할 권한이 없습니다.");
         }
 
         // 3. 이미 취소되었거나 완료되지 않은 예약인지 확인
-        // resStatus가 true(완료)일 때만 취소 가능하다고 가정 (정책에 따라 변경)
-        if (reservation.getResStatus() == null || !reservation.getResStatus()) {
-            throw new IllegalStateException("이미 취소되었거나 완료되지 않은 예약은 취소할 수 없습니다.");
+        if (Boolean.FALSE.equals(reservation.getResStatus())) { // 이미 취소된 경우 (false = 취소 가정)
+            throw new IllegalStateException("이미 취소 처리된 예약입니다.");
+        }
+        LocalDateTime now = LocalDateTime.now();
+        if (reservation.getResStart() != null && now.isAfter(reservation.getResStart())) {
+            System.out.println("[Service] 경고: 이미 시작된 예약 취소 시도 (현재 로직 허용)");
         }
 
         // 4. 연결된 Payment 정보 조회 (카카오페이 취소에 필요한 정보 가져오기)
-        // Payment 테이블에 resNo로 조회하는 기능 필요 (Repository에 findByResNo 추가 가정)
         Optional<Payment> paymentOpt = paymentRepository.findByResNo(resNo);
-        if (paymentOpt.isEmpty()) {
-            System.err.println("!!! 경고: 예약(ResNo:" + resNo + ")에 연결된 결제 정보를 찾을 수 없습니다. DB 상태만 취소로 변경합니다.");
-        }
+        if (paymentOpt.isPresent()) {
+            Payment payment = paymentOpt.get();
+            System.out.println("[Service] 관련 결제 정보 찾음: PaymentKey=" + payment.getPaymentKey());
 
-        Payment payment = paymentOpt.orElse(null); // 없으면 null
-
-        // --- !!! 중요: 카카오페이 결제 취소 로직 !!! ---
-        if ("KAKAO".equals(payment.getPayProvider()) && "DONE".equals(payment.getPayStatus())) {
+            // 5. 실제 결제된 금액이 있었는지 확인 (0원 예약 여부)
+            int paidAmount;
             try {
-                String tid = payment.getPaymentKey(); // tid가 저장된 필드 사용
-                int cancelAmount = Integer.parseInt(payment.getPayPrice());
-                // kakaoPayService.cancelPayment(tid, cancelAmount, 0); // 카카오 취소 API 호출
-                System.out.println("카카오페이 결제 취소 API 호출 성공 (가정)");
-                payment.setPayStatus("CANCELED"); // Payment 상태 변경
-                payment.setPayCanclDt(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)); // 시간 기록
-                paymentRepository.save(payment);
-
-            } catch (Exception e) {
-                System.err.println("!!! 카카오페이 결제 취소 중 오류 발생 !!! - " + e.getMessage());
-                e.printStackTrace();
-                // 카카오페이 취소 실패 시 어떻게 처리할지 정책 결정 필요
-                // 1. DB 롤백 (현재 @Transactional 이므로 자동 롤백됨)
-                // 2. 사용자에게 취소 실패 알림 (Controller에서 처리)
-                throw new RuntimeException("카카오페이 결제 취소 중 오류가 발생했습니다. 관리자에게 문의하세요.", e);
+                paidAmount = Integer.parseInt(payment.getPayPrice());
+            } catch (NumberFormatException | NullPointerException e) {
+                System.err.println("결제 금액(payPrice) 파싱 오류 또는 없음: " + payment.getPayPrice());
+                paidAmount = 0; // 오류 시 0원으로 간주 (또는 예외 처리)
             }
-        } else {
-            System.out.println("카카오페이 취소 대상이 아니거나 이미 취소된 결제입니다. DB 예약 상태만 변경합니다.");
-        }
-        // ------------------------------------------
 
-        // 5. Reservation 상태 '취소'로 업데이트
+            if (paidAmount > 0 && "KAKAO".equals(payment.getPayProvider())) {
+                try {
+                    String tid = payment.getPaymentKey(); // tid가 저장된 필드 사용
+                    int cancelAmount = Integer.parseInt(payment.getPayPrice());
+                   //  kakaoPayService.cancelKakaoPayment(tid, cancelAmount, 0); // 카카오 취소 API 호출
+                    System.out.println("카카오페이 결제 취소 API 호출 성공 (가정)");
+                    payment.setPayStatus("CANCELED"); // Payment 상태 변경
+                    payment.setPayCanclDt(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)); // 시간 기록
+                    paymentRepository.save(payment);
+
+                } catch (Exception e) {
+                    System.err.println("!!! 카카오페이 결제 취소 중 오류 발생 !!! - " + e.getMessage());
+                    e.printStackTrace();
+                    throw new RuntimeException("카카오페이 결제 취소 중 오류가 발생했습니다. 관리자에게 문의하세요.", e);
+                }
+
+            } else {
+                System.out.println("[Service] 0원 예약 또는 카카오페이 결제 건이 아니므로 외부 API 취소 호출 생략.");
+            }
+            // ----------------------------------------------------------
+
+            // 6. Payment 테이블 상태 업데이트
+            payment.setPayStatus("CANCELED"); // 결제 상태 '취소'
+            payment.setPayCanclDt(now.format(DateTimeFormatter.ISO_DATE_TIME)); // 취소 시각 기록 (String)
+            paymentRepository.save(payment);
+            System.out.println("[Service] Payment 상태 'CANCELED' 업데이트 완료");
+
+        } else {
+            System.out.println("[Service] 해당 예약(" + resNo + ")에 대한 결제 정보 없음. Reservation 상태만 변경.");
+
+        }
+
+        // 7. Reservation 테이블 상태 '취소'로 업데이트
         reservation.setResStatus(false); // false = 취소 상태로 가정
         reservation.setMoDt(LocalDateTime.now());
         reservationRepository.save(reservation);
@@ -337,173 +353,120 @@ public class ReservationService {
     }
 
     /**
-     * 예약 변경 요청을 처리합니다.
-     * @param resNo 변경할 원본 예약 번호
-     * @param updateDto 변경 요청 정보
-     * @param username 요청 사용자
-     * @return 처리 결과 Map (success, message, paymentRequired 등 포함)
+     *
+     * @param resNo           변경할 예약 번호
+     * @param modificationDto 변경할 내용 DTO
+     * @param currentUserId   현재 로그인한 사용자 ID (소유권 확인용)
+     * @return 업데이트된 Reservation 객체
+     * @throws RuntimeException, EntityNotFoundException, SecurityException, IllegalArgumentException
      */
-    @Transactional
-    public Map<String, Object> updateReservation(Long resNo, ReservationUpdateRequestDto updateDto, String username) {
-        System.out.printf("[Service] 예약 변경 처리 시작 - ResNo: %d, Username: %s%n", resNo, username);
-        System.out.println("Update Request DTO: " + updateDto);
+    @Transactional // DB 업데이트가 있으므로 트랜잭션 필요
+    public Reservation updateReservation(Long resNo, ReservationUpdateRequestDto modificationDto, Long currentUserId) {
+        System.out.printf("[Service] 예약 변경 요청 시작: ResNo=%d, UserID=%d%n", resNo, currentUserId);
 
-        User user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("서비스에서 사용자를 찾을 수 없습니다: " + username));
-        Long userId = user.getUserNo();
-
-        // 1. 원본 예약 조회 및 권한/상태 확인
+        // 1. 원본 예약 정보 조회
         Reservation originalReservation = reservationRepository.findById(resNo)
                 .orElseThrow(() -> new EntityNotFoundException("변경할 예약 정보를 찾을 수 없습니다: " + resNo));
 
-        if (!Objects.equals(originalReservation.getUserNo(), userId)) {
-            throw new SecurityException("해당 예약을 변경할 권한이 없습니다.");
+        // 2. 예약 소유권 확인
+        if (!originalReservation.getUserNo().equals(currentUserId)) {
+            throw new SecurityException("해당 예약을 변경할 권한이 없습니다."); // 예외 타입은 상황에 맞게
         }
+        System.out.println("[Service] 예약 소유권 확인 완료");
 
-        // 취소되었거나 이미 지난 예약은 변경 불가 (정책에 따라 기준 변경 가능)
-        if (originalReservation.getResStatus() == null || !originalReservation.getResStatus()) {
-            throw new IllegalStateException("취소된 예약은 변경할 수 없습니다.");
+/*
+        // 3. 요금제 변경 시도 확인 (변경 불가 정책)
+        if (modificationDto.getPlanType() != null && !modificationDto.getPlanType().equals(originalReservation.getPlanType())) {
+            throw new IllegalArgumentException("예약 변경 시 요금제는 변경할 수 없습니다.");
         }
-        if (originalReservation.getResEnd().isBefore(LocalDateTime.now())) {
-            throw new IllegalStateException("이미 지난 예약은 변경할 수 없습니다.");
-        }
+        System.out.println("[Service] 요금제 변경 없음 확인 완료");
+*/
 
-        // 2. 요금제 변경 불가 확인
-        String originalPlanType = determinePlanTypeFromTimes(originalReservation.getResStart(), originalReservation.getResEnd());
-        if (!Objects.equals(updateDto.getPlanType(), originalPlanType)) {
-            throw new IllegalArgumentException(String.format("해당 요금제는 변경할 수 없습니다. 예약을 취소하고 새로 예약해주세요.", originalPlanType));
-        }
-
-        // 3. 변경될 시간 계산
-        LocalDate newReservationDate = LocalDate.parse(updateDto.getReservationDate());
+        // 4. 변경될 예약 시작/종료 시각 계산
+        LocalDate newReservationDate = LocalDate.parse(modificationDto.getReservationDate());
         LocalDateTime newStartDateTime;
         LocalDateTime newEndDateTime;
-        switch (updateDto.getPlanType()) {
+        switch (modificationDto.getPlanType()) { // DTO의 planType 사용 (원본과 동일해야 함)
             case "HOURLY":
-                if (updateDto.getSelectedTimes() == null || updateDto.getSelectedTimes().isEmpty()) throw new IllegalArgumentException("시간제는 예약 시간을 선택해야 합니다.");
-                updateDto.getSelectedTimes().sort(Comparator.naturalOrder());
-                newStartDateTime = newReservationDate.atTime(LocalTime.parse(updateDto.getSelectedTimes().get(0), TIME_FORMATTER));
-                newEndDateTime = newReservationDate.atTime(LocalTime.parse(updateDto.getSelectedTimes().get(updateDto.getSelectedTimes().size() - 1), TIME_FORMATTER).plusHours(1));
+                if (modificationDto.getSelectedTimes() == null || modificationDto.getSelectedTimes().isEmpty()) throw new IllegalArgumentException("시간제는 예약 시간을 선택해야 합니다.");
+                modificationDto.getSelectedTimes().sort(Comparator.naturalOrder());
+                LocalTime st = LocalTime.parse(modificationDto.getSelectedTimes().get(0), TIME_FORMATTER);
+                LocalTime lt = LocalTime.parse(modificationDto.getSelectedTimes().get(modificationDto.getSelectedTimes().size() - 1), TIME_FORMATTER);
+                newStartDateTime = newReservationDate.atTime(st);
+                newEndDateTime = newReservationDate.atTime(lt.plusHours(1));
                 break;
-            case "DAILY":
-                newStartDateTime = newReservationDate.atTime(OPEN_TIME);
-                newEndDateTime = newReservationDate.atTime(CLOSE_TIME);
-                break;
-            case "MONTHLY":
-                newStartDateTime = newReservationDate.atTime(OPEN_TIME);
-                newEndDateTime = newReservationDate.plusMonths(1).atTime(CLOSE_TIME);
-                break;
+            case "DAILY": newStartDateTime = newReservationDate.atTime(OPEN_TIME); newEndDateTime = newReservationDate.atTime(CLOSE_TIME); break;
+            case "MONTHLY": newStartDateTime = newReservationDate.atTime(OPEN_TIME); newEndDateTime = newReservationDate.plusMonths(1).atTime(CLOSE_TIME); break;
             default: throw new IllegalArgumentException("알 수 없는 요금제 타입입니다.");
         }
+        System.out.println("[Service] 변경될 예약 시간 계산 완료: " + newStartDateTime + " ~ " + newEndDateTime);
 
-        // --- Redis 락 획득 (변경될 대상 좌석/날짜 기준) ---
-        String lockKey = String.format("lock:seat:%s:%s", updateDto.getItemId(), updateDto.getReservationDate());
-        String lockValue = UUID.randomUUID().toString();
-        Boolean lockAcquired = false;
+        // --- 변경될 좌석/시간에 대한 Redis Lock 시도 ---
+        // (주의: 원래 예약 슬롯에 대한 락 해제는? -> 여기선 새 슬롯만 잠그고 DB로 최종 확인)
+        String newLockKey = String.format("lock:seat:%s:%s", modificationDto.getItemId(), modificationDto.getReservationDate());
+        String newLockValue = UUID.randomUUID().toString();
+        Boolean newLockAcquired = false;
 
         try {
-            lockAcquired = redisTemplate.opsForValue().setIfAbsent(lockKey, lockValue, Duration.ofSeconds(LOCK_TIMEOUT_SECONDS));
-            if (lockAcquired == null || !lockAcquired) {
-                System.out.println("락 획득 실패 (Update): " + lockKey);
-                throw new RuntimeException("다른 사용자가 현재 좌석/날짜를 변경/예약 중입니다. 잠시 후 다시 시도해주세요.");
-            }
-            System.out.println("락 획득 성공 (Update): " + lockKey);
+            newLockAcquired = redisTemplate.opsForValue().setIfAbsent(newLockKey, newLockValue, Duration.ofSeconds(LOCK_TIMEOUT_SECONDS));
 
-            // --- !!! CRITICAL SECTION START (락 확보 상태) !!! ---
-            long overlappingCount = reservationRepository.countOverlappingReservationsExcludingSelf(
-                    updateDto.getItemId(), newStartDateTime, newEndDateTime, originalReservation.getResNo());
+            if (newLockAcquired != null && newLockAcquired) {
+                System.out.println("[Service] 변경 대상 슬롯 Redis 락 획득 성공: " + newLockKey);
 
-            if (overlappingCount > 0) {
-                System.out.println("중복 예약 발견됨 (Update): " + lockKey);
-                throw new RuntimeException("변경하려는 시간에 이미 다른 예약이 존재합니다.");
-            }
-            System.out.println("DB 예약 가능 확인 완료 (Update)");
+                // --- CRITICAL SECTION START ---
+                try {
+                    // 5. 변경될 좌석/시간이 예약 가능한지 DB에서 최종 확인 (자기 자신 제외)
+                    long overlappingCount = reservationRepository.countOverlappingReservationsExcludingSelf(
+                            modificationDto.getItemId(), newStartDateTime, newEndDateTime, resNo // !!! 자기 자신(resNo) 제외 !!!
+                    );
+                    if (overlappingCount > 0) {
+                        throw new RuntimeException("변경하려는 시간에 이미 다른 예약이 존재합니다.");
+                    }
+                    System.out.println("[Service] DB 예약 가능 최종 확인 완료 (중복 없음)");
 
-            // 5. 변경된 내용으로 가격 재계산
-            String newBasePriceStr = calculateBasePrice(updateDto.getPlanType(), updateDto.getSelectedTimes());
-            String newDiscountPriceStr = calculateDiscount(newBasePriceStr, updateDto.getCouponId());
-            String newFinalPriceStr = calculateFinalPrice(newBasePriceStr, newDiscountPriceStr);
-            int newFinalPrice = Integer.parseInt(newFinalPriceStr);
+                    // 6. 가격 재계산
+                    String basePriceStr = calculateBasePrice(modificationDto.getPlanType(), modificationDto.getSelectedTimes());
+                    String discountPriceStr = calculateDiscount(basePriceStr, modificationDto.getCouponId());
+                    String finalPriceStr = calculateFinalPrice(basePriceStr, discountPriceStr);
+                    System.out.println("[Service] 변경 후 가격 계산 완료: " + finalPriceStr);
 
-            // 6. 프론트엔드 계산 가격과 비교 (검증)
-            if (!Objects.equals(newFinalPrice, updateDto.getTotalPrice())) {
-                System.err.printf("가격 불일치. Frontend: %d, Backend: %d%n", updateDto.getTotalPrice(), newFinalPrice);
-                // throw new IllegalArgumentException("요청된 가격과 서버 계산 가격이 일치하지 않습니다. 다시 시도해주세요.");
-            }
+                    // 7. Reservation Entity 업데이트
+                    originalReservation.setSeatNo(modificationDto.getItemId());
+                    originalReservation.setResStart(newStartDateTime);
+                    originalReservation.setResEnd(newEndDateTime);
+                    originalReservation.setTotalPrice(finalPriceStr);
+                    originalReservation.setResPrice(basePriceStr);
+                    originalReservation.setDcPrice(discountPriceStr);
+                    // originalReservation.setUserCpNo(...); // 쿠폰 ID 업데이트
+                    originalReservation.setResStatus(true); // 변경 시 상태는 '확정' 유지 (정책에 따라 다름)
+                    // moDt는 @UpdateTimestamp로 자동 업데이트될 것임
 
-            // 7. 원본 가격과 비교하여 추가 결제 필요 여부 판단
-            int originalFinalPrice = Integer.parseInt(originalReservation.getTotalPrice());
-            int priceDifference = newFinalPrice - originalFinalPrice;
+                    // 8. DB에 변경사항 저장
+                    System.out.println("[Service] Reservation 정보 업데이트 시도...");
+                    Reservation updatedReservation = reservationRepository.save(originalReservation); // JPA가 변경 감지 후 UPDATE
+                    System.out.println("[Service] >>> Reservation 정보 업데이트 성공! ResNo: " + updatedReservation.getResNo());
 
-            Map<String, Object> result = new HashMap<>();
+                    // --- CRITICAL SECTION END ---
+                    return updatedReservation;
 
-            if (priceDifference > 0) {
-                // --- 추가 결제 필요 ---
-                System.out.println("가격 증가: 추가 결제 필요 (" + priceDifference + "원)");
-                result.put("success", true);
-                result.put("paymentRequired", true);
-                result.put("message", String.format("예약 변경으로 %s원의 추가 결제가 필요합니다.", String.format("%,d", priceDifference)));
-                // 결제 위한 정보 생성 (기존 createReservation과 유사하게)
-                // 주의: 새 주문 ID 생성 및 관리 필요
-                String newOrderId = "MOD_" + originalReservation.getResNo() + "_" + System.currentTimeMillis();
-                result.put("orderId", newOrderId);
-                result.put("orderName", String.format("예약 변경 (No.%d) 추가 결제", originalReservation.getResNo()));
-                result.put("amount", priceDifference); // !!! 차액만 결제 !!!
-                result.put("customerKey", String.valueOf(userId));
-
-                // !!! 중요: 실제 DB 업데이트는 결제 성공 후 웹훅 등에서 처리해야 함 !!!
-                // 여기서는 결제 정보만 반환하고 종료. 임시 데이터 저장 로직 필요 시 추가.
-                System.out.println("추가 결제 정보를 반환합니다. DB 업데이트는 보류됩니다.");
+                } catch (Exception criticalException) {
+                    System.err.println("!!! 예약 변경 처리 중 에러 !!! " + criticalException.getMessage());
+                    throw criticalException;
+                }
 
             } else {
-                // --- 가격 동일 또는 감소 (즉시 변경 처리) ---
-                System.out.println("가격 동일 또는 감소: 즉시 변경 처리");
-
-                // TODO: 가격 감소 시 환불 로직 필요!
-                // if (priceDifference < 0) {
-                //     int refundAmount = -priceDifference;
-                //     // 1. 연결된 Payment 정보 조회
-                //     Payment payment = paymentRepository.findByResNo(resNo).orElse(null);
-                //     // 2. 카카오페이 부분 취소 API 호출 (kakaoPayService 사용)
-                //     // kakaoPayService.cancelPayment(payment.getPaymentKey(), refundAmount, 0); // 부분 취소
-                //     // 3. Payment 테이블 상태 업데이트 (부분 취소 기록)
-                // }
-
-                // Reservation 엔티티 업데이트
-                originalReservation.setSeatNo(updateDto.getItemId());
-                originalReservation.setResStart(newStartDateTime);
-                originalReservation.setResEnd(newEndDateTime);
-                // originalReservation.setPlanType(updateDto.getPlanType()); // Entity에 필드 추가 시
-                // originalReservation.setUserCpNo(updateDto.getCouponId()); // Entity에 필드 추가 시
-                originalReservation.setResPrice(newBasePriceStr);
-                originalReservation.setDcPrice(newDiscountPriceStr);
-                originalReservation.setTotalPrice(newFinalPriceStr);
-                originalReservation.setMoDt(LocalDateTime.now()); // 수정 시간 업데이트
-
-                reservationRepository.save(originalReservation);
-                System.out.println("DB 예약 정보 업데이트 완료 (즉시 변경)");
-
-                result.put("success", true);
-                result.put("paymentRequired", false); // 추가 결제 불필요
-                result.put("message", "예약 내용이 성공적으로 변경되었습니다.");
+                System.out.println("[Service] 변경 대상 슬롯 Redis 락 획득 실패: " + newLockKey);
+                throw new RuntimeException("다른 사용자가 해당 좌석/시간을 변경/예약 중입니다.");
             }
-
-            // --- !!! CRITICAL SECTION END !!! ---
-            return result;
-
         } finally {
-            // 락 해제
-            if (Boolean.TRUE.equals(lockAcquired)) {
-                String redisValue = redisTemplate.opsForValue().get(lockKey);
-                if (lockValue.equals(redisValue)) {
-                    redisTemplate.delete(lockKey);
-                    System.out.println("락 해제 성공 (Update): " + lockKey);
-                } else {
-                    System.out.println("락 해제 실패 (Update): 소유자 다르거나 만료됨 - " + lockKey);
-                }
+            // 락 해제 (내가 획득했던 락만 해제)
+            if (Boolean.TRUE.equals(newLockAcquired) && newLockValue.equals(redisTemplate.opsForValue().get(newLockKey))) {
+                redisTemplate.delete(newLockKey);
+                System.out.println("[Service] 변경 대상 슬롯 Redis 락 해제 성공: " + newLockKey);
             }
         }
     }
+
 
     // --- 임시: Reservation Entity에 planType 필드가 없을 경우 시간으로 추정 ---
     private String determinePlanTypeFromTimes(LocalDateTime start, LocalDateTime end) {
