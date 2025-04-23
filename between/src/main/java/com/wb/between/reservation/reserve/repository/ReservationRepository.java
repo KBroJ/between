@@ -2,6 +2,7 @@ package com.wb.between.reservation.reserve.repository;
 
 
 import com.wb.between.reservation.reserve.domain.Reservation;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -42,5 +43,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     // 특정 좌석/시간대에 겹치는 예약 수 조회 (본인 예약 제외)
     @Query("SELECT count(r) FROM Reservation r WHERE r.resNo <> :excludeResNo AND r.seatNo = :seatId AND r.resStatus = true AND r.resStart < :endTime AND r.resEnd > :startTime")
     long countOverlappingReservationsExcludingSelf(@Param("seatId") Long seatId, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime, @Param("excludeResNo") Long excludeResNo);
+
+
+    // 특정 사용자의 예약을 'resDt'(예약 생성일시) 기준 내림차순으로 조회하는 메소드
+    // Pageable 객체를 통해 조회할 개수(limit)와 시작점(offset) 등을 지정할 수 있음 (예: 최근 5개)
+    List<Reservation> findByUserNoOrderByResDtDesc(Long userNo, Pageable pageable);
+
+
 }
 

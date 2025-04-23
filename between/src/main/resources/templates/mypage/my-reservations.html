@@ -39,7 +39,9 @@
           <th>이용 시간</th>
           <th>결제 금액</th>
           <th>상태</th>
+          <!--
           <th>작업</th>
+          -->
         </tr>
         </thead>
         <tbody>
@@ -62,17 +64,15 @@
                   <span th:case="*" class="status" th:text="${reservation.resStatus}"></span>
               </span>
             </td>
-            <td>
               <!--
-              <button class="btn btn-sm btn-detail" th:onclick="|location.href='@{/mypage/reservations/detail/{resNo}(resNo=${reservation.resNo})}'|">상세</button>
-              -->
-              <!-- 예약 상태(resStatus)가 예약완료(1)이며 취소 버튼 표시 -->
+            <td>
               <button th:if="${reservation.resStatus == '1'}" type="button" class="btn btn-cancel"
                       th:onclick="'confirmCancel(\'' + ${reservation.resNo} + '\', \'' + @{/api/reservations/{resNo}/cancel(resNo=${reservation.resNo})} + '\');'">
                 예약 취소
               </button>
 
             </td>
+              -->
           </tr>
           <tr th:if="${reservationsPage.empty}">
             <td colspan="6" class="no-data">조회된 예약 내역이 없습니다.</td>

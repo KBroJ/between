@@ -2,26 +2,29 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/layout}">
-<head>
-  <title>마이페이지 화면</title>
-    <link rel="stylesheet" th:href="@{/css/layout/mypage.css}">
-</head>
-<body>
+    <head>
+        <title>마이페이지 화면</title>
+        <link rel="stylesheet" th:href="@{/css/layout/mypage.css}">
+    </head>
 
-<main layout:fragment="content">
-  <div class="mypage-container">
-<!--    &lt;!&ndash; 사이드 메뉴 &ndash;&gt;-->
-    <aside th:replace="~{/mypage/sidebar :: mypage-sidebar}"></aside>
-<!--    &lt;!&ndash; ✅ 메인 콘텐츠 &ndash;&gt;-->
-    <div class="mypage-content" layout:fragment="mypage-content"></div>
-  </div>
-</main>
-<th:block layout:fragment="page-script">
-    <script>
-        $(document).ready(function () {
-        });
-    </script>
-</th:block>
+    <body>
 
-</body>
+        <main layout:fragment="content">
+            <div class="mypage-container">
+        <!--    &lt;!&ndash; 사이드 메뉴 &ndash;&gt;-->
+                <aside th:replace="~{/mypage/sidebar :: mypage-sidebar}"></aside>
+                <aside th:replace="~{/admin/sidebar :: mypage-sidebar}"></aside>
+        <!--    &lt;!&ndash; ✅ 메인 콘텐츠 &ndash;&gt;-->
+                <div class="mypage-content" layout:fragment="mypage-content"></div>
+          </div>
+        </main>
+
+        <th:block layout:fragment="page-script">
+            <script>
+                $(document).ready(function () {
+                });
+            </script>
+        </th:block>
+
+    </body>
 </html>

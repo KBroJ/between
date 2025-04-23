@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/mypage}">
+
+    <head>
+        <title>회원 상세 정보</title>
+        <th:block layout:fragment="page-css">
+            <link rel="stylesheet" th:href="@{/css/admin/user/user-detail.css}">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        </th:block>
+    </head>
+
+    <body>
+        <main layout:fragment="content">
+
+            <div class="detail-card">
+                <h2 class="card-title">
+                    <i class="fa-solid fa-user-circle card-title-icon"></i>
+                    <span th:text="${user.name}">홍길동</span>님의 상세 정보
+                </h2>
+
+                <hr class="card-divider">
+
+                <section class="info-section">
+                    <h3 class="section-title">기본 정보</h3>
+                    <div class="info-grid">
+                        <p>
+                            <i class="fa-solid fa-envelope info-icon"></i>
+                            <strong>이메일:</strong>
+                            <span th:text="${user.email}">user@example.com</span>
+                        </p>
+                        <p>
+                            <i class="fa-solid fa-user info-icon"></i>
+                            <strong>이름:</strong>
+                            <span th:text="${user.name}">홍길동</span>
+                        </p>
+                        <p>
+                            <i class="fa-solid fa-phone info-icon"></i>
+                            <strong>휴대폰 번호:</strong>
+                            <span th:text="${user.phoneNo}">010-****-1234</span>
+                        </p>
+                        <p>
+                            <i class="fa-solid fa-calendar-alt info-icon"></i>
+                            <strong>가입일:</strong>
+                            <span th:text="${#temporals.format(user.createDt, 'yyyy-MM-dd')}">2024-01-15</span>
+                        </p>
+                    </div>
+                </section>
+
+                <hr class="card-divider">
+
+                <section class="info-section">
+                    <h3 class="section-title">계정 설정</h3>
+                    <div class="setting-grid">
+                        <div class="form-group">
+                            <label for="userGrade">
+                                <i class="fa-solid fa-crown info-icon"></i>
+                                <strong>회원 등급:</strong>
+                            </label>
+                            <select id="userGrade" name="userGrade" class="form-select">
+                                <option value="일반" th:selected="${user.authCd == '일반'}">일반</option>
+                                <option value="임직원" th:selected="${user.authCd == '임직원'}">임직원</option>
+                                <option value="관리자" th:selected="${user.authCd == '관리자'}">관리자</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="userStatus">
+                                <i class="fa-solid fa-toggle-on info-icon"></i>
+                                <strong>회원 상태:</strong>
+                            </label>
+                            <select id="userStatus" name="userStatus" class="form-select">
+                                <option value="정상" th:selected="${user.userStts == '정상'}">정상</option>
+                                <option value="휴면" th:selected="${user.userStts == '휴면'}">휴면</option>
+                            </select>
+                        </div>
+                    </div>
+                </section>
+
+                <hr class="card-divider">
+
+                <section class="info-section">
+                    <h3 class="section-title">최근 예약 목록</h3>
+                    <div class="table-responsive">
+                        <table class="reservation-table">
+                            <thead>
+                                <tr>
+                                    <th>예약 번호</th>
+                                    <th>예약 일시</th>
+                                    <th>좌석명</th>
+                                    <th>이용 시간</th>
+                                    <th>예약 상태</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${#lists.isEmpty(user.recentReservations)}">
+                                    <td colspan="5" class="text-center">최근 예약 내역이 없습니다.</td>
+                                </tr>
+                                <tr th:each="reservation : ${user.recentReservations}">
+                                    <td th:text="${reservation.resNo}">RES-12345</td>
+                                    <td th:text="${#temporals.format(reservation.resDt, 'yyyy-MM-dd HH:mm')}">2024-04-20 10:00</td>
+                                    <td th:text="${reservation.seatNm}">회의실 A</td>
+                                    <td>
+                                        <span th:text="${#temporals.format(reservation.resStart, 'yyyy.MM.dd HH:mm')}">[시작 시간]</span>
+                                        <span>~</span>
+                                        <span th:text="${#temporals.format(reservation.resEnd, 'yyyy.MM.dd HH:mm')}">[종료 시간]</span>
+                                    </td>
+                                    <td th:text="${reservation.resStatusNm}">완료</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <div class="card-actions">
+                    <button type="button" class="btn btn-secondary" id="goToListBtn">목록으로</button>
+                    <button type="button" class="btn btn-danger" id="deleteUserBtn">탈퇴 처리</button>
+                    <button type="button" class="btn btn-primary" id="updateUserBtn">수정</button>
+                </div>
+            </div>
+        </main>
+
+        <th:block layout:fragment="page-script">
+            <script th:src="@{/js/admin/user/user-detail.js}"></script>
+        </th:block>
+    </body>
+</html>

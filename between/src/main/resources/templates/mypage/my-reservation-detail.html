@@ -9,7 +9,8 @@
         <link rel="stylesheet" th:href="@{/css/mypage/my-reservation-detail.css}">
     </head>
 
-    <section layout:fragment="mypage-content" th:object="${reservationDetail}"> <h1 class="main-title">예약 상세 내역</h1>
+    <section layout:fragment="mypage-content" th:object="${reservationDetail}">
+        <h1 class="main-title">예약 상세 내역</h1>
 
         <div class="detail-card">
             <div class="detail-section">
@@ -18,6 +19,10 @@
                     <div class="info-item">
                         <label class="info-label">예약 번호</label>
                         <p class="info-value" th:text="*{resNo}">[예약 번호]</p>
+                    </div>
+                    <div class="info-item">
+                        <label class="info-label">예약일</label>
+                        <p class="info-value" th:text="${#temporals.format(reservationDetail.resDt, 'yyyy.MM.dd HH:mm')}">[예약 일시]</p>
                     </div>
                     <div class="info-item">
                         <label class="info-label">예약 상태</label>
@@ -29,10 +34,6 @@
                                 <span th:case="*" class="status" th:text="*{displayStatus}"></span>
                             </span>
                         </p>
-                    </div>
-                    <div class="info-item">
-                        <label class="info-label">예약일</label>
-                        <p class="info-value" th:text="${#temporals.format(reservationDetail.resDt, 'yyyy.MM.dd HH:mm')}">[예약 일시]</p>
                     </div>
                 </div>
             </div>
@@ -107,7 +108,9 @@
                 </button>
             </div>
 
-        </div> <script th:src="@{/js/mypage/my-reservations.js}"></script>
+        </div>
+
+        <script th:src="@{/js/mypage/my-reservations.js}"></script>
 
     </section>
 
