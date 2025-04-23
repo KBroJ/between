@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AdminPermissionRepository extends JpaRepository<Permission, Long> {
 
-//    @Query("SELECT p FROM Permission p WHERE p.permissionName LIKE CONCAT('%', :searchPermissionName, '%')")
+    @Query("SELECT p FROM Permission p WHERE p.permissionName LIKE CONCAT('%', :searchPermissionName, '%')")
     Page<Permission> findPermissionWithFilter(Pageable pageable,
                                        @Param("searchCpnNm") String searchPermissionName);
 }
