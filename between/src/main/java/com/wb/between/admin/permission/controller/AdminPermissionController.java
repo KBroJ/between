@@ -39,6 +39,6 @@ public class AdminPermissionController {
 
         model.addAttribute("adminPermissionList", adminPermissionList);
 
-        return "admin/permission-manage";
+        return "admin/permission/permission-manage";
     }
 }

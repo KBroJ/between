@@ -21,7 +21,7 @@ public class AdminMenuController {
      */
     @GetMapping
     public String getMenuManagementView(@AuthenticationPrincipal User user, Model model){
-        return "admin/menu-manage";
+        return "admin/menu/menu-manage";
     }
 
 }

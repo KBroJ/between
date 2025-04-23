@@ -39,6 +39,6 @@ public class AdminRoleController {
 
         model.addAttribute("adminRoleList", adminRoleList);
 
-        return "admin/role-manage";
+        return "admin/role/role-manage";
     }
 }

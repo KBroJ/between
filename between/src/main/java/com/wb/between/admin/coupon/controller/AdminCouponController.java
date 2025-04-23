@@ -39,7 +39,7 @@ public class AdminCouponController {
 
         model.addAttribute("adminCouponList", adminCouponList);
 
-        return "admin/coupon-manage";
+        return "admin/coupon/coupon-manage";
     }
 
 
