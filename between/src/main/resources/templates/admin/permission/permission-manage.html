@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin/admin}">
+<head>
+  <title>관리자 화면</title>
+  <link rel="stylesheet" th:href="@{/css/admin/permission-manage.css}">
+</head>
+<body>
+
+<section layout:fragment="admin-content">   <!-- Main Content -->
+
+  <h1 class="main-title">권한 관리 화면</h1>
+  <div class="content-container">
+    <!-- 상단 검색 영역 -->
+    <form id="searchForm" class="search-area">
+      <div class="form-group">
+        <label for="searchGroupName">권한 명</label>
+        <input type="text" id="searchGroupName" name="searchGroupName">
+        <button type="submit" id="searchBtn">검색</button> <!-- 2. 검색 버튼 -->
+      </div>
+      <!-- 1. 등록 버튼 (검색 영역 오른쪽에 배치) -->
+      <button type="button" id="registerBtn" class="register-button">권한 등록</button>
+    </form>
+
+    <!-- 결과 테이블 영역 -->
+    <div class="table-area">
+      <table class="results-table">
+        <thead>
+        <tr>
+          <th scope="col">번호</th>
+          <th scope="col">권한 명</th>
+          <th scope="col">권한 설명</th>
+          <th scope="col">조회</th>
+          <th scope="col">화면 이동</th>
+          <th scope="col">등록</th>
+          <th scope="col">수정</th>
+          <th scope="col">삭제</th>
+          <th scope="col">등록일자</th>
+          <th scope="col">관리</th>
+        </tr>
+        </thead>
+        <tbody id="resultsBody">
+        <!-- 검색 결과가 여기에 동적으로 추가됩니다 -->
+        <!-- 예시 행 (실제로는 JS로 생성) -->
+        <tr>
+          <td>1</td>
+          <td>조회 권한</td>
+          <td>조회 권한 입니다.</td>
+          <td>2</td>
+          <td>2</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>2023-09-01</td>
+          <td><button type="button" class="btn-edit" data-group-id="1">수정</button></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>권한 01</td>
+          <td>권한 01 입니다.</td>
+          <td>2</td>
+          <td>2</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>2023-09-01</td>
+          <td><button type="button" class="btn-edit" data-group-id="2">수정</button></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>권한 02</td>
+          <td>권한 02 입니다.</td>
+          <td>2</td>
+          <td>2</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>2023-09-01</td>
+          <td><button type="button" class="btn-edit" data-group-id="3">수정</button></td>
+        </tr>
+        <!-- ... 추가 예시 행 ... -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 페이지네이션 영역 -->
+    <div class="pagination-area">
+      <a href="#" class="page-link current-page">1</a>
+      <!-- <a href="#" class="page-link">2</a> -->
+      <!-- <a href="#" class="page-link">3</a> -->
+    </div>
+  </div>
+</section >
+</body>
+</html>

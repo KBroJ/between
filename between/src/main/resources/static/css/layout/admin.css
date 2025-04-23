@@ -1,0 +1,108 @@
+/* Layout Container */
+.admin-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: 260px; /* Fixed width for sidebar */
+    background-color: #ffffff; /* White background */
+    padding: 24px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+    display: flex;
+    flex-direction: column; /* Arrange items vertically */
+    flex-shrink: 0; /* Prevent sidebar from shrinking */
+}
+
+.sidebar-title {
+    font-size: 1.75rem; /* 28px */
+    font-weight: 600;
+    margin-bottom: 32px;
+    color: #212529;
+}
+
+.sidebar-nav {
+    flex-grow: 1; /* Allow nav to take available space */
+}
+
+.sidebar-nav ul {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Space between menu items */
+    list-style: none;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 1rem; /* 16px */
+    font-weight: 500;
+    color: #495057; /* Default menu item color */
+    transition: background-color 0.2s ease, color 0.2s ease;
+    text-decoration: none;
+}
+
+.menu-item .icon {
+    width: 20px; /* Icon width */
+    margin-right: 12px;
+    text-align: center;
+    color: #6c757d; /* Icon color */
+    transition: color 0.2s ease;
+}
+
+.menu-item:hover {
+    background-color: #f1f3f5; /* Light gray hover */
+    color: #212529;
+}
+
+.menu-item:hover .icon {
+    color: #495057;
+}
+
+.menu-item.active {
+    background-color: #e7f5ff; /* Light blue background for active */
+    color: #1c7ed6; /* Blue text for active */
+    font-weight: 600;
+}
+
+.menu-item.active .icon {
+    color: #1c7ed6; /* Blue icon for active */
+}
+
+.sidebar-footer {
+    margin-top: auto; /* Push footer to the bottom */
+    padding-top: 16px;
+    border-top: 1px solid #e9ecef; /* Separator line */
+}
+
+.logout-link {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #e03131; /* Red color for logout */
+    transition: background-color 0.2s ease;
+}
+
+.logout-link .icon {
+    width: 20px;
+    margin-right: 12px;
+    text-align: center;
+}
+
+.logout-link:hover {
+    background-color: #fff5f5; /* Light red hover */
+}
+
+/* Main Content Area Styling (the container itself) */
+.admin-content {
+    flex-grow: 1; /* Take remaining space */
+    padding: 32px; /* Padding for the content area */
+    overflow-y: auto; /* Add scroll if content overflows */
+}
+

@@ -1,0 +1,175 @@
+/* Content Title */
+.main-title {
+    font-size: 1.8em;
+    margin-bottom: 25px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.content-container {
+    background-color: #fff;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* 검색 영역 스타일 */
+.search-area {
+    background-color: #f8f9fa; /* 약간 밝은 배경 */
+    padding: 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    display: flex; /* 요소들을 가로로 배치 */
+    justify-content: space-between; /* 양쪽 끝으로 정렬 */
+    align-items: center;
+}
+
+.search-area .form-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0; /* search-area 내부 form-group 마진 제거 */
+}
+
+.search-area label {
+    /* display: inline-block; */ /* flex 사용 시 불필요 */
+    width: 100px; /* 라벨 너비 */
+    font-weight: bold;
+    margin-right: 10px;
+    color: #555;
+    text-align: right;
+}
+
+.search-area input[type="text"] {
+    /* flex: 1; */ /* 필요 시 너비 자동 조절 */
+    width: 250px; /* 너비 지정 */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    margin-right: 10px; /* 검색 버튼과의 간격 */
+}
+
+/* 기본 버튼 스타일 (이전과 유사하게) */
+button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+#searchBtn {
+    background-color: #007bff;
+    color: white;
+}
+#searchBtn:hover {
+    background-color: #0056b3;
+}
+
+.register-button { /* 등록 버튼 별도 스타일 */
+    background-color: #17a2b8; /* 정보성 색상 */
+    color: white;
+}
+.register-button:hover {
+    background-color: #138496;
+}
+
+
+/* 테이블 영역 스타일 */
+.table-area {
+    width: 100%;
+    overflow-x: auto; /* 테이블 내용 많을 시 가로 스크롤 */
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse; /* 테두리 겹치기 */
+    margin-bottom: 20px;
+    font-size: 14px;
+    table-layout: fixed; /* 컬럼 너비 고정 시 유용 */
+}
+
+.results-table th,
+.results-table td {
+    border: 1px solid #ddd; /* 테이블 셀 테두리 */
+    padding: 10px; /* 셀 안쪽 여백 */
+    text-align: center; /* 기본 가운데 정렬 */
+    white-space: nowrap; /* 줄바꿈 방지 (필요 시) */
+    overflow: hidden; /* 내용 넘칠 때 숨김 */
+    text-overflow: ellipsis; /* 넘치는 텍스트 ... 처리 */
+}
+
+.results-table th {
+    background-color: #f2f2f2; /* 헤더 배경색 */
+    font-weight: bold;
+}
+
+/* 특정 컬럼 텍스트 정렬 조정 */
+.results-table td:nth-child(2), /* 권한 그룹 명 */
+.results-table td:nth-child(3) { /* 권한 그룹 설명 */
+    text-align: left;
+}
+
+/* 관리 컬럼의 수정 버튼 */
+.results-table .btn-edit {
+    background-color: #6c757d;
+    color: white;
+    padding: 5px 10px; /* 테이블 내 버튼 크기 조정 */
+    font-size: 12px;
+}
+.results-table .btn-edit:hover {
+    background-color: #5a6268;
+}
+
+/* 페이지네이션 영역 스타일 */
+.pagination-area {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.pagination-area .page-link {
+    display: inline-block;
+    padding: 5px 10px;
+    margin: 0 3px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    color: #007bff;
+    text-decoration: none;
+    border-radius: 3px;
+}
+
+.pagination-area .page-link:hover {
+    background-color: #e9ecef;
+}
+
+.pagination-area .current-page {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+    font-weight: bold;
+}
+
+/* --- 이전에 정의된 다른 스타일들 ... --- */
+
+/* 메뉴 관리 화면과 공유하는 스타일 조정 (필요 시) */
+/* 예: .form-group, label, input[type="text"] 등의 공통 스타일 */
+.form-group {
+    margin-bottom: 15px; /* 기본 폼 그룹 마진 */
+    display: flex;
+    align-items: center;
+    /* flex-wrap: wrap; */ /* 필요 시 */
+}
+
+label {
+    /* 이전 스타일 유지 또는 조정 */
+}
+
+input[type="text"], input[type="number"], textarea {
+    /* 이전 스타일 유지 또는 조정 */
+    /* flex: 1; */ /* 필요에 따라 */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-sizing: border-box;
+}

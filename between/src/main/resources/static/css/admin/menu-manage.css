@@ -1,0 +1,128 @@
+/* Content Title */
+.main-title {
+    font-size: 1.8em;
+    margin-bottom: 25px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+
+.menu-management-container {
+    display: flex;
+    gap: 20px; /* 패널 사이 간격 */
+    background-color: #fff;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    min-height: 500px; /* 최소 높이 */
+}
+
+.tree-panel {
+    flex: 1; /* 비율 설정 (예: 1:2) */
+    border: 1px solid #ddd;
+    padding: 15px;
+    overflow: auto; /* 내용 많을 시 스크롤 */
+    min-width: 250px; /* 최소 너비 */
+}
+
+#menuTreeContainer {
+    /* JSTree 스타일링은 기본 테마 사용 */
+}
+
+.form-panel {
+    flex: 2; /* 비율 설정 (예: 1:2) */
+    border: 1px solid #ddd;
+    padding: 15px;
+}
+
+#menuInfoForm .form-group {
+    margin-bottom: 15px;
+    display: flex; /* 라벨과 인풋 정렬 위해 */
+    align-items: center; /* 수직 가운데 정렬 */
+    flex-wrap: wrap; /* 화면 작을 때 줄바꿈 */
+}
+
+#menuInfoForm label {
+    display: inline-block;
+    width: 100px; /* 라벨 너비 고정 */
+    font-weight: bold;
+    margin-right: 10px;
+    color: #555;
+    text-align: right;
+}
+
+#menuInfoForm input[type="text"],
+#menuInfoForm input[type="number"],
+#menuInfoForm textarea {
+    flex: 1; /* 남은 공간 채우기 */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    min-width: 150px; /* 최소 너비 */
+    box-sizing: border-box; /* 패딩 포함 크기 계산 */
+}
+
+#menuInfoForm input[readonly] {
+    background-color: #eee;
+    cursor: not-allowed;
+}
+
+#menuInfoForm textarea {
+    min-height: 80px; /* 텍스트 영역 높이 */
+    resize: vertical; /* 수직 리사이즈만 허용 */
+}
+
+#menuInfoForm .radio-group {
+    display: flex;
+    align-items: center;
+}
+
+#menuInfoForm .radio-group input[type="radio"] {
+    margin-right: 5px;
+}
+#menuInfoForm .radio-group label {
+    width: auto; /* 라디오 버튼 라벨 너비 자동 */
+    margin-right: 15px;
+    font-weight: normal;
+    text-align: left;
+}
+
+
+#menuInfoForm button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-left: 5px; /* 버튼 간격 */
+}
+
+#saveBtn {
+    background-color: #007bff;
+    color: white;
+}
+#saveBtn:hover {
+    background-color: #0056b3;
+}
+
+.button-group {
+    margin-top: 20px;
+    text-align: right; /* 버튼 오른쪽 정렬 */
+    width: calc(100% - 110px); /* 라벨 너비만큼 제외하고 정렬 */
+    margin-left: 110px; /* 라벨 너비만큼 왼쪽 여백 */
+}
+
+.button-group button {
+    background-color: #6c757d;
+    color: white;
+}
+.button-group button:hover {
+    background-color: #5a6268;
+}
+
+#deleteBtn {
+    background-color: #dc3545;
+}
+#deleteBtn:hover {
+    background-color: #c82333;
+}

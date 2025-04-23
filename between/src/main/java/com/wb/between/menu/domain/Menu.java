@@ -29,4 +29,7 @@ public class Menu {
     private Date createDt;
 
     private int sortOrder;
+
+    @Column(name = "menuType", length = 30)
+    private String menuType;
 }

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin/admin}">
+<head>
+  <title>관리자 화면</title>
+  <link rel="stylesheet" th:href="@{/css/admin/role-manage.css}">
+</head>
+<body>
+
+<section layout:fragment="admin-content">   <!-- Main Content -->
+
+  <h1 class="main-title">역할 관리 화면</h1>
+
+  <div class="content-container">
+    <!-- 상단 검색 영역 -->
+    <form id="searchForm" class="search-area">
+      <div class="form-group">
+        <label for="searchRoleName">역할 명</label>
+        <input type="text" id="searchRoleName" name="searchRoleName">
+        <button type="submit" id="searchBtn">검색</button> <!-- 2. 검색 버튼 -->
+      </div>
+      <!-- 1. 등록 버튼 (검색 영역 오른쪽에 배치) -->
+      <button type="button" id="registerBtn" class="register-button">역할 등록</button>
+    </form>
+
+    <!-- 결과 테이블 영역 -->
+    <div class="table-area">
+      <table class="results-table">
+        <thead>
+        <tr>
+          <th scope="col">역할번호</th>
+          <th scope="col">역할코드</th>
+          <th scope="col">역할명</th>
+          <th scope="col">역할설명</th>
+          <th scope="col">등록일</th>
+          <th scope="col">수정</th>
+        </tr>
+        </thead>
+        <tbody id="resultsBody">
+        <!-- 검색 결과가 여기에 동적으로 추가됩니다 -->
+        <!-- 검색 결과가 여기에 동적으로 추가됩니다 -->
+        <tr th:each="role : ${adminRoleList}">
+          <td th:text="${role.roleId}"></td>
+          <td th:text="${role.roleCode}"></td>
+          <td th:text="${role.roleName}"></td>
+          <td th:text="${role.description}"></td>
+          <td th:text="${#temporals.format(role.createDt, 'yyyy.MM.dd HH:mm')}"></td>
+          <td><button type="button" class="btn-edit" data-group-id="3">수정</button></td>
+        </tr>
+        <tr th:if="${adminRoleList.empty}">
+          <td colspan="6" class="no-data">조회된 역할 목록이 없습니다.</td>
+        </tr>
+        <!-- ... 추가 예시 행 ... -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 페이지네이션 영역 -->
+    <div class="pagination-area">
+      <a href="#" class="page-link current-page">1</a>
+      <!-- <a href="#" class="page-link">2</a> -->
+      <!-- <a href="#" class="page-link">3</a> -->
+    </div>
+  </div>
+    <!-- 회원 탈퇴 확인을 위한 간단한 스크립트 예시 -->
+    <script>
+      // function confirmWithdrawal() {
+      //   if (confirm('정말로 회원을 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+      //     // 실제 탈퇴 처리 로직 호출 (예: form submit 또는 fetch API 사용)
+      //     // location.href = '/mypage/withdraw'; // 예시 URL
+      //     // alert('회원 탈퇴 로직을 구현해야 합니다.');
+      //   }
+      // }
+    </script>
+  </div>
+</section >
+</body>
+</html>

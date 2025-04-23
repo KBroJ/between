@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin/admin}">
+<head>
+  <title>관리자 화면</title>
+  <link rel="stylesheet" th:href="@{/css/admin/menu-manage.css}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+
+</head>
+<body>
+<section layout:fragment="admin-content">   <!-- Main Content -->
+
+  <h1 class="main-title">메뉴관리</h1>
+
+  <div class="menu-management-container">
+    <div class="tree-panel">
+      <div id="menuTreeContainer">
+        <!-- JSTree가 여기에 렌더링됩니다 -->
+        <div id="jstree_div"></div>
+      </div>
+    </div>
+
+    <!-- 오른쪽 정보 패널 -->
+    <div class="form-panel">
+      <h2>메뉴 정보</h2>
+      <form id="menuInfoForm">
+        <!-- 숨겨진 필드: 현재 메뉴 번호 (수정 시 사용) -->
+        <input type="hidden" id="menuNo" name="menuNo">
+        <!-- 숨겨진 필드: 상위 메뉴 번호 (저장 시 사용) -->
+        <input type="hidden" id="upperMenuNo" name="upperMenuNo">
+
+        <div class="form-group">
+          <label for="menuNm">메뉴 명</label>
+          <input type="text" id="menuNm" name="menuNm" required>
+          <!-- 이미지의 조회 버튼은 '저장'으로 가정 -->
+          <button type="submit" id="saveBtn">저장</button>
+        </div>
+        <div class="form-group">
+          <label for="upperMenuDisplay">상위 메뉴</label>
+          <!-- 상위 메뉴 이름 표시용 (읽기 전용) -->
+          <input type="text" id="upperMenuDisplay" name="upperMenuDisplay" readonly>
+          <!-- 실제 상위 메뉴 선택 기능은 추가 구현 필요 -->
+        </div>
+        <div class="form-group">
+          <label for="sortOrder">메뉴 순서</label>
+          <input type="number" id="sortOrder" name="sortOrder" value="1" min="0">
+        </div>
+        <div class="form-group">
+          <label>노출 여부</label>
+          <div class="radio-group">
+            <input type="radio" id="useAtY" name="useAt" value="Y" checked>
+            <label for="useAtY">노출</label>
+            <input type="radio" id="useAtN" name="useAt" value="N">
+            <label for="useAtN">미노출</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="menuUrl">경로</label>
+          <input type="text" id="menuUrl" name="menuUrl">
+        </div>
+        <div class="form-group">
+          <label for="menuDsc">메뉴 설명</label>
+          <textarea id="menuDsc" name="menuDsc" rows="4"></textarea>
+        </div>
+
+        <div class="button-group">
+          <!-- 3. 추가 버튼 -->
+          <button type="button" id="addBtn">추가</button>
+          <!-- 4. 삭제 버튼 -->
+          <button type="button" id="deleteBtn">삭제</button>
+        </div>
+      </form>
+    </div>
+
+
+
+
+  </div>
+</section >
+<th:block layout:fragment="page-script">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+  <!-- 커스텀 JavaScript -->
+  <script th:src="@{/js/admin/menu-manage.js}"></script>
+</th:block>
+</body>
+</html>
