@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin/admin}">
+
+    <head>
+        <title>회원 관리 목록</title>
+        <th:block layout:fragment="page-css">
+            <link rel="stylesheet" th:href="@{/css/admin/user/users.css}">
+        </th:block>
+    </head>
+
+    <body>
+        <section layout:fragment="admin-content">
+            <h1 class="main-title">회원 관리 목록</h1>
+
+            <!-- 회원 정보 검색 폼 -->
+            <form th:action="@{/admin/users}" method="get" class="filter-area">
+                <div class="filter-group date-filter">
+                    <label for="searchStartDate">가입일</label>
+                    <div class="date-inputs">
+                        <input type="date" id="searchStartDate" name="startDate" th:value="${filterParams?.startDate}">
+                        <span>~</span>
+                        <input type="date" id="searchEndDate" name="endDate" th:value="${filterParams?.endDate}">
+                    </div>
+                </div>
+
+                <div class="filter-group keyword-filter">
+                    <label for="searchText">검색</label>
+                    <div class="keyword-inputs">
+                        <select id="searchType" name="searchType">
+                            <option value="email" th:selected="${filterParams?.searchType == 'email'}">이메일</option>
+                            <option value="name" th:selected="${filterParams?.searchType == 'name'}">이름</option>
+                            <option value="phone" th:selected="${filterParams?.searchType == 'phone'}">연락처</option>
+                        </select>
+                        <input type="text" id="searchText" name="searchText" placeholder="검색어 입력" th:value="${filterParams?.searchText}">
+                    </div>
+                </div>
+
+                <div class="filter-group status-filter">
+                    <label for="searchStatus">회원 상태</label>
+                    <select id="searchStatus" name="status">
+                        <option value="" th:selected="${filterParams?.status == ''}">전체</option>
+                        <option value="정상" th:selected="${filterParams?.status == '정상'}">정상</option>
+                        <option value="휴면" th:selected="${filterParams?.status == '휴면'}">휴면</option>
+                    </select>
+                </div>
+
+                <div class="filter-group grade-filter">
+                    <label for="searchGrade">회원 등급</label>
+                    <select id="searchGrade" name="grade">
+                        <option value="" th:selected="${filterParams?.grade == ''}">전체</option>
+                        <option value="일반" th:selected="${filterParams?.grade == '일반'}">일반</option>
+                        <option value="임직원" th:selected="${filterParams?.grade == '임직원'}">임직원</option>
+                        <option value="관리자" th:selected="${filterParams?.grade == '관리자'}">관리자</option>
+                    </select>
+                </div>
+
+                <div class="filter-group button-group">
+                    <button type="submit" class="search-button">검색</button>
+                </div>
+            </form>
+
+            <div class="table-area">
+                <table class="user-data-table">
+                    <thead>
+                        <tr>
+                            <th>번호</th>
+                            <th>이메일</th>
+                            <th>이름</th>
+                            <th>연락처</th>
+                            <th>가입일</th>
+                            <th>상태</th>
+                            <th>등급</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${userPage == null or userPage.empty}">
+                            <td colspan="7" class="no-result">조회된 회원이 없습니다.</td>
+                        </tr>
+                        <tr th:unless="${userPage == null or userPage.empty}"
+                            th:each="user, iterStat : ${userPage.content}"
+                            th:attr="data-user-id=${user.userNo}" class="data-row">
+                            <td th:text="${userPage.totalElements - (userPage.number * userPage.size) - iterStat.index}"></td>
+                            <td th:text="${user.email}"></td>
+                            <td th:text="${user.name}"></td>
+                            <td th:text="${user.phoneNo}"></td>
+                            <td th:text="${#temporals.format(user.createDt, 'yyyy-MM-dd')}"></td>
+                            <td th:text="${user.userStts}"></td>
+                            <td th:text="${user.authCd}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <nav class="pagination-area" aria-label="Page navigation" th:if="${userPage != null and userPage.totalPages > 0}">
+                <ul class="pagination-list">
+                    <li class="pagination-item" th:classappend="${userPage.first} ? 'disabled'">
+                        <a class="pagination-link" th:href="@{/admin/users(page=0,
+                                                startDate=${filterParams.startDate},
+                                                endDate=${filterParams.endDate},
+                                                searchType=${filterParams.searchType},
+                                                searchText=${filterParams.searchText},
+                                                status=${filterParams.status},
+                                                grade=${filterParams.grade})}" aria-label="First">&laquo;</a>
+                    </li>
+                    <li class="pagination-item" th:classappend="${userPage.first} ? 'disabled'">
+                        <a class="pagination-link" th:href="@{/admin/users(page=${userPage.number - 1},
+                                                startDate=${filterParams.startDate},
+                                                endDate=${filterParams.endDate},
+                                                searchType=${filterParams.searchType},
+                                                searchText=${filterParams.searchText},
+                                                status=${filterParams.status},
+                                                grade=${filterParams.grade})}" aria-label="Previous">&lsaquo;</a>
+                    </li>
+                    <li class="pagination-item" th:each="pageNum : ${#numbers.sequence( T(java.lang.Math).max(0, userPage.number - 2), T(java.lang.Math).min(userPage.totalPages - 1, userPage.number + 2) )}"
+                        th:classappend="${pageNum == userPage.number} ? 'active'">
+                        <a class="pagination-link" th:href="@{/admin/users(page=${pageNum},
+                                                startDate=${filterParams.startDate},
+                                                endDate=${filterParams.endDate},
+                                                searchType=${filterParams.searchType},
+                                                searchText=${filterParams.searchText},
+                                                status=${filterParams.status},
+                                                grade=${filterParams.grade})}" th:text="${pageNum + 1}"></a>
+                    </li>
+                    <li class="pagination-item" th:classappend="${userPage.last} ? 'disabled'">
+                        <a class="pagination-link" th:href="@{/admin/users(page=${userPage.number + 1},
+                                                startDate=${filterParams.startDate},
+                                                endDate=${filterParams.endDate},
+                                                searchType=${filterParams.searchType},
+                                                searchText=${filterParams.searchText},
+                                                status=${filterParams.status},
+                                                grade=${filterParams.grade})}" aria-label="Next">&rsaquo;</a>
+                    </li>
+                    <li class="pagination-item" th:classappend="${userPage.last} ? 'disabled'">
+                        <a class="pagination-link" th:href="@{/admin/users(page=${userPage.totalPages - 1},
+                                                startDate=${filterParams.startDate},
+                                                endDate=${filterParams.endDate},
+                                                searchType=${filterParams.searchType},
+                                                searchText=${filterParams.searchText},
+                                                status=${filterParams.status},
+                                                grade=${filterParams.grade})}" aria-label="Last">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+
+            <th:block layout:fragment="page-script">
+                <script th:src="@{/js/admin/user/users.js}"></script>
+            </th:block>
+
+        </section>
+    </body>
+</html>

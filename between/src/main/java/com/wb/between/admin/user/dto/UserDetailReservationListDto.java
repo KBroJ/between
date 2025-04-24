@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 */
 @Data
 @Builder
-public class UserReservationDto {
+public class UserDetailReservationListDto {
 
     private Long resNo;
     private LocalDateTime resDt;    // 예약시간

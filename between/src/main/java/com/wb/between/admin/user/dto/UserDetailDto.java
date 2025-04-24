@@ -20,6 +20,6 @@ public class UserDetailDto {
     private String authCd;
     private String userStts;                            // ("정상", "휴면", "탈퇴")
     private LocalDateTime createDt;
-    private List<UserReservationDto> recentReservations;    // 최근 예약 목록
+    private List<UserDetailReservationListDto> recentReservations;    // 최근 예약 목록
 
 }

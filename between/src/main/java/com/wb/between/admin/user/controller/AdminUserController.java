@@ -1,12 +1,19 @@
 package com.wb.between.admin.user.controller;
 
 import com.wb.between.admin.user.dto.UserDetailDto;
+import com.wb.between.admin.user.dto.UserFilterParamsDto;
+import com.wb.between.admin.user.dto.UserListDto;
 import com.wb.between.admin.user.service.AdminUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -18,10 +25,31 @@ public class AdminUserController {
 
     private final AdminUserService adminUserService; // 주입받은 서비스 객체
 
+    /**
+     * 회원 관리 목록 페이지 요청 처리 (검색 조건 및 페이징 포함)
+     * @param filterParams 검색 조건 DTO (@ModelAttribute 를 통해 HTTP 파라미터를 객체에 바인딩)
+     * @param pageable 페이징/정렬 정보 (@PageableDefault 로 기본값 설정)
+     * @param model View 로 전달할 데이터 모델
+     * @return 렌더링할 뷰의 논리적 이름
+     */
     // 회원 관리 - 회원 목록 페이지
     @GetMapping("/users")
-    public String userManagement(Model model) {
+    public String userManagement(@ModelAttribute UserFilterParamsDto filterParams,
+                                 @PageableDefault(size = 10, sort = "createDt", direction = Sort.Direction.DESC) Pageable pageable, // 페이징 기본값 설정
+                                 Model model) {
+        log.info("AdminUserController|userManagement|관리자 - 사용자 목록 조회 요청 시작 ==================");
+        log.info("AdminUserController|userManagement|=========> 1. filterParams: {}", filterParams);
+        log.info("AdminUserController|userManagement|=========> 2. Pageable: {}", pageable);
+        log.info("AdminUserController|userManagement|관리자 - 사용자 목록 조회 요청 끝   ==================");
 
+        // 서비스 호출하여 필터링/페이징된 사용자 목록 조회
+        Page<UserListDto> userPage = adminUserService.getUsers(filterParams, pageable);
+
+        // Model에 데이터 추가 -> Thymeleaf 템플릿에서 사용 가능
+        model.addAttribute("userPage", userPage);           // 페이징된 사용자 목록 데이터
+        model.addAttribute("filterParams", filterParams);   // 검색 조건 유지를 위해 전달
+
+        log.info("조회 완료. 총 페이지: {}, 총 회원 수: {}", userPage.getTotalPages(), userPage.getTotalElements());
 
         return "admin/user/users";
     }

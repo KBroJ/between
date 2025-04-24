@@ -1,0 +1,191 @@
+/* === 기본 설정 및 컨테이너 === */
+.admin-content-container {
+    padding: 20px;
+    font-family: sans-serif; /* 기본 폰트 지정 */
+}
+
+.page-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 25px;
+    color: #333;
+}
+
+.main-title {
+    font-size: 1.8em;
+    margin-bottom: 25px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+/* === 필터 영역 === */
+.filter-area {
+    display: flex; /* Flexbox 사용 */
+    flex-wrap: wrap; /* 넘치면 다음 줄로 */
+    gap: 15px; /* 요소 간 간격 */
+    align-items: flex-end; /* 요소 하단 정렬 */
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    padding: 20px;
+    margin-bottom: 25px;
+    border-radius: 4px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column; /* 라벨과 입력 필드 수직 배치 */
+    margin-bottom: 10px; /* 그룹 간 하단 여백 (flex-wrap 시) */
+}
+
+.filter-group label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.filter-group input[type="date"],
+.filter-group input[type="text"],
+.filter-group select {
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    height: 38px; /* 높이 통일 */
+    box-sizing: border-box;
+}
+
+.filter-group input[type="text"] {
+    flex-grow: 1; /* 남는 공간 차지 (키워드 입력칸) */
+}
+
+.filter-group select {
+    min-width: 120px; /* Select box 최소 너비 */
+}
+
+.date-filter .date-inputs,
+.keyword-filter .keyword-inputs {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.date-filter .date-inputs span {
+    padding: 0 5px;
+}
+
+.keyword-filter .keyword-inputs select {
+     flex-shrink: 0; /* 선택 박스 줄어들지 않게 */
+}
+
+.button-group {
+    margin-left: auto; /* 검색 버튼을 오른쪽으로 밀기 (flex 컨테이너 내에서) */
+}
+
+.search-button {
+    padding: 8px 20px;
+    font-size: 0.9rem;
+    background-color: #0d6efd;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    height: 38px;
+    white-space: nowrap;
+}
+
+.search-button:hover {
+    background-color: #0b5ed7;
+}
+
+/* === 테이블 영역 === */
+.table-area {
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    overflow-x: auto; /* 테이블 내용 넘칠 경우 가로 스크롤 */
+    background-color: #fff;
+}
+
+.user-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.user-data-table thead th {
+    background-color: #e9ecef;
+    border-bottom: 2px solid #dee2e6;
+    padding: 12px 10px;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.user-data-table tbody td {
+    border-top: 1px solid #dee2e6;
+    padding: 10px;
+    vertical-align: middle;
+    text-align: center; /* 테이블 내용 가운데 정렬 */
+}
+
+.user-data-table .no-result {
+    padding: 20px;
+    color: #6c757d;
+}
+
+/* 클릭 가능한 행 */
+.user-data-table tbody tr.data-row {
+    cursor: pointer;
+}
+
+.user-data-table tbody tr.data-row:hover {
+    background-color: #f1f3f5;
+}
+
+/* === 페이지네이션 영역 === */
+.pagination-area {
+    display: flex;
+    justify-content: center;
+    margin-top: 25px;
+}
+
+.pagination-list {
+    display: flex;
+    padding-left: 0;
+    list-style: none;
+    margin: 0;
+}
+
+.pagination-item {
+    margin: 0 3px; /* 페이지 번호 간 간격 */
+}
+
+.pagination-link {
+    display: block;
+    padding: 6px 12px;
+    color: #0d6efd;
+    text-decoration: none;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.pagination-link:hover {
+    background-color: #e9ecef;
+}
+
+.pagination-item.active .pagination-link {
+    z-index: 3;
+    color: #fff;
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.pagination-item.disabled .pagination-link {
+    color: #6c757d;
+    pointer-events: none;
+    background-color: #fff;
+    border-color: #dee2e6;
+}

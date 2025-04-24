@@ -3,6 +3,21 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/admin/admin}">
 
+    <!--
+        1. 브라우저가 /admin/user/{id} 같은 주소를 요청하면, 컨트롤러는 user-detail 뷰 이름을 반환합니다.
+        2. 타임리프는 user-detail.html을 처리하기 시작합니다.
+        3. user-detail.html은 admin.html을 레이아웃으로 사용(layout:decorate)하므로, 타임리프는 admin.html을 로드합니다.
+        4. admin.html은 layout.html을 레이아웃으로 사용(layout:decorate)하므로, 타임리프는 layout.html을 로드합니다.
+        5. layout.html이 가장 바깥 뼈대를 그립니다 (헤더, 푸터 포함). content와 page-script 영역은 비워둡니다.
+        6. admin.html이 layout.html의 content 영역을 자신의 내용(사이드바 + admin-content 영역)으로 채웁니다.
+           사이드바는 sidebar.html에서 가져옵니다 (th:replace). page-script도 일단 자신의 것으로 채웁니다.
+        7. user-detail.html이 admin.html의 admin-content 영역을 자신의 내용(회원 상세 정보 등)으로 채웁니다. page-css는 <head>에 추가하고,
+           page-script는 admin.html의 것을 덮어쓰며 최종본을 만듭니다.
+
+        결론적으로 layout.html -> admin.html -> user-detail.html 순서로 껍데기를 만들고 속을 채워나가는 방식으로 페이지가 완성됩니다.
+        sidebar.html은 중간에 필요한 부품으로 사용됩니다.
+    -->
+
     <head>
         <title>회원 상세 정보</title>
         <th:block layout:fragment="page-css">
@@ -12,7 +27,6 @@
     </head>
 
     <body>
-<!--        <main layout:fragment="content">-->
         <section layout:fragment="admin-content">
             <div class="detail-card">
                 <h2 class="card-title">
@@ -119,7 +133,6 @@
                 </div>
             </div>
         </section>
-<!--        </main>-->
 
         <th:block layout:fragment="page-script">
             <script th:src="@{/js/admin/user/user-detail.js}"></script>
