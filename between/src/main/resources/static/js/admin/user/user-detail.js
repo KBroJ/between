@@ -95,8 +95,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // '목록으로' 버튼 클릭 이벤트
     if (goToListBtn) {
         goToListBtn.addEventListener('click', function() {
-            // 회원 목록 페이지로 이동 (실제 경로로 수정 필요)
-            window.location.href = '/admin/users'; // 목록 페이지 경로 예시
+            // 회원 목록 페이지로 이동
+            window.location.href = '/admin/userList'; // 목록 페이지 경로 예시
         });
     }
 
