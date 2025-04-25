@@ -33,14 +33,14 @@ public class AdminUserController {
      * @return 렌더링할 뷰의 논리적 이름
      */
     // 회원 관리 - 회원 목록 페이지
-    @GetMapping("/users")
-    public String userManagement(@ModelAttribute UserFilterParamsDto filterParams,
+    @GetMapping("/userList")
+    public String userListPage(@ModelAttribute UserFilterParamsDto filterParams,
                                  @PageableDefault(size = 10, sort = "createDt", direction = Sort.Direction.DESC) Pageable pageable, // 페이징 기본값 설정
                                  Model model) {
-        log.info("AdminUserController|userManagement|관리자 - 사용자 목록 조회 요청 시작 ==================");
-        log.info("AdminUserController|userManagement|=========> 1. filterParams: {}", filterParams);
-        log.info("AdminUserController|userManagement|=========> 2. Pageable: {}", pageable);
-        log.info("AdminUserController|userManagement|관리자 - 사용자 목록 조회 요청 끝   ==================");
+        log.info("AdminUserController|userListPage|관리자 - 사용자 목록 조회 요청 시작 ==================");
+        log.info("AdminUserController|userListPage|=========> 1. filterParams: {}", filterParams);
+        log.info("AdminUserController|userListPage|=========> 2. Pageable: {}", pageable);
+        log.info("AdminUserController|userListPage|관리자 - 사용자 목록 조회 요청 끝   ==================");
 
         // 서비스 호출하여 필터링/페이징된 사용자 목록 조회
         Page<UserListDto> userPage = adminUserService.getUsers(filterParams, pageable);
@@ -51,7 +51,7 @@ public class AdminUserController {
 
         log.info("조회 완료. 총 페이지: {}, 총 회원 수: {}", userPage.getTotalPages(), userPage.getTotalElements());
 
-        return "admin/user/users";
+        return "admin/user/user-list";
     }
 
     /**
@@ -61,8 +61,8 @@ public class AdminUserController {
      * @return 렌더링할 뷰의 이름
      */
     @GetMapping("/users/{userNo}") // 요청 경로 변경: /admin/users/{userNo} 형태
-    public String showUserDetailPage(@PathVariable Long userNo, Model model) { // 메소드명 변경 및 파라미터 추가
-        log.info("관리자 - 사용자 상세 정보 조회 요청. userNo={}", userNo);
+    public String userDetailPage(@PathVariable Long userNo, Model model) { // 메소드명 변경 및 파라미터 추가
+        log.info("AdminUserController|userDetailPage|관리자 - 사용자 상세 정보 조회 요청. userNo={}", userNo);
         try {
 
             // userNo로 사용자 상세 정보 DTO 가져오기
@@ -78,12 +78,13 @@ public class AdminUserController {
             // 사용자를 찾을 수 없는 경우 에러 처리
             log.error("사용자 조회 실패: {}", e.getMessage());
             model.addAttribute("errorMessage", e.getMessage());
+
             return "error/404"; // 임시 에러 페이지
         } catch (Exception e) {
             // 기타 예외 처리
             log.error("사용자 상세 정보 조회 중 오류 발생", e);
             model.addAttribute("errorMessage", "사용자 정보를 불러오는 중 오류가 발생했습니다.");
-            // TODO: 적절한 에러 페이지 경로 반환
+
             return "error/500"; // 임시 에러 페이지
         }
     }
