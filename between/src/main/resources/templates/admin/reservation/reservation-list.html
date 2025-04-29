@@ -6,7 +6,7 @@
     <head>
         <title>예약 관리 목록</title>
         <th:block layout:fragment="page-css">
-            <link rel="stylesheet" th:href="@{/css/admin/user/reservation-list.css}">
+            <link rel="stylesheet" th:href="@{/css/admin/reservation/reservation-list.css}">
         </th:block>
     </head>
 
@@ -14,10 +14,11 @@
         <section layout:fragment="admin-content">
             <h1 class="main-title">예약 관리 목록</h1>
 
-            <!-- 예약 정보 검색 폼 -->
-            <form th:action="@{/admin/users}" method="get" class="filter-area">
+            <!-- 예약 정보 검색 필터 폼 -->
+            <form th:action="@{/admin/reservationList}" method="get" class="filter-area">
+
                 <div class="filter-group date-filter">
-                    <label for="searchStartDate">가입일</label>
+                    <label for="searchStartDate">예약일</label>
                     <div class="date-inputs">
                         <input type="date" id="searchStartDate" name="startDate" th:value="${filterParams?.startDate}">
                         <span>~</span>
@@ -36,107 +37,121 @@
                     </div>
                 </div>
 
-                <div class="filter-group grade-filter">
-                    <label for="searchGrade">회원 등급</label>
-                    <select id="searchGrade" name="grade">
-                        <option value="" th:selected="${filterParams?.grade == ''}">전체</option>
-                        <option value="일반" th:selected="${filterParams?.grade == '일반'}">일반</option>
-                        <option value="임직원" th:selected="${filterParams?.grade == '임직원'}">임직원</option>
-                        <option value="관리자" th:selected="${filterParams?.grade == '관리자'}">관리자</option>
+                <div class="filter-group seat-filter">
+                    <label for="searchSeat">좌석 선택</label>
+                    <select id="searchSeat" name="seatNo">
+                        <option value="" th:selected="${filterParams?.seatNo == null}">전체</option>
+                        <option th:each="seat : ${seats}"
+                                th:value="${seat.seatNo}"
+                                th:text="${seat.seatNm}"
+                                th:selected="${filterParams?.seatNo == seat.seatNo}">
+                            <!--
+                            회의실 A (예시)
+                            -->
+                        </option>
                     </select>
                 </div>
 
                 <div class="filter-group button-group">
                     <button type="submit" class="search-button">검색</button>
                 </div>
+
             </form>
 
             <div class="table-area">
-                <table class="user-data-table">
+                <table class="reservation-data-table">
                     <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>예약일</th>
-                        <th>이메일</th>
-                        <th>이름</th>
-                        <th>좌석정보</th>
-                        <th>이용시간</th>
-                        <th>결제금액</th>
-                        <th>상태</th>
-                    </tr>
+                        <tr>
+                            <th>No</th>
+                            <th>예약일</th>
+                            <th>이메일</th>
+                            <th>이름</th>
+                            <th>좌석정보</th>
+                            <th>이용시간</th>
+                            <th>결제금액</th>
+                            <th>상태</th>
+                        </tr>
                     </thead>
                     <tbody>
-                    <tr th:if="${userPage == null or userPage.empty}">
-                        <td colspan="7" class="no-result">조회된 예약 내역이 없습니다.</td>
-                    </tr>
-                    <tr th:unless="${userPage == null or userPage.empty}"
-                        th:each="user, iterStat : ${userPage.content}"
-                        th:attr="data-user-id=${user.userNo}" class="data-row">
-                        <td th:text="${userPage.totalElements - (userPage.number * userPage.size) - iterStat.index}"></td>
-                        <td th:text="${user.email}"></td>
-                        <td th:text="${user.name}"></td>
-                        <td th:text="${user.phoneNo}"></td>
-                        <td th:text="${#temporals.format(user.createDt, 'yyyy-MM-dd')}"></td>
-                        <td th:text="${user.userStts}"></td>
-                        <td th:text="${user.authCd}"></td>
-                    </tr>
+
+                        <tr th:if="${reservationPage == null or reservationPage.empty}">
+                            <td colspan="8" class="no-result">조회된 예약이 없습니다.</td>
+                        </tr>
+
+                        <tr th:unless="${reservationPage == null or reservationPage.empty}"
+                            th:each="reservation, iterStat : ${reservationPage.content}"
+                            th:attr="data-reservation-id=${reservation.resNo}" class="data-row">
+                            <td th:text="${reservationPage.totalElements - (reservationPage.number * reservationPage.size) - iterStat.index}"></td>
+                            <td th:text="${#temporals.format(reservation.resDt, 'yyyy-MM-dd HH:mm')}"></td>
+                            <td th:text="${reservation.userEmail}"></td>
+                            <td th:text="${reservation.userName}"></td>
+                            <td th:text="${reservation.seatNm}"></td>
+                            <td th:text="${#temporals.format(reservation.resStart, 'yyyy.MM.dd HH:mm') + ' ~ ' + #temporals.format(reservation.resEnd, 'yyyy.MM.dd HH:mm')}"></td>
+                            <!--
+                            <td th:text="${reservation.totalPrice != null ? #numbers.formatInteger(reservation.totalPrice, '###,###') + '원' : '-'}"></td>
+                            -->
+                            <td th:text="${reservation.totalPrice != null ? #numbers.formatDecimal(reservation.totalPrice, 0, 'COMMA', 0, 'POINT') : '-'} + '원'"></td>
+                            <td th:text="${reservation.resStatus}"></td>
+                        </tr>
+
                     </tbody>
                 </table>
             </div>
 
-            <nav class="pagination-area" aria-label="Page navigation" th:if="${userPage != null and userPage.totalPages > 0}">
+            <nav class="pagination-area" aria-label="Page navigation" th:if="${reservationPage != null and reservationPage.totalPages > 0}">
                 <ul class="pagination-list">
-                    <li class="pagination-item" th:classappend="${userPage.first} ? 'disabled'">
-                        <a class="pagination-link" th:href="@{/admin/users(page=0,
-                                                        startDate=${filterParams.startDate},
-                                                        endDate=${filterParams.endDate},
-                                                        searchType=${filterParams.searchType},
-                                                        searchText=${filterParams.searchText},
-                                                        status=${filterParams.status},
-                                                        grade=${filterParams.grade})}" aria-label="First">&laquo;</a>
+                    <li class="pagination-item" th:classappend="${reservationPage.first} ? 'disabled'">
+                        <a class="pagination-link" th:href="@{/admin/reservationList(page=0,
+                                                startDate=${filterParams.startDate},
+                                                endDate=${filterParams.endDate},
+                                                searchType=${filterParams.searchType},
+                                                searchText=${filterParams.searchText},
+                                                seatNo=${filterParams.seatNo})}" aria-label="First">&laquo;
+                        </a>
                     </li>
-                    <li class="pagination-item" th:classappend="${userPage.first} ? 'disabled'">
-                        <a class="pagination-link" th:href="@{/admin/users(page=${userPage.number - 1},
-                                                        startDate=${filterParams.startDate},
-                                                        endDate=${filterParams.endDate},
-                                                        searchType=${filterParams.searchType},
-                                                        searchText=${filterParams.searchText},
-                                                        status=${filterParams.status},
-                                                        grade=${filterParams.grade})}" aria-label="Previous">&lsaquo;</a>
+                    <li class="pagination-item" th:classappend="${reservationPage.first} ? 'disabled'">
+                        <a class="pagination-link" th:href="@{/admin/reservationList(page=${reservationPage.number - 1},
+                                                startDate=${filterParams.startDate},
+                                                endDate=${filterParams.endDate},
+                                                searchType=${filterParams.searchType},
+                                                searchText=${filterParams.searchText},
+                                                seatNo=${filterParams.seatNo})}" aria-label="Previous">&lsaquo;
+                        </a>
                     </li>
-                    <li class="pagination-item" th:each="pageNum : ${#numbers.sequence( T(java.lang.Math).max(0, userPage.number - 2), T(java.lang.Math).min(userPage.totalPages - 1, userPage.number + 2) )}"
-                        th:classappend="${pageNum == userPage.number} ? 'active'">
-                        <a class="pagination-link" th:href="@{/admin/users(page=${pageNum},
-                                                        startDate=${filterParams.startDate},
-                                                        endDate=${filterParams.endDate},
-                                                        searchType=${filterParams.searchType},
-                                                        searchText=${filterParams.searchText},
-                                                        status=${filterParams.status},
-                                                        grade=${filterParams.grade})}" th:text="${pageNum + 1}"></a>
+                    <li class="pagination-item" th:each="pageNum : ${#numbers.sequence( T(java.lang.Math).max(0, reservationPage.number - 2), T(java.lang.Math).min(reservationPage.totalPages - 1, reservationPage.number + 2) )}"
+                        th:classappend="${pageNum == reservationPage.number} ? 'active'">
+                            <a class="pagination-link" th:href="@{/admin/reservationList(page=${pageNum},
+                                                startDate=${filterParams.startDate},
+                                                endDate=${filterParams.endDate},
+                                                searchType=${filterParams.searchType},
+                                                searchText=${filterParams.searchText},
+                                                seatNo=${filterParams.seatNo})}" th:text="${pageNum + 1}">
+
+                            </a>
                     </li>
-                    <li class="pagination-item" th:classappend="${userPage.last} ? 'disabled'">
-                        <a class="pagination-link" th:href="@{/admin/users(page=${userPage.number + 1},
-                                                        startDate=${filterParams.startDate},
-                                                        endDate=${filterParams.endDate},
-                                                        searchType=${filterParams.searchType},
-                                                        searchText=${filterParams.searchText},
-                                                        status=${filterParams.status},
-                                                        grade=${filterParams.grade})}" aria-label="Next">&rsaquo;</a>
+                    <li class="pagination-item" th:classappend="${reservationPage.last} ? 'disabled'">
+                        <a class="pagination-link" th:href="@{/admin/reservationList(page=${reservationPage.number + 1},
+                                                startDate=${filterParams.startDate},
+                                                endDate=${filterParams.endDate},
+                                                searchType=${filterParams.searchType},
+                                                searchText=${filterParams.searchText},
+                                                seatNo=${filterParams.seatNo})}" aria-label="Next">&rsaquo;
+                        </a>
                     </li>
-                    <li class="pagination-item" th:classappend="${userPage.last} ? 'disabled'">
-                        <a class="pagination-link" th:href="@{/admin/users(page=${userPage.totalPages - 1},
-                                                        startDate=${filterParams.startDate},
-                                                        endDate=${filterParams.endDate},
-                                                        searchType=${filterParams.searchType},
-                                                        searchText=${filterParams.searchText},
-                                                        status=${filterParams.status},
-                                                        grade=${filterParams.grade})}" aria-label="Last">&raquo;</a>
+                    <li class="pagination-item" th:classappend="${reservationPage.last} ? 'disabled'">
+                        <a class="pagination-link" th:href="@{/admin/reservationList(page=${reservationPage.totalPages - 1},
+                                                startDate=${filterParams.startDate},
+                                                endDate=${filterParams.endDate},
+                                                searchType=${filterParams.searchType},
+                                                searchText=${filterParams.searchText},
+                                                seatNo=${filterParams.seatNo})}" aria-label="Last">&raquo;
+                        </a>
                     </li>
                 </ul>
             </nav>
 
             <th:block layout:fragment="page-script">
-                <script th:src="@{/js/admin/user/reservation-list.js}"></script>
+                <script th:src="@{/js/admin/reservation/reservation-list.js}"></script>
             </th:block>
 
         </section>

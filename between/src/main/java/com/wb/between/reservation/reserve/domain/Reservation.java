@@ -1,5 +1,7 @@
 package com.wb.between.reservation.reserve.domain;
 
+import com.wb.between.reservation.seat.domain.Seat;
+import com.wb.between.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,10 +21,10 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long resNo; // 예약 번호 (PK)
 
-    @Column(nullable = false)
+    @Column(nullable = false, insertable = false, updatable = false)
     private Long userNo; // 예약한 사용자 번호
 
-    @Column(nullable = false)
+    @Column(nullable = false, insertable = false, updatable = false)
     private Long seatNo; // 예약된 좌석 번호 (Seat 테이블의 PK 타입과 일치해야 함)
 
     @Column(nullable = false, length = 10)
@@ -64,12 +66,24 @@ public class Reservation {
     // @Column(length = 20)
     // private String paymentStatus = "PENDING"; // 결제 상태 (PENDING, PAID, FAILED, CANCELED) - String 또는 Enum 권장
 
+
+    // @JoinColumn의 name 속성을 실제 DB의 외래키 컬럼 이름(userNo)으로 정확히 지정
+    // 이 관계를 통해 JPA가 외래 키를 관리 (insert/update)
+    @ManyToOne(fetch = FetchType.LAZY) // User 엔티티와 다대일 관계
+    @JoinColumn(name = "userNo", nullable = false)
+    private User user;
+
+    // @JoinColumn의 name 속성을 실제 DB의 외래키 컬럼 이름(seatNo)으로 정확히 지정
+    // 이 관계를 통해 JPA가 외래 키를 관리 (insert/update)
+    @ManyToOne(fetch = FetchType.LAZY) // Seat 엔티티와 다대일 관계
+    @JoinColumn(name = "seatNo", nullable = false)
+    private Seat seat;
+
     public Reservation() {} // 기본 생성자
 
-
-   public Reservation(
-            long l,
-            LocalDateTime localDateTime, String s, LocalDateTime localDateTime1, LocalDateTime localDateTime2, String number, String 예약완료, boolean b
+    public Reservation(
+            long l, LocalDateTime localDateTime, String s, LocalDateTime localDateTime1,
+            LocalDateTime localDateTime2, String number, String 예약완료, boolean b
     ) {
     }
 }
