@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
@@ -58,7 +59,22 @@ public class AdminReservationController {
         return "admin/reservation/reservation-list";
     }
 
+/*
+    @GetMapping("/reservationList/{resNo}")
+    public String reservationDetailPage(@PathVariable Long resNo, Model model) {
+        log.info("AdminReservationController|reservationDetailPage|관리자 - 예약 상세 조회 요청 시작 ==================");
 
+        // 1. 서비스 호출: 예약 상세 정보 조회
+        ReservationListDto reservationDetail = adminReservationService.getReservationDetail(resNo);
 
+        // 2. Model에 데이터 추가 (View에서 사용)
+        model.addAttribute("reservationDetail", reservationDetail); // 예약 상세 정보
 
+        log.info("조회 완료. 예약 번호: {}", resNo);
+
+        log.info("AdminReservationController|reservationDetailPage|관리자 - 예약 상세 조회 요청 끝   ==================");
+
+        return "admin/reservation/reservation-detail";
+    }
+*/
 }

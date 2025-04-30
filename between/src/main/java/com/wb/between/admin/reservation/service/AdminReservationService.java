@@ -45,11 +45,22 @@ public class AdminReservationService {
 
         Specification<Reservation> spec = buildReservationSpecification(filterParams); // 동적 쿼리 조건 생성
 
-        Page<Reservation> reservationPage = adminReservationRepository.findAll(spec, pageable); // DB 조회
+        Page<Reservation> reservationPage = adminReservationRepository.findAll(spec, pageable); // 전체 예약 목록 DB 조회
         log.info("DB 조회 완료. 조회된 예약 수: {}", reservationPage.getTotalElements());
 
+        /*
+            reservationPage.map(this::mapToReservationListDto)
+                reservationPage 안에 있는 예약 리스트 각각의 Reservation 엔티티에 대해 mapToReservationListDto 메소드를 순차적으로 호출
+                각 호출에서 반환된 ReservationListDto 객체들을 모음
+                원본 reservationPage와 동일한 페이지네이션 정보를 가지는 새로운 Page<ReservationListDto> 객체(dtoPage)를 생성하여 반환
+        */
         Page<ReservationListDto> dtoPage = reservationPage.map(this::mapToReservationListDto); // DTO 변환
-        log.info("DTO 변환 완료.");
+
+        if (log.isDebugEnabled()) {
+            log.debug("ReservationListDto Page Content ({}개):", dtoPage.getNumberOfElements());
+            // 각 DTO 객체를 개별 라인으로 출력 (DTO의 toString() 사용)
+            dtoPage.getContent().forEach(dto -> log.debug("예약 목록 DTO {} : {}", dto.getResNo(), dto));
+        }
 
         return dtoPage;
     }
@@ -113,8 +124,16 @@ public class AdminReservationService {
      * Reservation 엔티티를 ReservationListDto로 변환
      */
     private ReservationListDto mapToReservationListDto(Reservation reservation) {
-        User user = reservation.getUser(); // 연관된 User 엔티티 가져오기
-        Seat seat = reservation.getSeat(); // 연관된 Seat 엔티티 가져오기
+
+        /*
+            각각의 reservation객체에 관한 getUser(), getSeat() 호출 시 관련 DB 조회하여 객체에 담음 > 여러번 동일 쿼리 발생
+            => 해결
+            AdminReservationRepository.findAll(spec, pageable) 메소드에서
+            @EntityGraph(attributePaths = {"user", "seat"})를 사용한 Eager 로딩으로 지정한 연관 엔티티도 미리 함께 조회하여
+            매번 DB 조회할 필요가 없게됨
+        */
+        User user = reservation.getUser();
+        Seat seat = reservation.getSeat();
 
         // 예약 상태(Boolean)를 화면에 표시할 문자열("완료", "취소" 등)로 변환
         String statusString;
