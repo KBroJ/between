@@ -170,3 +170,38 @@
     background-color: #c92a2a; /* Darker red hover */
     border-color: #c92a2a;
 }
+
+
+/* 예약 테이블 */
+.table-responsive {
+    overflow-x: auto; /* 작은 화면에서 가로 스크롤 */
+}
+
+.reservation-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 0.9em;
+}
+
+.reservation-table th,
+.reservation-table td {
+    border: 1px solid #e9ecef;
+    padding: 10px 12px;
+    text-align: center;     /* 텍스트 가운데 정렬 적용 */
+    vertical-align: middle;
+}
+
+.reservation-table thead th {
+    background-color: #f8f9fa; /* 테이블 헤더 배경색 */
+    font-weight: 500;
+    color: #495057;
+}
+
+.reservation-table tbody tr:hover {
+    background-color: #f1f3f5; /* 행 호버 효과 */
+}
+
+.text-center {
+    text-align: center;
+}
