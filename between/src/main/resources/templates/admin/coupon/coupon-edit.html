@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin/admin}">
+<head>
+  <title>관리자 화면 - 쿠폰 등록</title>
+  <!-- 통일성을 위해 동일한 CSS 사용 -->
+  <link rel="stylesheet" th:href="@{/css/admin/coupon-manage.css}">
+  <!-- 등록 폼을 위한 추가/수정 스타일 (필요시) -->
+  <style>
+    /* 등록 폼 레이아웃 미세 조정 */
+    .register-form .form-group {
+      margin-bottom: 20px; /* 폼 그룹 간 간격 추가 */
+      display: flex; /* 라벨과 입력 필드 정렬 */
+      align-items: center; /* 수직 가운데 정렬 */
+    }
+    .register-form .form-group label {
+      width: 120px; /* 라벨 너비 고정 */
+      margin-right: 15px;
+      font-weight: bold;
+      text-align: right; /* 라벨 우측 정렬 */
+    }
+    .register-form .form-group input[type="text"],
+    .register-form .form-group input[type="number"],
+    .register-form .form-group input[type="datetime-local"],
+    .register-form .form-group select, /* select 사용 시 */
+    .register-form .form-group textarea {
+      flex-grow: 1; /* 입력 필드가 남은 공간 차지하도록 */
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .register-form .form-group textarea {
+      resize: vertical; /* 세로 크기 조절만 허용 */
+    }
+    /* 라디오 버튼 그룹 스타일 */
+    .register-form .radio-group label {
+      width: auto; /* 라디오 라벨 너비 자동 */
+      margin-right: 5px;
+      margin-left: 15px; /* 라디오 옵션 간 간격 */
+      font-weight: normal; /* 라디오 라벨 굵기 보통 */
+      text-align: left;
+    }
+    .register-form .radio-group input[type="radio"] {
+      margin-left: 0; /* 라디오 버튼 자체 정렬 */
+    }
+    /* 버튼 영역 스타일 */
+    .register-form .button-area {
+      text-align: center; /* 버튼 가운데 정렬 */
+      margin-top: 30px;
+    }
+    .register-form .button-area button,
+    .register-form .button-area a { /* 링크도 버튼처럼 보이게 */
+      margin: 0 10px;
+      padding: 10px 25px;
+    }
+  </style>
+</head>
+<body>
+
+<section layout:fragment="admin-content">   <!-- Main Content -->
+
+  <h1 class="main-title">쿠폰 등록</h1>
+
+  <div class="content-container">
+    <!-- 쿠폰 등록 폼 -->
+    <!-- 컨트롤러에서 'couponInfo'이라는 이름의 빈 Coupon 객체/DTO를 모델에 추가한다고 가정 -->
+    <!-- th:action은 실제 등록 처리 URL로 변경 필요 -->
+    <form class="register-form" th:action="@{/admin/coupons/edit/{cpNo}(cpNo=*{cpNo})}" th:object="${couponInfo}" method="post">
+      <!-- put 처리 -->
+      <input type="hidden" name="_method" value="put" />
+      <div class="form-group">
+        <label for="cpnNm">쿠폰명:</label>
+        <input type="text" id="cpnNm" th:field="*{cpnNm}" placeholder="예: 신규가입 환영 쿠폰" required>
+      </div>
+
+      <div class="form-group">
+        <label>할인 유형:</label> <!-- 그룹 라벨 -->
+        <div class="radio-group"> <!-- 라디오 버튼 그룹 -->
+          <!-- th:field를 사용해 선택된 값을 couponInfo.discountAt에 바인딩 -->
+          <input type="radio" id="discountWon" th:field="*{discountAt}" value="W" required>
+          <label for="discountWon">금액(원)</label>
+
+
+<!--          <input type="radio" id="discountRate" th:field="*{discountAt}" value="R" required>-->
+<!--          <label for="discountRate">비율(%)</label>-->
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="discount">할인 값:</label>
+        <input type="number" id="discount" th:field="*{discount}" placeholder="정액(원) 또는 정률(%) 값을 숫자로 입력" required min="0">
+        <!-- 필요시 JavaScript로 %가 100 이하인지 등 추가 검증 -->
+      </div>
+
+      <div class="form-group">
+        <label for="cpnStartDt">시작 일시:</label>
+        <!-- HTML5 datetime-local 입력 타입 사용 -->
+        <input type="datetime-local" id="cpnStartDt" th:field="*{cpnStartDt}" required>
+      </div>
+
+      <div class="form-group">
+        <label for="cpnEndDt">종료 일시:</label>
+        <input type="datetime-local" id="cpnEndDt" th:field="*{cpnEndDt}" required>
+        <!-- 필요시 JavaScript로 종료일이 시작일 이후인지 검증 -->
+      </div>
+
+      <div class="form-group">
+        <label for="cpnDsc">쿠폰 내용:</label>
+        <textarea id="cpnDsc" th:field="*{cpnDsc}" rows="4" placeholder="쿠폰에 대한 상세 설명을 입력하세요 (선택)"></textarea>
+      </div>
+
+
+      <div class="form-group">
+        <label>사용 여부:</label> <!-- 그룹 라벨 -->
+        <div class="radio-group"> <!-- 라디오 버튼 그룹 -->
+          <!-- th:field를 사용해 선택된 값을 couponInfo.discountAt에 바인딩 -->
+          <input type="radio" id="activeY" th:field="*{activeYn}" value="Y" required>
+          <label for="activeY">사용</label>
+
+
+          <input type="radio" id="activeN" th:field="*{activeYn}" value="N" required>
+          <label for="activeN">미사용</label>
+        </div>
+      </div>
+
+      <!-- 폼 버튼 영역 -->
+      <div class="button-area">
+        <button type="submit" class="btn-save">저장</button>
+        <!-- 취소 시 목록 페이지로 이동 -->
+        <a th:href="@{/admin/coupons}" class="btn-cancel">취소</a>
+        <!-- 또는 JS 사용 버튼:
+        <button type="button" onclick="location.href='/admin/coupons'" class="btn-cancel">취소</button>
+         -->
+      </div>
+
+    </form>
+  </div>
+
+</section >
+
+</body>
+</html>

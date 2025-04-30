@@ -21,7 +21,8 @@
         <button type="submit" id="searchBtn">검색</button> <!-- 2. 검색 버튼 -->
       </div>
       <!-- 1. 등록 버튼 (검색 영역 오른쪽에 배치) -->
-      <button type="button" id="registerBtn" class="register-button">쿠폰 등록</button>
+      <button type="button" id="registerBtn" class="register-button"
+              onclick="location.href='/admin/coupons/regist'">쿠폰 등록</button>
     </form>
 
     <!-- 결과 테이블 영역 -->
@@ -40,23 +41,26 @@
         </tr>
         </thead>
         <tbody id="resultsBody">
-        <!-- 검색 결과가 여기에 동적으로 추가됩니다 -->
-        <tr th:each="coupon : ${adminCouponList}">
-          <td th:text="${coupon.cpNo}"></td>
-          <td th:text="${coupon.cpnNm}"></td>
-          <td th:if="${coupon.discountAt == 'W'}"
-              th:text="${#numbers.formatInteger(coupon.discount, 3, 'COMMA') + '원 할인'}">할인</td>
-          <td th:if="${coupon.discountAt == 'R'}"
-              th:text="${coupon.discount + '% 할인'}">할인</td>
-          <td th:text="${#temporals.format(coupon.cpnStartDt, 'yyyy.MM.dd HH:mm')}"></td>
-          <td th:text="${#temporals.format(coupon.cpnEndDt, 'yyyy.MM.dd HH:mm')}"></td>
-          <td th:text="${coupon.cpnDsc}"></td>
-          <td></td>
-          <td><button type="button" class="btn-edit" data-group-id="3">수정</button></td>
-        </tr>
-        <tr th:if="${adminCouponList.empty}">
-          <td colspan="6" class="no-data">조회된 쿠폰 내역이 없습니다.</td>
-        </tr>
+          <!-- 검색 결과가 여기에 동적으로 추가됩니다 -->
+          <tr th:each="coupon : ${adminCouponList}">
+            <td th:text="${coupon.cpNo}"></td>
+            <td th:text="${coupon.cpnNm}"></td>
+            <td th:if="${coupon.discountAt == 'W'}"
+                th:text="${#numbers.formatInteger(coupon.discount, 3, 'COMMA') + '원 할인'}">할인</td>
+            <td th:if="${coupon.discountAt == 'R'}"
+                th:text="${coupon.discount + '% 할인'}">할인</td>
+            <td th:text="${#temporals.format(coupon.cpnStartDt, 'yyyy.MM.dd HH:mm')}"></td>
+            <td th:text="${#temporals.format(coupon.cpnEndDt, 'yyyy.MM.dd HH:mm')}"></td>
+            <td th:text="${coupon.cpnDsc}"></td>
+            <td th:text="${coupon.activeYn}"></td>
+            <td>
+              <a th:href="@{/admin/coupons/edit/{cpNo}(cpNo=${coupon.cpNo})}" class="btn btn-edit">수정</a>
+              <button type="button" class="btn-edit" data-coupon-id="${coupon.cpNo}">수정</button></td>
+
+          </tr>
+          <tr th:if="${adminCouponList.empty}">
+            <td colspan="8" class="no-data">조회된 쿠폰 내역이 없습니다.</td>
+          </tr>
         </tbody>
       </table>
     </div>
