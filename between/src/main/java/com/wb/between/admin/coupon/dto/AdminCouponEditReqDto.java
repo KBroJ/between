@@ -23,7 +23,7 @@ public class AdminCouponEditReqDto {
     @NotNull(message = "할인 값은 필수 입력 항목입니다.")
     @Positive(message = "할인 값은 0보다 커야 합니다.") // 0 초과 (또는 @Min(0)으로 0 포함)
     // @Max(value = 100, message = "할인율은 100%를 초과할 수 없습니다.") // 할인율(R)일 때 추가 검증 필요
-    private String discount; // 숫자 타입으로 변경 (혹은 Integer)
+    private Integer discount; // 숫자 타입으로 변경 (혹은 Integer)
 
     @NotBlank(message = "할인 유형은 필수 선택 항목입니다.")
     @Pattern(regexp = "[WR]", message = "할인 유형은 'W'(정액) 또는 'R'(정률) 중 하나여야 합니다.")

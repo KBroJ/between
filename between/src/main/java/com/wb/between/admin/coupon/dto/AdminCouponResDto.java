@@ -26,7 +26,7 @@ public class AdminCouponResDto {
 
     private String cpnDsc;        // 쿠폰 설명 (Coupon 엔티티 필드)
 
-    private String discount;
+    private Integer discount;
 
     private String discountAt;
 
