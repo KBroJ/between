@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin/admin}">
+
+    <head>
+        <title>예약 상세 정보</title>
+        <th:block layout:fragment="page-css">
+            <link rel="stylesheet" th:href="@{/css/admin/reservation/reservation-detail.css}">
+        </th:block>
+    </head>
+
+    <body>
+        <section layout:fragment="admin-content" th:if="${reservationDetail}">
+            <h1 class="main-title">
+                예약 상세 정보(예약번호:<span th:text="${reservationDetail.resNo}">[ResNo]</span>)
+            </h1>
+
+            <form id="reservationUpdateForm" th:action="@{/api/admin/reservations/{resNo}/update(resNo=${reservationDetail.resNo})}" method="post">
+                <div class="detail-card">
+                    <div class="detail-section">
+                        <h2 class="section-title">예약자 정보</h2>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">이메일</span>
+                                <span class="info-value" th:text="${reservationDetail.userEmail}">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">이름</span>
+                                <span class="info-value" th:text="${reservationDetail.userName}">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">휴대폰 번호</span>
+                                <span class="info-value" th:text="${reservationDetail.userPhoneNo}">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">회원 등급</span>
+                                <span class="info-value" th:text="${reservationDetail.userGrade}">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="card-divider">
+
+                    <div class="detail-section">
+                        <h2 class="section-title">예약 정보</h2>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label class="info-label" for="seatNo">좌석명</label>
+                                <th:block th:if="${reservationDetail.canModify}">
+                                    <select id="seatNo" name="seatNo" class="form-control info-value-input">
+                                        <option th:each="seatOpt : ${allSeats}"
+                                                th:value="${seatOpt.seatNo}"
+                                                th:text="${seatOpt.seatNm}"
+                                                th:selected="${seatOpt.seatNo == reservationDetail.currentSeatNo}">
+                                        </option>
+                                    </select>
+                                </th:block>
+                                <th:block th:unless="${reservationDetail.canModify}">
+                                    <span class="info-value" th:text="${reservationDetail.seatNm}">-</span>
+                                </th:block>
+                            </div>
+
+                            <div class="info-item">
+                                <span class="info-label">요금제</span>
+                                <span class="info-value" th:text="${reservationDetail.planType}">-</span>
+                                <input th:if="${reservationDetail.canModify}" type="hidden" name="planType" th:value="${reservationDetail.planType}" />
+                            </div>
+
+                            <th:block th:if="${reservationDetail.canModify}">
+                                <div class="info-item">
+                                    <label class="info-label" for="resStart">예약 시작</label>
+                                    <input type="datetime-local" id="resStart" name="resStart"
+                                           th:value="${#temporals.format(reservationDetail.resStart, 'yyyy-MM-dd''T''HH:mm')}"
+                                           class="form-control info-value-input">
+                                </div>
+                                <div class="info-item">
+                                    <label class="info-label" for="resEnd">예약 종료</label>
+                                    <input type="datetime-local" id="resEnd" name="resEnd"
+                                           th:value="${#temporals.format(reservationDetail.resEnd, 'yyyy-MM-dd''T''HH:mm')}"
+                                           class="form-control info-value-input">
+                                </div>
+                            </th:block>
+                            <th:block th:unless="${reservationDetail.canModify}">
+                                <div class="info-item">
+                                    <span class="info-label">예약 기간</span>
+                                    <span class="info-value">
+                                <span th:text="${#temporals.format(reservationDetail.resStart, 'yyyy.MM.dd HH:mm')}">-</span>
+                                <span> ~ </span>
+                                <span th:text="${#temporals.format(reservationDetail.resEnd, 'yyyy.MM.dd HH:mm')}">-</span>
+                            </span>
+                                </div>
+                            </th:block>
+
+                            <div class="info-item">
+                                <span class="info-label">예약 상태</span>
+                                <span class="info-value">
+                            <span th:text="${reservationDetail.statusNm}" class="status-badge"
+                                  th:classappend="'status-' + ${reservationDetail.statusNm?.toLowerCase()?.replace(' ', '-')}">
+                                -
+                            </span>
+                        </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="card-divider">
+
+                    <div class="detail-section">
+                        <h2 class="section-title">결제 정보</h2>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">총 결제금액</span>
+                                <span class="info-value" th:text="${reservationDetail.totalPrice != null ? #numbers.formatDecimal(reservationDetail.totalPrice, 0, 'COMMA', 0, 'POINT') + '원' : '-'}">0원</span>
+                            </div>
+                            <div class="info-item"></div>
+                        </div>
+
+                        <details class="payment-details-expandable">
+                            <summary class="summary-label">상세 결제 내역 보기</summary>
+                            <div class="info-grid indented-content"> <div class="info-item">
+                                <span class="info-label">좌석 금액</span>
+                                <span class="info-value" th:text="${reservationDetail.resPrice != null ? reservationDetail.resPrice + '원' : '-'}">0원</span>
+                            </div>
+                                <th:block th:if="${reservationDetail.couponUsed}">
+                                    <div class="info-item">
+                                        <span class="info-label">사용 쿠폰</span>
+                                        <span class="info-value" th:text="${reservationDetail.couponName}">쿠폰명</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">쿠폰 할인액</span>
+                                        <span class="info-value" th:text="${reservationDetail.dcPrice != null ? reservationDetail.dcPrice + '원' : '0원'}">0원</span>
+                                    </div>
+                                </th:block>
+                                <div class="info-item" th:unless="${reservationDetail.couponUsed}">
+                                    <span class="info-label">쿠폰 사용</span>
+                                    <span class="info-value">해당 없음</span>
+                                </div>
+                            </div>
+                        </details>
+                    </div>
+
+                    <hr class="card-divider">
+
+                    <div class="actions-area">
+                        <a th:href="@{/admin/reservationList}" class="btn btn-secondary">목록으로</a>
+                        <button th:if="${reservationDetail.canModify}" type="submit"
+                                class="btn btn-primary">수정 완료</button>
+                        <button th:if="${reservationDetail.canCancel}" type="button" class="btn btn-danger btn-cancel-reservation"
+                                th:data-resno="${reservationDetail.resNo}">예약 취소</button>
+                    </div>
+                </div>
+            </form>
+
+        </section>
+
+        <div th:if="${errorMessage}" class="error-message-container">
+            <p th:text="${errorMessage}">에러 발생</p>
+            <a th:href="@{/admin/reservationList}" class="btn btn-secondary">목록으로 돌아가기</a>
+        </div>
+
+        <th:block layout:fragment="page-script">
+            <script th:src="@{/js/admin/reservation/reservation-detail.js}"></script>
+        </th:block>
+    </body>
+</html>

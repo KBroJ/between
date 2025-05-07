@@ -1,5 +1,6 @@
 package com.wb.between.admin.reservation.service;
 
+import com.wb.between.admin.reservation.dto.ReservationDetailDto;
 import com.wb.between.admin.reservation.dto.ReservationFilterParamsDto;
 import com.wb.between.admin.reservation.dto.ReservationListDto;
 import com.wb.between.admin.reservation.dto.SeatDto;
@@ -8,6 +9,7 @@ import com.wb.between.reservation.reserve.domain.Reservation;
 import com.wb.between.reservation.seat.domain.Seat;
 import com.wb.between.reservation.seat.repository.SeatRepository;
 import com.wb.between.user.domain.User;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -177,7 +179,98 @@ public class AdminReservationService {
         return seatDtos;
     }
 
-    // --- 예약 상세 정보 조회 로직 (추후 구현) ---
-    // public ReservationDetailDto getReservationDetail(Long resNo) { ... }
+    /**
+     * 특정 예약의 상세 정보를 조회합니다.
+     * @param resNo 조회할 예약 번호
+     * @return AdminReservationDetailDto
+     * @throws EntityNotFoundException 해당 예약 번호가 없을 경우
+     */
+    public ReservationDetailDto getReservationDetail(Long resNo) {
+        log.info("관리자 - 예약 상세 정보 조회 서비스 시작. resNo: {}", resNo);
+
+        // 1. 예약 정보 조회
+        Reservation reservation = adminReservationRepository.findById(resNo)
+                .orElseThrow(() -> new EntityNotFoundException("해당 예약을 찾을 수 없습니다. 예약번호: " + resNo));
+
+        User user = reservation.getUser();
+        Seat seat = reservation.getSeat();
+
+        // 2. 예약 상태 문자열 변환
+        String statusString;
+        if (reservation.getResStatus() == null) {
+            statusString = "확인 불가";
+        } else if (Boolean.TRUE.equals(reservation.getResStatus())) {
+            // 예약 시작 시간이 현재 시간보다 이전이고, 아직 이용완료 처리가 안 되었다면 '이용중' 등으로 표시 가능
+            if (reservation.getResEnd() != null && reservation.getResEnd().isBefore(LocalDateTime.now())) {
+                statusString = "이용완료"; // 또는 별도 상태값이 있다면 그것 사용
+            } else {
+                statusString = "예약완료(이용예정)";
+            }
+        } else {
+            statusString = "취소됨";
+        }
+
+        // 3. 쿠폰 정보 처리 (예시: userCpNo가 있고, UserCoupon 테이블이 있다면)
+        String couponNameDisplay = "해당 없음";
+        boolean couponActuallyUsed = false;
+        if (reservation.getUserCpNo() != null) {
+            // 예시: userCouponRepository.findById(reservation.getUserCpNo()).ifPresent(coupon -> couponNameDisplay = coupon.getCouponName());
+            // 실제 쿠폰명 조회 로직 필요. 여기서는 ID로 간단히 표시하거나 고정값 사용.
+            // dcPrice가 0이 아니거나 "0"이 아니면 쿠폰이 사용된 것으로 간주할 수도 있음.
+            if (reservation.getDcPrice() != null && !reservation.getDcPrice().equals("0") && !reservation.getDcPrice().isEmpty()) {
+                couponNameDisplay = "쿠폰 사용 (ID: " + reservation.getUserCpNo() + ")"; // 실제 쿠폰 이름으로 대체
+                couponActuallyUsed = true;
+            }
+        }
+        String dcPriceDisplay = (reservation.getDcPrice() == null || reservation.getDcPrice().isEmpty()) ? "0" : reservation.getDcPrice();
+
+
+        // 4. 수정/취소 가능 여부 판단 로직
+        boolean canModifyReservation = false;
+        boolean canCancelReservation = false;
+        if (Boolean.TRUE.equals(reservation.getResStatus())) { // "예약완료" 상태일 때
+            if (reservation.getResStart() != null && reservation.getResStart().isAfter(LocalDateTime.now())) {
+                // 예약 시작 시간이 미래인 경우에만 수정/취소 가능
+                canModifyReservation = true;
+                canCancelReservation = true;
+            }
+        }
+
+        // 5. ReservationDetailDto 빌드
+        return ReservationDetailDto.builder()
+                .resNo(reservation.getResNo())
+                // 예약자 정보
+                .userEmail(user != null ? user.getEmail() : "N/A")
+                .userName(user != null ? user.getName() : "N/A")
+                .userPhoneNo(user != null ? PhoneNumber(user.getPhoneNo()) : "N/A") // User 엔티티에 getPhoneNo() 필요
+                .userGrade(user != null ? user.getAuthCd() : "N/A")   // User 엔티티에 getAuthCd() 필요
+                // 예약 정보
+                .currentSeatNo(seat != null ? seat.getSeatNo() : null)
+                .seatNm(seat != null ? seat.getSeatNm() : "N/A")
+                .resStart(reservation.getResStart())
+                .resEnd(reservation.getResEnd())
+                .statusNm(statusString)
+                .planType(reservation.getPlanType())
+                // 결제 정보
+                .totalPrice(reservation.getTotalPrice())
+                .resPrice(reservation.getResPrice())
+                .couponName(couponNameDisplay)
+                .dcPrice(dcPriceDisplay)
+                .couponUsed(couponActuallyUsed)
+                // 버튼 활성화 플래그
+                .canModify(canModifyReservation)
+                .canCancel(canCancelReservation)
+                .build();
+    }
+
+    // 휴대폰 번호 '-'로 구분하여 포맷팅
+    private String PhoneNumber(String phoneNo) {
+        if (phoneNo != null && phoneNo.length() == 11) {
+            return phoneNo.substring(0, 3) + "-" +  phoneNo.substring(3, 7)+ "-" + phoneNo.substring(7, 11);
+        } else if (phoneNo != null && phoneNo.length() == 10) {
+            return phoneNo.substring(0, 3) + "-" + phoneNo.substring(3, 6) + "-" + phoneNo.substring(6, 10);
+        }
+        return phoneNo;
+    }
 
 }

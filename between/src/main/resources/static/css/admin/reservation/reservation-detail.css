@@ -1,0 +1,193 @@
+
+.main-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 25px;
+    color: #333;
+}
+
+.detail-card {
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.detail-section {
+    margin-bottom: 20px;
+}
+
+.section-title {
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+/* === 정보 그리드 레이아웃 === */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2개의 동일한 너비 컬럼 */
+    gap: 10px 20px; /* 행 간격 10px, 열 간격 20px */
+}
+
+.info-item {
+    display: flex;
+    align-items: flex-start; /* 라벨과 값이 여러 줄일 경우 상단 정렬 */
+    padding: 8px 0;
+    /* border-bottom: 1px dashed #f0f0f0; 항목별 구분선 제거 (그리드 간격으로 대체) */
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+/* 그리드 내 마지막 항목 하단 패딩 추가 (구분선 역할) */
+.info-grid > .info-item:nth-last-child(-n+2):not(:nth-child(odd):nth-last-child(2)) { /* 마지막 행 아이템들 */
+   /* padding-bottom: 0; */ /* 필요하다면 마지막 행의 하단 패딩 제거 */
+}
+
+
+.info-label {
+    font-weight: bold;
+    color: #333;
+    margin-right: 10px;
+    min-width: 100px; /* 라벨 최소 너비 (조정 가능) */
+    width: 120px;     /* 라벨 고정 너비 (조정 가능) */
+    flex-shrink: 0;
+    padding-top: 2px; /* input과 라벨 텍스트 상단 정렬 미세 조정 */
+}
+
+.info-value {
+    color: #555;
+    flex-grow: 1;
+    word-break: break-all; /* 긴 텍스트 자동 줄바꿈 */
+}
+
+/* 수정 가능한 입력 필드 스타일 */
+.info-value-input.form-control {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    height: 36px;
+    box-sizing: border-box;
+    /* width: auto; 불필요, 아래 max-width로 제어 */
+    max-width: 280px; /* 입력 필드 최대 너비 제한! */
+    /* flex-grow: 1; 이전에 있었으나, max-width를 위해 제거 또는 조정 */
+}
+select.info-value-input.form-control {
+    /* select는 내용에 따라 너비가 결정되므로 max-width가 잘 동작 */
+}
+input[type="datetime-local"].info-value-input.form-control {
+    /* datetime-local은 내부 요소 때문에 너비가 더 필요할 수 있음 */
+    min-width: 220px; /* 최소 너비를 주어 너무 좁아지는 것 방지 */
+}
+
+
+.card-divider {
+    border: 0;
+    height: 1px;
+    background-color: #e0e0e0;
+    margin: 25px 0;
+}
+
+/* 결제 상세 내역 펼치기/접기 스타일 */
+.payment-details-expandable summary.summary-label { /* 클래스명 변경 */
+    cursor: pointer;
+    color: #007bff;
+    margin-bottom: 10px;
+    display: inline-block;
+    padding: 5px 0;
+    font-size: 0.95rem;
+    font-weight: normal; /* 일반 텍스트처럼 */
+}
+.payment-details-expandable summary.summary-label:hover {
+    text-decoration: underline;
+}
+.payment-details-expandable .indented-content {
+    padding-left: 20px; /* 상세 내용 들여쓰기 */
+    /* border-left: 2px solid #007bff20; 구분선 제거 또는 변경 */
+    margin-top: 10px;
+}
+/* 상세 결제 내역도 그리드 안에 있으므로 info-item 스타일 적용됨 */
+
+
+/* 예약 상태 뱃지 스타일 */
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 0.85em;
+    color: #fff;
+    font-weight: 500;
+    display: inline-block;
+    text-transform: capitalize;
+}
+.status-예약완료 { background-color: #28a745; }
+.status-취소됨 { background-color: #dc3545; }
+.status-이용완료 { background-color: #6c757d; }
+.status-확인-불가 { background-color: #ffc107; color: #212529;}
+
+
+/* 하단 버튼 영역 */
+.actions-area {
+    margin-top: 30px;
+    text-align: right;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.actions-area .btn {
+    padding: 10px 20px;
+    margin-left: 10px;
+    text-decoration: none;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+    line-height: 1.5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 100px;
+}
+
+.actions-area .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+.actions-area .btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.actions-area .btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+.actions-area .btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.actions-area .btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+.actions-area .btn-danger:hover {
+    background-color: #c82333;
+}
+
+/* 에러 메시지 컨테이너 */
+.error-message-container {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #dc3545;
+    background-color: #f8d7da;
+    color: #721c24;
+    border-radius: 4px;
+    text-align: center;
+}
+.error-message-container p {
+    margin-bottom: 10px;
+}

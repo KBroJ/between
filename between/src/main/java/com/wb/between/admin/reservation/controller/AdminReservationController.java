@@ -1,10 +1,12 @@
 package com.wb.between.admin.reservation.controller;
 
+import com.wb.between.admin.reservation.dto.ReservationDetailDto;
 import com.wb.between.admin.reservation.dto.ReservationFilterParamsDto;
 import com.wb.between.admin.reservation.dto.ReservationListDto;
 import com.wb.between.admin.reservation.dto.SeatDto;
 import com.wb.between.admin.reservation.service.AdminReservationService;
 import com.wb.between.admin.user.service.AdminUserService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -59,22 +61,32 @@ public class AdminReservationController {
         return "admin/reservation/reservation-list";
     }
 
-/*
     @GetMapping("/reservationList/{resNo}")
     public String reservationDetailPage(@PathVariable Long resNo, Model model) {
-        log.info("AdminReservationController|reservationDetailPage|관리자 - 예약 상세 조회 요청 시작 ==================");
+        log.info("관리자 - 예약 상세 정보 조회 요청. resNo: {}", resNo);
 
-        // 1. 서비스 호출: 예약 상세 정보 조회
-        ReservationListDto reservationDetail = adminReservationService.getReservationDetail(resNo);
+        try {
+            // 예약 상세 정보 조회
+            ReservationDetailDto reservationDetail = adminReservationService.getReservationDetail(resNo);
+            // 모든 좌석 정보 가져오기
+            List<SeatDto> allSeats = adminReservationService.getAllSeatsForFilter();
 
-        // 2. Model에 데이터 추가 (View에서 사용)
-        model.addAttribute("reservationDetail", reservationDetail); // 예약 상세 정보
+            model.addAttribute("reservationDetail", reservationDetail);
+            model.addAttribute("allSeats", allSeats);
 
-        log.info("조회 완료. 예약 번호: {}", resNo);
+            return "admin/reservation/reservation-detail";
 
-        log.info("AdminReservationController|reservationDetailPage|관리자 - 예약 상세 조회 요청 끝   ==================");
-
-        return "admin/reservation/reservation-detail";
+        } catch (EntityNotFoundException e) {
+            log.warn("요청한 예약 정보를 찾을 수 없습니다. resNo: {}", resNo, e);
+            model.addAttribute("errorMessage", e.getMessage());
+            // TODO: 적절한 404 에러 페이지 또는 목록 페이지로 리다이렉션
+            return "error/404"; // 예시 404 페이지
+        } catch (Exception e) {
+            log.error("예약 상세 정보 조회 중 오류 발생. resNo: {}", resNo, e);
+            model.addAttribute("errorMessage", "예약 정보를 불러오는 중 오류가 발생했습니다.");
+            // TODO: 적절한 500 에러 페이지
+            return "error/500"; // 예시 500 페이지
+        }
     }
-*/
+
 }

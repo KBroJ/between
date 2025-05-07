@@ -18,7 +18,7 @@
             <form th:action="@{/admin/reservationList}" method="get" class="filter-area">
 
                 <div class="filter-group date-filter">
-                    <label for="searchStartDate">예약일</label>
+                    <label for="searchStartDate">이용일</label>
                     <div class="date-inputs">
                         <input type="date" id="searchStartDate" name="startDate" th:value="${filterParams?.startDate}">
                         <span>~</span>
@@ -63,9 +63,7 @@
                     <thead>
                         <tr>
                             <th>No</th>
-                            <!--
-                            <th>예약일</th>
-                            -->
+                            <!--<th>예약일</th>-->
                             <th>이메일</th>
                             <th>이름</th>
                             <th>좌석정보</th>
@@ -83,16 +81,16 @@
                         <tr th:unless="${reservationPage == null or reservationPage.empty}"
                             th:each="reservation, iterStat : ${reservationPage.content}"
                             th:attr="data-reservation-id=${reservation.resNo}" class="data-row">
+
                             <td th:text="${reservationPage.totalElements - (reservationPage.number * reservationPage.size) - iterStat.index}"></td>
-                            <!-- 예약일자
-                            <td th:text="${#temporals.format(reservation.resDt, 'yyyy-MM-dd HH:mm')}"></td>
-                            -->
+                            <!--<td th:text="${#temporals.format(reservation.resDt, 'yyyy-MM-dd HH:mm')}"></td>-->
                             <td th:text="${reservation.userEmail}"></td>
                             <td th:text="${reservation.userName}"></td>
                             <td th:text="${reservation.seatNm}"></td>
                             <td th:text="${#temporals.format(reservation.resStart, 'yyyy.MM.dd HH:mm') + ' ~ ' + #temporals.format(reservation.resEnd, 'yyyy.MM.dd HH:mm')}"></td>
                             <td th:text="${reservation.totalPrice != null ? #numbers.formatDecimal(reservation.totalPrice, 0, 'COMMA', 0, 'POINT') : '-'} + '원'"></td>
                             <td th:text="${reservation.resStatus}"></td>
+
                         </tr>
 
                     </tbody>

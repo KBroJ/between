@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // reservationId 값이 유효한 경우 (존재하는 경우)
                 if (reservationId) {
                     // 해당 예약의 상세 페이지 URL 생성
-                    const detailPageUrl = '/admin/reservations/' + reservationId;
+                    const detailPageUrl = '/admin/reservationList/' + reservationId;
                     // 생성된 URL로 페이지 이동
                     window.location.href = detailPageUrl;
                 } else {
