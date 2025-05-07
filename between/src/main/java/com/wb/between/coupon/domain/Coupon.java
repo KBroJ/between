@@ -26,7 +26,7 @@ public class Coupon {
     @Column(length = 30)
     private String cpnNm;
 
-    private Integer discount;
+    private String discount;
 
     @Column(length = 5)
     private String discountAt;
