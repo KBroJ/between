@@ -204,7 +204,7 @@ public class AdminReservationService {
             if (reservation.getResEnd() != null && reservation.getResEnd().isBefore(LocalDateTime.now())) {
                 statusString = "이용완료"; // 또는 별도 상태값이 있다면 그것 사용
             } else {
-                statusString = "예약완료(이용예정)";
+                statusString = "이용예정";
             }
         } else {
             statusString = "취소됨";
@@ -247,6 +247,7 @@ public class AdminReservationService {
                 // 예약 정보
                 .currentSeatNo(seat != null ? seat.getSeatNo() : null)
                 .seatNm(seat != null ? seat.getSeatNm() : "N/A")
+                .resDt(reservation.getResDt())
                 .resStart(reservation.getResStart())
                 .resEnd(reservation.getResEnd())
                 .statusNm(statusString)

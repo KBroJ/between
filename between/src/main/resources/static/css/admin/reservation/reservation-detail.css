@@ -27,44 +27,36 @@
     border-bottom: 1px solid #eee;
 }
 
-/* === 정보 그리드 레이아웃 === */
 .info-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2개의 동일한 너비 컬럼 */
-    gap: 10px 20px; /* 행 간격 10px, 열 간격 20px */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px 20px;
 }
 
 .info-item {
     display: flex;
-    align-items: flex-start; /* 라벨과 값이 여러 줄일 경우 상단 정렬 */
+    align-items: flex-start;
     padding: 8px 0;
-    /* border-bottom: 1px dashed #f0f0f0; 항목별 구분선 제거 (그리드 간격으로 대체) */
     font-size: 0.95rem;
     line-height: 1.6;
 }
-/* 그리드 내 마지막 항목 하단 패딩 추가 (구분선 역할) */
-.info-grid > .info-item:nth-last-child(-n+2):not(:nth-child(odd):nth-last-child(2)) { /* 마지막 행 아이템들 */
-   /* padding-bottom: 0; */ /* 필요하다면 마지막 행의 하단 패딩 제거 */
-}
-
 
 .info-label {
     font-weight: bold;
     color: #333;
     margin-right: 10px;
-    min-width: 100px; /* 라벨 최소 너비 (조정 가능) */
-    width: 120px;     /* 라벨 고정 너비 (조정 가능) */
+    min-width: 100px;
+    width: 120px;
     flex-shrink: 0;
-    padding-top: 2px; /* input과 라벨 텍스트 상단 정렬 미세 조정 */
+    padding-top: 2px;
 }
 
 .info-value {
     color: #555;
     flex-grow: 1;
-    word-break: break-all; /* 긴 텍스트 자동 줄바꿈 */
+    word-break: break-all;
 }
 
-/* 수정 가능한 입력 필드 스타일 */
 .info-value-input.form-control {
     padding: 6px 10px;
     border: 1px solid #ccc;
@@ -72,18 +64,12 @@
     font-size: 0.9rem;
     height: 36px;
     box-sizing: border-box;
-    /* width: auto; 불필요, 아래 max-width로 제어 */
-    max-width: 280px; /* 입력 필드 최대 너비 제한! */
-    /* flex-grow: 1; 이전에 있었으나, max-width를 위해 제거 또는 조정 */
+    max-width: 280px;
 }
-select.info-value-input.form-control {
-    /* select는 내용에 따라 너비가 결정되므로 max-width가 잘 동작 */
-}
+select.info-value-input.form-control {}
 input[type="datetime-local"].info-value-input.form-control {
-    /* datetime-local은 내부 요소 때문에 너비가 더 필요할 수 있음 */
-    min-width: 220px; /* 최소 너비를 주어 너무 좁아지는 것 방지 */
+    min-width: 220px;
 }
-
 
 .card-divider {
     border: 0;
@@ -92,26 +78,49 @@ input[type="datetime-local"].info-value-input.form-control {
     margin: 25px 0;
 }
 
-/* 결제 상세 내역 펼치기/접기 스타일 */
-.payment-details-expandable summary.summary-label { /* 클래스명 변경 */
-    cursor: pointer;
-    color: #007bff;
-    margin-bottom: 10px;
-    display: inline-block;
-    padding: 5px 0;
-    font-size: 0.95rem;
-    font-weight: normal; /* 일반 텍스트처럼 */
+/* --- 결제 정보 펼치기/접기 관련 스타일 추가 --- */
+.info-item.clickable-toggle {
+    cursor: pointer; /* 클릭 가능 표시 */
+    transition: background-color 0.2s ease;
+    position: relative; /* 아이콘 위치 기준점 */
 }
-.payment-details-expandable summary.summary-label:hover {
-    text-decoration: underline;
+.info-item.clickable-toggle:hover {
+    background-color: #f9f9f9; /* 클릭 영역 호버 효과 */
 }
-.payment-details-expandable .indented-content {
-    padding-left: 20px; /* 상세 내용 들여쓰기 */
-    /* border-left: 2px solid #007bff20; 구분선 제거 또는 변경 */
-    margin-top: 10px;
-}
-/* 상세 결제 내역도 그리드 안에 있으므로 info-item 스타일 적용됨 */
 
+.toggle-icon {
+    margin-left: auto;                      /* 아이콘을 오른쪽으로 밀기 */
+    padding-left: 10px;
+    transition: transform 0.3s ease-in-out; /* 아이콘 회전 애니메이션 */
+    color: #007bff;
+    font-size: 0.9em; /* 크기 조정 */
+    display: inline-block; /* transform 적용 위해 */
+}
+
+/* 180도 회전 (▼ -> ▲) */
+.toggle-icon.open {
+    transform: rotate(180deg);
+}
+
+.collapsible-content {
+    max-height: 0;      /* 초기에는 높이 0으로 숨김 */
+    opacity: 0;         /* 초기에는 투명 */
+    overflow: hidden;   /* 내용 넘어가면 숨김 (max-height 애니메이션 위해 필수) */
+    transition: max-height 0.5s ease-in-out, opacity 0.4s ease-in-out, margin-top 0.5s ease-in-out; /* 부드러운 전환 효과 */
+    margin-top: 0;
+    /* border-top: 1px solid #eee; */ /* 필요하다면 구분선 추가 */
+}
+
+.collapsible-content.open {
+    max-height: 500px;  /* 펼쳐질 때 충분한 최대 높이 (콘텐츠 높이에 따라 조절) */
+    opacity: 1;         /* 펼쳐질 때 보이도록 */
+    margin-top: 15px;   /* 펼쳐졌을 때 위쪽 여백 */
+}
+
+.collapsible-content .indented-content {
+    padding-left: 20px;
+    margin-top: 0;
+}
 
 /* 예약 상태 뱃지 스타일 */
 .status-badge {
@@ -123,7 +132,9 @@ input[type="datetime-local"].info-value-input.form-control {
     display: inline-block;
     text-transform: capitalize;
 }
-.status-예약완료 { background-color: #28a745; }
+
+/* 예약 상태 별 색 설정 */
+.status-이용예정 { background-color: #28a745; }
 .status-취소됨 { background-color: #dc3545; }
 .status-이용완료 { background-color: #6c757d; }
 .status-확인-불가 { background-color: #ffc107; color: #212529;}
@@ -134,7 +145,7 @@ input[type="datetime-local"].info-value-input.form-control {
     margin-top: 30px;
     text-align: right;
     padding-top: 20px;
-    border-top: 1px solid #eee;
+    /*border-top: 1px solid #eee;*/
 }
 
 .actions-area .btn {
@@ -190,4 +201,157 @@ input[type="datetime-local"].info-value-input.form-control {
 }
 .error-message-container p {
     margin-bottom: 10px;
+}
+
+
+
+
+/* === 순수 CSS/JS 모달 스타일 === */
+.modal-overlay {
+    position: fixed; /* 화면 전체 고정 */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* 반투명 검정 배경 */
+    display: none; /* 초기에는 숨김 */
+    justify-content: center;
+    align-items: center;
+    z-index: 1050; /* 다른 요소들보다 위에 오도록 */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* 오버레이를 화면에 표시 (flex 불필요) */
+.modal-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+.modal-container {
+    /* --- 위치 및 레이어 --- */
+    position: fixed; /* 화면 기준으로 위치 고정 */
+    top: 50%;        /* 상단에서 50% 지점 */
+    left: 50%;       /* 좌측에서 50% 지점 */
+    /* transform의 translate(-50%, -50%)로 요소 자체 크기의 절반만큼 이동시켜 정중앙에 위치 */
+    transform: translate(-50%, -50%) scale(0.95); /* 초기: 약간 작게 + 중앙 */
+    z-index: 1051;   /* 오버레이(1050)보다 확실히 위에 오도록 설정 */
+
+    /* --- 모양 및 디자인 --- */
+    background-color: #fff; /* 모달 배경색을 흰색으로 명확히 지정 (어둡게 보이지 않도록) */
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 500px; /* 모달 최대 너비 */
+
+    /* --- 초기 상태 및 애니메이션 --- */
+    display: none; /* 초기에는 숨김 (JS로 컨트롤) */
+    opacity: 0;    /* 초기에는 투명 */
+    transition: opacity 0.3s ease, transform 0.3s ease; /* 부드러운 등장 효과 */
+
+    /* --- 내부 콘텐츠 정렬 --- */
+    flex-direction: column; /* 모달 내부 요소들을 세로로 정렬 (JS에서 display:flex로 바꿀 때 사용) */
+}
+.modal-container.active {
+    display: flex;
+    opacity: 1;
+    /* 정중앙에 원래 크기로 표시 */
+    transform: scale(1) translate(-50%, -50%)
+}
+
+.modal-header-custom {
+    display: flex;
+    justify-content: space-between; /* 제목과 닫기 버튼 양쪽 정렬 */
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.modal-title-custom {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 500;
+}
+
+.modal-close-button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+    line-height: 1;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 0.5rem; /* 클릭 영역 확보 */
+    margin: -0.5rem -0.5rem -0.5rem auto; /* 오른쪽 정렬 및 패딩 보정 */
+}
+.modal-close-button:hover {
+    color: #000;
+}
+
+.modal-body-custom {
+    padding: 1.5rem;
+    overflow-y: auto; /* 내용 길어질 경우 스크롤 */
+}
+
+.modal-footer-custom {
+    display: flex;
+    justify-content: flex-end; /* 버튼 오른쪽 정렬 */
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #dee2e6;
+    gap: 0.5rem; /* 버튼 사이 간격 */
+}
+
+/* 모달 내 폼 그룹 및 입력 요소 스타일 */
+.form-group-custom {
+    margin-bottom: 1rem;
+}
+.form-label-custom {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+.form-control-custom { /* textarea 스타일 */
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    box-sizing: border-box;
+}
+.form-control-custom:focus {
+    color: #495057;
+    background-color: #fff;
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
+}
+.required-mark {
+    color: #dc3545; /* 빨간색 별표 */
+    font-weight: bold;
+    margin-left: 3px;
+}
+.validation-message {
+    display: none; /* 평소엔 숨김 */
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: .875em;
+    color: #dc3545; /* 빨간색 에러 메시지 */
+}
+
+/* Bootstrap validation 스타일 제거 후 */
+textarea.invalid { /* JS로 invalid 클래스 추가 시 적용 */
+    border-color: #dc3545;
+}
+textarea.invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+.validation-message.show { /* JS로 show 클래스 추가 시 보임 */
+    display: block;
 }

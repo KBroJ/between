@@ -19,12 +19,13 @@ public class ReservationDetailDto {
     private String userGrade;   // User 엔티티에 authCd (회원 등급) 필드가 있다고 가정
 
     // 예약 정보
-    private Long currentSeatNo; // 현재 예약된 좌석의 ID (수정 시 selectbox 초기 선택용)
+    private Long currentSeatNo;     // 현재 예약된 좌석의 ID (수정 시 selectbox 초기 선택용)
     private String seatNm;
-    private LocalDateTime resStart;
-    private LocalDateTime resEnd;
-    private String statusNm; // 예: "예약완료", "취소됨", "이용완료"
-    private String planType; // 요금제(HOURLY, DAILY, MONTHLY 등)
+    private LocalDateTime resDt;    // 예약 요청 시간
+    private LocalDateTime resStart; // 이용 시작 시간
+    private LocalDateTime resEnd;   // 이용 종료 시간
+    private String statusNm;        // 예: "예약완료", "취소됨", "이용완료"
+    private String planType;        // 요금제(HOURLY, DAILY, MONTHLY 등)
 
     // 결제 정보
     private String totalPrice;  // 최종 결제 금액 (DB가 varchar이므로 String 유지)
