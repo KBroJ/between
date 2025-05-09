@@ -9,50 +9,126 @@
 <body>
 
 <section layout:fragment="admin-content">   <!-- Main Content -->
+  <div class="dashboard-header">
+    관리자 대시보드
+    <small th:if="${dashboardData.todayDate}" style="font-size: 0.5em; color: #777; margin-left:10px;"
+           th:text="${dashboardData.todayDate}"></small>
+  </div>
+  <div class="dashboard-container">
 
-  <h1 class="main-title">관리자 화면</h1>
-  <!-- 메인 콘텐츠 -->
-  <div class="content">
-    <div class="card">
-      <div class="card-title">총 예약 건수</div>
-      <div th:text="${totalReservations}">42건</div>
+    <!-- KPI 카드 섹션 -->
+    <div class="grid-container kpi-grid" th:if="${dashboardData.kpis}">
+      <div class="kpi-card blue">
+        <div class="title">현재 점유율</div>
+        <div class="value">
+          <span th:text="${dashboardData.kpis.occupancy.current}">75</span><span class="unit">%</span>
+        </div>
+        <div class="description" th:text="|총 ${dashboardData.kpis.occupancy.totalSeats}석 중 ${dashboardData.kpis.occupancy.usedSeats}석 이용 중|">
+          총 100석 중 75석 이용 중
+        </div>
+      </div>
+      <div class="kpi-card green">
+        <div class="title">오늘 신규 예약</div>
+        <div class="value">
+          <span th:text="${dashboardData.kpis.newBookingsToday}">5</span><span class="unit">건</span>
+        </div>
+        <div class="description">오늘 접수된 신규 예약 수</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="title">오늘 예상 수익</div>
+        <div class="value">
+          <span th:text="${#numbers.formatInteger(dashboardData.kpis.revenueToday, 3, 'COMMA')}">125,000</span><span class="unit">원</span>
+        </div>
+        <div class="description">오늘 발생 예상 수익</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="title">미처리 문의</div>
+        <div class="value">
+          <span th:text="${dashboardData.kpis.pendingInquiries}">3</span><span class="unit">건</span>
+        </div>
+        <div class="description">답변 대기 중인 고객 문의</div>
+      </div>
     </div>
 
-    <div class="card">
-      <div class="card-title">사용된 쿠폰 수</div>
-      <div th:text="${usedCoupons}">15건</div>
+    <!-- 최근 활동 및 빠른 링크 섹션 -->
+    <div class="grid-container content-grid" style="margin-top: 20px;">
+      <!-- 최근 예약 목록 -->
+      <div class="panel recent-bookings">
+        <h2 class="panel-title">최근 예약</h2>
+        <ul th:if="${not #lists.isEmpty(dashboardData.recentBookings)}">
+          <!-- 최근 5개만 표시 (예시) -->
+          <li th:each="booking, iterStat : ${dashboardData.recentBookings}" th:if="${iterStat.index < 5}">
+            <a th:href="@{/admin/bookings/{id}(id=${booking.id})}">
+              <span th:text="${booking.userName}">홍길동</span>,
+              <span th:text="${booking.spaceName}">회의실 A</span>
+              (<span th:text="${booking.time}">14:00-16:00</span>)
+            </a>
+            <span class="status"
+                  th:classappend="${booking.status == '확정' ? 'status-confirmed' : 'status-pending'}"
+                  th:text="${booking.status}">확정</span>
+          </li>
+        </ul>
+        <p th:if="${#lists.isEmpty(dashboardData.recentBookings)}">최근 예약이 없습니다.</p>
+        <a th:if="${not #lists.isEmpty(dashboardData.recentBookings) and #lists.size(dashboardData.recentBookings) > 5}"
+           th:href="@{/admin/bookings}" class="more-link">
+          모든 예약 보기 →
+        </a>
+      </div>
+
+      <!-- 빠른 실행 링크 -->
+      <div class="panel quick-links">
+        <h2 class="panel-title">빠른 실행</h2>
+        <ul th:if="${not #lists.isEmpty(dashboardData.quickLinks)}">
+          <li th:each="link : ${dashboardData.quickLinks}">
+            <a th:href="@{${link.href}}" th:text="${link.title}">신규 예약 등록</a>
+          </li>
+        </ul>
+        <p th:if="${#lists.isEmpty(dashboardData.quickLinks)}">등록된 링크가 없습니다.</p>
+      </div>
     </div>
 
-    <div class="card">
-      <div class="card-title">신규 회원 수</div>
-      <div th:text="${newUsers}">8명</div>
-    </div>
+    <!-- 알림 및 차트 섹션 -->
+    <div class="grid-container content-grid" style="margin-top: 20px;">
+      <!-- 알림 (만료 예정 계약 등) -->
+      <div class="panel alerts">
+        <h2 class="panel-title">알림</h2>
+        <ul th:if="${not #lists.isEmpty(dashboardData.alerts)}">
+          <!-- 최근 3개만 표시 (예시) -->
+          <li th:each="alert, iterStat : ${dashboardData.alerts}" th:if="${iterStat.index < 3}">
+            <!-- 알림 종류에 따라 링크 다르게 처리 가능 -->
+<!--            <a th:href="${alert.userContractId != null ? '/admin/contracts/' + alert.userContractId : (alert.userId != null ? '/admin/users/' + alert.userId : '#')}"-->
+<!--               th:text="${alert.message}">-->
+<!--              '박보검'님 계약 만료 D-5-->
+<!--            </a>-->
+            <a th:text="${alert.message}"></a>
+            <span th:if="${alert.type == 'warning'}" style="color: #e74c3c; font-weight: bold;">중요</span>
+            <span th:if="${alert.type == 'info'}" style="color: #3498db;">정보</span>
+          </li>
+        </ul>
+        <p th:if="${#lists.isEmpty(dashboardData.alerts)}">새로운 알림이 없습니다.</p>
+        <a th:if="${not #lists.isEmpty(dashboardData.alerts) and #lists.size(dashboardData.alerts) > 3}"
+           th:href="@{/admin/notifications}" class="more-link">
+          모든 알림 보기 →
+        </a>
+      </div>
 
-    <div class="card">
-      <div class="card-title">최근 예약 목록</div>
-      <div class="table-responsive">
-        <table class="reservation-table">
-          <thead>
-          <tr>
-            <th>예약 번호</th>
-            <th>예약 일시</th>
-            <th>좌석명</th>
-            <th>이용 시간</th>
-            <th>예약 상태</th>
-          </tr>
-          </thead>
-          <tbody>
-            <tr th:each="res : ${recentReservations}">
-              <td th:text="${res.userName}">홍길동</td>
-              <td th:text="${res.roomName}">회의실 A</td>
-              <td th:text="${res.dateTime}">2025-04-30 14:00</td>
-              <td th:text="${res.status}">확정</td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- 간단한 차트 (자리 표시자) -->
+      <div class="panel chart-area">
+        <h2 class="panel-title" th:text="${dashboardData.sampleChart?.title ?: '데이터 분석'}">주간 예약 추이</h2>
+        <!-- 실제 차트는 Chart.js, ApexCharts 등의 JS 라이브러리와 Thymeleaf를 연동하여 구현합니다. -->
+        <!-- 이 예제에서는 단순히 자리만 표시합니다. -->
+        <div class="chart-placeholder">
+          차트 라이브러리 연동 영역<br>
+          (예: Chart.js)
+          <div th:if="${dashboardData.sampleChart}" style="font-size:0.8em; margin-top:10px;">
+            데이터: <span th:text="${dashboardData.sampleChart.data}"></span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+
+
 </section >
 </body>
 </html>
