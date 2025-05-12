@@ -184,61 +184,31 @@
             <!-- 예약 수정/취소 관련 모달 영역 -->
             <div class="modal-overlay" id="modalOverlay"></div>
 
-            <div class="modal-container" id="confirmUpdateModalContainer">
+            <!-- 모달창 공통화 -->
+            <div class="modal-container" id="reasonModalContainer">
                 <div class="modal-content-custom">
                     <div class="modal-header-custom">
-                        <h5 class="modal-title-custom">예약 정보 수정</h5>
-                        <button type="button" class="modal-close-button" data-modal-id="confirmUpdateModalContainer">×</button>
+                        <h5 class="modal-title-custom" id="reasonModalTitle">타이틀</h5>
+                        <button type="button" class="modal-close-button" data-modal-id="reasonModalContainer">×</button>
                     </div>
 
                     <div class="modal-body-custom">
-                        <form id="updateReasonForm">
+                        <form id="reasonForm">
                             <div class="form-group-custom">
-                                <label for="updateReasonInput" class="form-label-custom">
-                                    수정 사유
-                                    <span class="required-mark">*</span>
-                                </label>
-                                <textarea class="form-control-custom" id="updateReasonInput" name="updateReason" rows="3"
-                                          placeholder="수정 사유를 입력해주세요.&#13;&#10;(예: 시간 변경, 좌석 변경 등)" required></textarea>
-                                <div class="validation-message" id="updateReasonValidationMessage">
-                                    수정 사유를 입력해주세요.
+                                <label for="reasonInput" class="form-label-custom" id="reasonModalLabel">사유</label>
+                                <textarea class="form-control-custom" id="reasonInput" name="reason" rows="3" placeholder="사유를 입력해주세요."></textarea>
+                                <div class="validation-message" id="reasonValidationMessage">
+                                    사유를 입력해주세요.
                                 </div>
                             </div>
                         </form>
                     </div>
 
                     <div class="modal-footer-custom">
-                        <button type="button" class="btn btn-secondary modal-cancel-button" data-modal-id="confirmUpdateModalContainer">취소</button>
-                        <button type="button" class="btn btn-primary" id="submitUpdateButton">수정 진행</button>
+                        <button type="button" class="btn btn-secondary modal-cancel-button" data-modal-id="reasonModalContainer">취소</button>
+                        <button type="button" class="btn" id="submitReasonButton">진행</button>
                     </div>
-                </div>
-            </div>
 
-            <div class="modal-container" id="cancelReasonModalContainer">
-                <div class="modal-content-custom">
-                    <div class="modal-header-custom">
-                        <h5 class="modal-title-custom">예약 취소</h5>
-                        <button type="button" class="modal-close-button" data-modal-id="cancelReasonModalContainer">×</button>
-                    </div>
-                    <div class="modal-body-custom">
-                        <form id="cancelReasonForm">
-                            <div class="form-group-custom">
-                                <label for="cancellationReasonInput" class="form-label-custom">
-                                    취소 사유
-                                    <span class="required-mark">*</span>
-                                </label>
-                                <textarea class="form-control-custom" id="cancellationReasonInput" rows="3"
-                                          placeholder="취소 사유를 반드시 입력해주세요." required></textarea>
-                                <div class="validation-message" id="cancelReasonValidationMessage">
-                                    취소 사유를 입력해주세요.
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer-custom">
-                        <button type="button" class="btn btn-secondary modal-cancel-button" data-modal-id="cancelReasonModalContainer">닫기</button>
-                        <button type="button" class="btn btn-danger" id="submitCancellationButton">취소 진행</button>
-                    </div>
                 </div>
             </div>
             <!-- 예약 수정/취소 관련 모달 영역 -->

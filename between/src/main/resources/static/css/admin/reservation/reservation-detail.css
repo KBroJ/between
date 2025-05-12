@@ -301,6 +301,96 @@ input[type="datetime-local"].info-value-input.form-control {
     gap: 0.5rem; /* 버튼 사이 간격 */
 }
 
+.modal-footer-custom .btn {
+    padding: 8px 18px; /* 버튼 내부 여백 */
+    /* margin-left: 0; /* .modal-footer-custom의 gap 속성으로 버튼 간 간격 조절 */
+    text-decoration: none;
+    border: 1px solid transparent; /* 기본 테두리는 투명하게 또는 특정 색상으로 */
+    border-radius: 6px;          /* 버튼 모서리 둥글게 */
+    font-size: 0.92rem;         /* 글꼴 크기 */
+    font-weight: 500;           /* 글꼴 두께 */
+    cursor: pointer;
+    /* 부드러운 전환 효과 */
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.1s ease-in-out;
+    line-height: 1.5;
+    display: inline-flex;        /* 아이콘과 텍스트 정렬에 용이 */
+    align-items: center;
+    justify-content: center;
+    min-width: 95px;             /* 버튼 최소 너비 */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.07); /* 은은한 그림자 효과 */
+}
+
+/* 버튼 호버 시 효과 */
+.modal-footer-custom .btn:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* 그림자 강조 */
+    transform: translateY(-1px);           /* 살짝 위로 이동하는 느낌 */
+}
+
+/* 버튼 클릭 시(active) 효과 */
+.modal-footer-custom .btn:active {
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05); /* 그림자 축소 */
+    transform: translateY(0px);            /* 원래 위치로 돌아오는 느낌 */
+}
+
+/* 주-액션 버튼 (수정 진행, 취소 진행 등) */
+.modal-footer-custom .btn.btn-primary {
+    background-color: #007bff; /* 예시: 파란색 계열 */
+    color: #ffffff;
+    border-color: #007bff;
+}
+.modal-footer-custom .btn.btn-primary:hover {
+    background-color: #0069d9;
+    border-color: #0062cc;
+}
+
+/* 위험-액션 버튼 (실제 예약 취소 진행 등) */
+.modal-footer-custom .btn.btn-danger {
+    background-color: #dc3545; /* 예시: 빨간색 계열 */
+    color: #ffffff;
+    border-color: #dc3545;
+}
+.modal-footer-custom .btn.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+/* 보조-액션 버튼 (모달 닫기, 단순 취소 등) */
+.modal-footer-custom .btn.btn-secondary {
+    background-color: #6c757d; /* 예시: 회색 계열 */
+    color: #ffffff;
+    border-color: #6c757d;
+    /* box-shadow: none; /* 보조 버튼은 그림자를 없애거나 더 약하게 할 수 있습니다. */
+}
+.modal-footer-custom .btn.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+/* (선택 사항) 테두리만 있는 버튼 스타일 (예: 덜 중요한 취소 버튼) */
+.modal-footer-custom .btn.btn-outline-secondary {
+    background-color: #ffffff;
+    color: #6c757d;
+    border-color: #6c757d;
+    box-shadow: none;
+}
+.modal-footer-custom .btn.btn-outline-secondary:hover {
+    background-color: #6c757d;
+    color: #ffffff;
+}
+
+/* (선택 사항) 좀 더 부드러운 회색 버튼 */
+.modal-footer-custom .btn.btn-light-gray {
+    background-color: #f8f9fa;
+    color: #343a40;
+    border-color: #dae0e5;
+    box-shadow: none;
+}
+.modal-footer-custom .btn.btn-light-gray:hover {
+    background-color: #e2e6ea;
+    border-color: #ced4da;
+}
+
+
 /* 모달 내 폼 그룹 및 입력 요소 스타일 */
 .form-group-custom {
     margin-bottom: 1rem;
