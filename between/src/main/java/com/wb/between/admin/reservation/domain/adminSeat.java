@@ -25,7 +25,7 @@ public class adminSeat {
     private Long seatNo;
 
     @Column(nullable = false, length = 100)
-    private String seatName;
+    private String seatNm;
 
     @Column(name = "useAt", nullable = false, length = 1)
     @Convert(converter = YesNoConverter.class)
