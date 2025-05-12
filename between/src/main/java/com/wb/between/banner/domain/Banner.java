@@ -1,13 +1,18 @@
 package com.wb.between.banner.domain;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
-@Data
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "banner")
 public class Banner {
 
@@ -19,14 +24,22 @@ public class Banner {
 
     private String bImageUrl;
 
-    private Date startDt;
+    private LocalDateTime startDt;
 
-    private Date endDt;
+    private LocalDateTime endDt;
 
     private String register;
 
-    private Date createDt;
+    private LocalDateTime createDt;
 
     @Column(name = "useAt", length = 10)
     private String useAt;
+
+    private Integer sortOrder;
+
+    private String originalFileName;
+
+    private Long fileSize;
+
+    String mimeType;
 }

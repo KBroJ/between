@@ -1,0 +1,331 @@
+/* Content Title */
+.main-title {
+    font-size: 1.8em;
+    margin-bottom: 25px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 25px 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.title-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+    opacity: 0.7; /* Adjust as needed */
+}
+
+/* Buttons */
+.btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: background-color 0.2s ease;
+    text-decoration: none; /* For potential <a> styled as buttons */
+    display: inline-block; /* Consistency */
+    margin-right: 5px; /* Spacing between buttons */
+}
+
+.btn-primary {
+    background-color: #3498db;
+    color: white;
+}
+.btn-primary:hover {
+    background-color: #2980b9;
+}
+
+.btn-secondary {
+    background-color: #ecf0f1;
+    color: #333;
+    border: 1px solid #bdc3c7;
+}
+.btn-secondary:hover {
+    background-color: #dadedf;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    color: white;
+}
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 0.85em;
+}
+
+/* Toolbar */
+.toolbar {
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: flex-end; /* Align button to the right */
+}
+
+/* Banner List Table */
+.banner-list-container {
+    margin-top: 20px;
+}
+
+.banner-list {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.banner-list th,
+.banner-list td {
+    border: 1px solid #ddd;
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.banner-list th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    font-size: 0.9em;
+    color: #555;
+}
+
+
+.col-order { width: 8%; text-align: center;}
+.col-preview { width: 15%; text-align: center;}
+.col-title { width: 30%; }
+.col-link { width: 22%; }
+.col-status { width: 10%; text-align: center;}
+.col-actions { width: 15%; text-align: center;}
+
+.order-handle span {
+    font-size: 1.2em;
+    color: #aaa;
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.banner-thumbnail {
+    max-width: 100px;
+    max-height: 40px; /* Adjust as needed */
+    object-fit: contain; /* Or 'cover' */
+    display: block;
+    margin: 0 auto;
+}
+
+.banner-list td a {
+    color: #3498db;
+    text-decoration: none;
+    word-break: break-all; /* Prevent long URLs from breaking layout */
+}
+.banner-list td a:hover {
+    text-decoration: underline;
+}
+
+.actions .btn {
+    margin: 0 3px; /* Spacing within actions cell */
+}
+
+/* List Actions (Save Order) */
+.list-actions {
+    margin-top: 20px;
+    text-align: right;
+}
+.list-actions small {
+    display: block;
+    margin-top: 5px;
+    color: #777;
+    font-size: 0.85em;
+}
+
+
+/* Status Toggle Switch CSS */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 44px; /* Adjusted size */
+    height: 24px; /* Adjusted size */
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px; /* Adjusted size */
+    width: 18px;  /* Adjusted size */
+    left: 3px;    /* Adjusted position */
+    bottom: 3px;   /* Adjusted position */
+    background-color: white;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: #2ecc71; /* Active color */
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #2ecc71;
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px); /* Adjusted movement */
+}
+
+.slider.round { border-radius: 24px; } /* Adjusted radius */
+.slider.round:before { border-radius: 50%; }
+
+/* Status Text */
+.status-text {
+    font-size: 0.9em;
+    font-weight: bold;
+    vertical-align: middle;
+}
+.status-active { color: #27ae60; }
+.status-inactive { color: #95a5a6; }
+
+
+/* Modal Form Styles */
+.modal {
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto; /* Centered */
+    padding: 30px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more specific */
+    max-width: 600px;
+    border-radius: 8px;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.close-btn {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Form Styles */
+#banner-form .form-group {
+    margin-bottom: 20px;
+}
+
+#banner-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+    font-size: 0.9em;
+}
+
+#banner-form input[type="text"],
+#banner-form input[type="url"],
+#banner-form input[type="file"],
+#banner-form input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+}
+#banner-form input[type="file"] {
+    padding: 5px;
+}
+
+#banner-form .required {
+    color: #e74c3c;
+    margin-left: 3px;
+}
+
+#banner-form small {
+    display: block;
+    font-size: 0.8em;
+    color: #777;
+    margin-top: 3px;
+}
+
+#banner-form .radio-label {
+    display: inline-block;
+    margin-right: 15px;
+    font-weight: normal;
+}
+#banner-form input[type="radio"] {
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+.image-preview {
+    display: block;
+    max-width: 200px;
+    max-height: 100px;
+    margin-top: 10px;
+    border: 1px solid #eee;
+    padding: 5px;
+}
+
+.date-group {
+    display: flex;
+    gap: 20px; /* Space between date inputs */
+}
+.date-group > div {
+    flex: 1; /* Make them share space equally */
+}
+
+
+.form-actions {
+    margin-top: 30px;
+    text-align: right;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.form-actions .btn {
+    margin-left: 10px;
+}

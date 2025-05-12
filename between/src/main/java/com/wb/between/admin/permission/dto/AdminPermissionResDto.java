@@ -14,11 +14,14 @@ public class AdminPermissionResDto {
 
     private String permissionName;
 
+    private String description;
+
     public static AdminPermissionResDto from(Permission permission) {
         return AdminPermissionResDto.builder()
                 .permissionId(permission.getPermissionId())
                 .permissionCode(permission.getPermissionCode())
                 .permissionName(permission.getPermissionName())
+                .description(permission.getDescription())
                 .build();
     }
 

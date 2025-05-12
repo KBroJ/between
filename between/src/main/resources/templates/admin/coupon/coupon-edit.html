@@ -72,6 +72,8 @@
       <div class="form-group">
         <label for="cpnNm">쿠폰명:</label>
         <input type="text" id="cpnNm" th:field="*{cpnNm}" placeholder="예: 신규가입 환영 쿠폰" required>
+        <div th:if="${#fields.hasErrors('cpnNm')}"
+             th:errors="*{cpnNm}"></div>
       </div>
 
       <div class="form-group">
@@ -97,11 +99,17 @@
         <label for="cpnStartDt">시작 일시:</label>
         <!-- HTML5 datetime-local 입력 타입 사용 -->
         <input type="datetime-local" id="cpnStartDt" th:field="*{cpnStartDt}" required>
+        <div th:if="${#fields.hasErrors('cpnStartDt')}"
+             th:errors="*{cpnStartDt}"></div>
+        <!-- 필요시 JavaScript로 종료일이 시작일 이후인지 검증 -->
       </div>
 
       <div class="form-group">
         <label for="cpnEndDt">종료 일시:</label>
+        <!-- HTML5 datetime-local 입력 타입 사용 -->
         <input type="datetime-local" id="cpnEndDt" th:field="*{cpnEndDt}" required>
+        <div th:if="${#fields.hasErrors('cpnEndDt')}"
+             th:errors="*{cpnEndDt}"></div>
         <!-- 필요시 JavaScript로 종료일이 시작일 이후인지 검증 -->
       </div>
 

@@ -117,3 +117,8 @@ kakao:
   pay:
     admin-key: 
 
+
+# 파일 경로 (로컬)
+file:
+  upload-dir: C:/tmp/banner_uploads
+

@@ -1,10 +1,13 @@
 package com.wb.between.user.service;
 
+import com.wb.between.admin.role.domain.Role;
 import com.wb.between.common.util.SmsUtil;
+import com.wb.between.role.repository.RoleRepository;
 import com.wb.between.user.domain.User;
 import com.wb.between.user.dto.SignupReqDto;
 import com.wb.between.user.dto.VerificationResult;
 import com.wb.between.user.repository.UserRepository;
+import com.wb.between.userrole.domain.UserRole;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +28,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final SmsUtil smsUtil;
+    private final RoleRepository roleRepository;
 
     // 인증번호
     private static final String OTP_PREFIX = "OTP_";
@@ -35,10 +39,15 @@ public class UserService {
     @Value("${spring.mail.username}") // application.properties/yml 값 주입
     private String fromEmail;
 
+    // 기본 역할 코드 상수 정의 (설정 파일 등으로 관리하는 것이 더 좋음)
+    private static final String DEFAULT_ROLE_CODE = "ROLE_USER"; // 일반 사용자 역할 코드
+    private static final String STAFF_ROLE_CODE = "ROLE_STAFF";   // 임직원 역할 코드 (예시)
+
     // 생성자 주입
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, SmsUtil smsUtil, JavaMailSender mailSender) {
+    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, SmsUtil smsUtil, JavaMailSender mailSender) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.smsUtil = smsUtil;
         this.mailSender = mailSender;
@@ -63,6 +72,19 @@ public class UserService {
             authCd = "임직원";
         }
 
+                // 1. 부여할 역할 코드 결정
+        String targetRoleCode = DEFAULT_ROLE_CODE; // 기본값: 일반 사용자
+//        String email = signupReqDto.getEmail();
+        if (email != null && email.endsWith("@winbit.kr")) { // 도메인 체크 (null 체크 추가)
+            targetRoleCode = STAFF_ROLE_CODE; // 특정 도메인이면 임직원 역할
+        }
+
+//        // 2. 역할(Role) 엔티티 조회
+//        // 시스템에 기본 역할('ROLE_USER', 'ROLE_STAFF' 등)은 반드시 미리 등록되어 있어야 함
+        Role assignedRole = roleRepository.findByRoleCode(targetRoleCode)
+                .orElseThrow(() -> new IllegalStateException("역할을 찾을 수 없습니다. 시스템 설정 오류입니다."));
+//        // 실제로는 RoleNotFoundException 같은 커스텀 예외 처리 권장
+
         // 비밀번호 암호화
         System.out.println("UserService|registerUser|비밀번호 암호화 전|signupRequest.getPassword() = " + signupReqDto.getPassword());
         String encodedPassword = passwordEncoder.encode(signupReqDto.getPassword());
@@ -78,6 +100,15 @@ public class UserService {
                 .authCd(authCd)
                 .loginM("일반")
                 .build();
+
+        // 3) UserRole 조인 엔티티 생성 & 연결
+        UserRole ur = new UserRole();
+        ur.setUser(user);               // 양방향이라면
+        ur.setRole(assignedRole);
+        // 만약 UserRole에 복합키나 빌더가 있으면 적절히 세팅
+
+        // 4) User 쪽 컬렉션에 추가
+        user.getUserRole().add(ur);
 
         // 저장 및 반환
         return userRepository.save(user);

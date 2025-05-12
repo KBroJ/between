@@ -1,6 +1,9 @@
 package com.wb.between.user.domain;
 
+import com.wb.between.admin.role.domain.Role;
+import com.wb.between.admin.rolepermission.domain.RolePermission;
 import com.wb.between.usercoupon.domain.UserCoupon;
+import com.wb.between.userrole.domain.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -66,13 +69,32 @@ public class User implements UserDetails, OAuth2User {
 
     @Override   // 권한
     public Collection<? extends GrantedAuthority> getAuthorities(){
-        return List.of(new SimpleGrantedAuthority("user"));
+        Set<GrantedAuthority> authorities = new HashSet<>();
+
+        //유저 역할
+        for (UserRole ur : userRole) {
+            Role role = ur.getRole();
+            //역할 등록
+            authorities.add(new SimpleGrantedAuthority(ur.getRole().getRoleCode()));
+            
+            for (RolePermission rp : role.getRolePermissions()) {
+                //권한 등록
+                authorities.add(new SimpleGrantedAuthority(rp.getPermission().getPermissionCode()));
+            }
+        }
+        return authorities;
     }
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @ToString.Exclude // Lombok이 생성하는 toString() 메소드에서 이 필드를 제외시킴!
     @Builder.Default
     private Set<UserCoupon> usercoupon = new HashSet<>(); // 사용자가 가진 쿠폰 목록 (UserCoupon 객체들을 통해 접근)
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @ToString.Exclude // Lombok이 생성하는 toString() 메소드에서 이 필드를 제외시킴!
+    @Builder.Default
+    private Set<UserRole> userRole = new HashSet<>(); // 사용자가 가진 쿠폰 목록 (UserCoupon 객체들을 통해 접근)
+
 
     // 사용자의 id를 반환 (고유한 값)
     @Override

@@ -8,37 +8,76 @@
     <link rel="stylesheet" th:href="@{/css/mypage/edit-profile.css}">
 </head>
 <body>
-
 <div layout:fragment="mypage-content">
+  <div class="detail-card" th:object="${userInfo}">
+    <form th:action="@{/mypage/edit}" method="post" class="profile-form">
+      <!-- put 처리 -->
+      <input type="hidden" name="_method" value="put" />
+      <h2 class="card-title">
+        <i class="fa-solid fa-user-circle card-title-icon"></i>
+        회원정보 수정
+      </h2>
+
+      <hr class="card-divider">
+
+      <section class="info-section">
+        <div class="info-grid">
+          <div class="form-group">
+            <label for="name">이름</label>
+            <input type="text" id="name" name="name" th:field="*{name}" />
+            <div th:if="${#fields.hasErrors('phoneNo')}"
+                 th:errors="*{phoneNo}">이름 에러 메시지</div>
+            <!-- 클라이언트 측 오류 메시지 표시용 (JavaScript) -->
+            <div class="error-message js-error" id="name-js-error" style="display: none;"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="phone">연락처</label>
+            <input type="text" id="phone" name="phone" th:field="*{phoneNo}" />
+            <div th:if="${#fields.hasErrors('phoneNo')}"
+                 th:errors="*{phoneNo}">전화번호 에러 메시지</div>
+          </div>
+          <!-- 클라이언트 측 오류 메시지 표시용 (JavaScript) -->
+          <div class="error-message js-error" id="phone-js-error" style="display: none;"></div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">정보 수정</button>
+          </div>
+        </div>
+      </section>
+    </form>
+  </div>
+
+
   <h1 class="main-title">회원정보 수정</h1>
   <div class="card info-card" th:object="${userInfo}">
     <div class="card-header">
 
     </div>
-    <div th:object="${userInfo}">
-      <form th:action="@{/mypage/edit}" method="post" class="profile-form">
-        <!-- put 처리 -->
-        <input type="hidden" name="_method" value="put" />
-        <div class="form-group">
-          <label for="name">이름</label>
-          <input type="text" id="name" name="name" th:field="*{name}" />
-          <div th:if="${#fields.hasErrors('phoneNo')}"
-               th:errors="*{phoneNo}">이름 에러 메시지</div>
-          <!-- 클라이언트 측 오류 메시지 표시용 (JavaScript) -->
-          <div class="error-message js-error" id="name-js-error" style="display: none;"></div>
-        </div>
-        <div class="form-group">
-          <label for="phone">연락처</label>
-          <input type="text" id="phone" name="phone" th:field="*{phoneNo}" />
-          <div th:if="${#fields.hasErrors('phoneNo')}"
-               th:errors="*{phoneNo}">전화번호 에러 메시지</div>
-        </div>
-        <div class="error-message js-error" id="phone-js-error" style="display: none;"></div>
-        <div class="form-actions">
-          <button type="submit" class="btn-primary">정보 수정</button>
-        </div>
-      </form>
-    </div>
+<!--    <div th:object="${userInfo}">-->
+<!--      <form th:action="@{/mypage/edit}" method="post" class="profile-form">-->
+<!--        &lt;!&ndash; put 처리 &ndash;&gt;-->
+<!--        <input type="hidden" name="_method" value="put" />-->
+<!--        <div class="form-group">-->
+<!--          <label for="name">이름</label>-->
+<!--          <input type="text" id="name" name="name" th:field="*{name}" />-->
+<!--          <div th:if="${#fields.hasErrors('phoneNo')}"-->
+<!--               th:errors="*{phoneNo}">이름 에러 메시지</div>-->
+<!--          &lt;!&ndash; 클라이언트 측 오류 메시지 표시용 (JavaScript) &ndash;&gt;-->
+<!--          <div class="error-message js-error" id="name-js-error" style="display: none;"></div>-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--          <label for="phone">연락처</label>-->
+<!--          <input type="text" id="phone" name="phone" th:field="*{phoneNo}" />-->
+<!--          <div th:if="${#fields.hasErrors('phoneNo')}"-->
+<!--               th:errors="*{phoneNo}">전화번호 에러 메시지</div>-->
+<!--        </div>-->
+<!--        <div class="error-message js-error" id="phone-js-error" style="display: none;"></div>-->
+<!--        <div class="form-actions">-->
+<!--          <button type="submit" class="btn-primary">정보 수정</button>-->
+<!--        </div>-->
+<!--      </form>-->
+<!--    </div>-->
 
   </div>
 </div>

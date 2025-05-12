@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AdminMenuRepository extends JpaRepository<Menu, Long> {
@@ -27,5 +28,14 @@ public interface AdminMenuRepository extends JpaRepository<Menu, Long> {
     @Query("SELECT m FROM Menu m WHERE m.menuType = :id")
     List<Menu> findDistinctByMenuType(@Param("id") String id);
 
-    List<Menu> findByUpperMenuNo(Long upperMenuNo, Sort sort);
+    /**
+     * 메뉴 단일 조회
+     * @param menuNo
+     * @return
+     */
+    @Query("SELECT m FROM Menu m " +
+            "LEFT JOIN FETCH m.menuRoles mr " +
+            "WHERE m.menuNo = :menuNo")
+    Optional<Menu> findByMenuNo(@Param("menuNo") Long menuNo);
+
 }

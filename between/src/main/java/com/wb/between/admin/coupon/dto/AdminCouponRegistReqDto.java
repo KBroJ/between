@@ -48,16 +48,4 @@ public class AdminCouponRegistReqDto {
     @Pattern(regexp = "[YN]", message = "활성 여부는 'Y' 또는 'N'이어야 합니다.")
     private String activeYn;
 
-
-    public static AdminCouponResDto from(Coupon coupon) {
-        return AdminCouponResDto.builder()
-                .cpNo(coupon.getCpNo())
-                .cpnNm(coupon.getCpnNm())
-                .discount(coupon.getDiscount())
-                .discountAt(coupon.getDiscountAt())
-                .cpnStartDt(coupon.getCpnStartDt())
-                .cpnEndDt(coupon.getCpnEndDt())
-                .cpnDsc(coupon.getCpnDsc())
-                .build();
-    }
 }

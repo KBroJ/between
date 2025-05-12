@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin/admin}">
+<head>
+  <title>관리자 화면</title>
+  <link rel="stylesheet" th:href="@{/css/admin/banner/banner-manage.css}">
+</head>
+<body>
+
+<section layout:fragment="admin-content">   <!-- Main Content -->
+
+  <h1 class="main-title">배너 관리</h1>
+  <div class="toolbar">
+    <a th:href="@{/admin/banner/regist}" title="" class="btn btn-primary">+ 새 배너 등록</a>
+    <!-- Optional: Add search/filter elements here -->
+  </div>
+
+  <div class="banner-list-container">
+    <h2>등록된 배너 목록</h2>
+    <table class="banner-list" id="resultsBody">
+      <thead>
+      <tr>
+        <th class="col-order">순서</th>
+        <th class="col-preview">미리보기</th>
+        <th class="col-title">배너명/대체 텍스트</th>
+        <th class="col-status">상태</th>
+        <th class="col-actions">관리</th>
+      </tr>
+      </thead>
+      <tbody>
+      <!-- 동적리스트 -->
+      <tr class="banner-item" th:each="banner : ${bannerList}">
+        <td class="order-handle"><span>↕️</span> <span th:text="${banner.sortOrder}"></span></td>
+        <td><img th:src="${banner.bImageUrl}" alt="" class="banner-thumbnail"></td>
+        <td th:text="${banner.bTitle}"></td>
+        <!--          <td><a th:href="/products/new?season=fw" target="_blank" title="/products/new?season=fw">/products/new...</a></td>-->
+        <td>
+          <label class="switch">
+            <input type="checkbox" checked data-id="3" class="status-toggle">
+            <span class="slider round"></span>
+          </label>
+          <span class="status-text status-active" th:text="${banner.useAt}"></span>
+        </td>
+        <td class="actions">
+          <a th:href="@{/admin/banner/edit/{bNo}(bNo=${banner.bNo})}" class="btn btn-secondary btn-sm edit-btn">수정</a>
+          <button class="btn btn-danger btn-sm delete-btn" th:data-bno="${banner.bNo}">삭제</button>
+        </td>
+      </tr>
+
+
+      <!-- Add more banner rows dynamically -->
+      </tbody>
+    </table>
+  </div>
+<!--  <div class="container">-->
+</section >
+<th:block layout:fragment="page-script">
+  <!-- 커스텀 JavaScript -->
+  <script th:src="@{/js/admin/banner/banner-manage.js}"></script>
+</th:block>
+</body>
+</html>

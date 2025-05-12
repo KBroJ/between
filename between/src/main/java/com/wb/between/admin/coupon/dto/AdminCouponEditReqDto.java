@@ -33,12 +33,10 @@ public class AdminCouponEditReqDto {
     private String discountInfo;
 
     @NotNull(message = "쿠폰 시작일시는 필수 입력 항목입니다.")
-    @FutureOrPresent(message = "쿠폰 시작일시는 현재 이후여야 합니다.") // 필요에 따라 조정
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") // HTML datetime-local 형식과 맞춤
     private LocalDateTime cpnStartDt;
 
     @NotNull(message = "쿠폰 만료일시는 필수 입력 항목입니다.")
-    @Future(message = "쿠폰 만료일시는 미래여야 합니다.")
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime cpnEndDt;
 
@@ -48,16 +46,4 @@ public class AdminCouponEditReqDto {
     @Pattern(regexp = "[YN]", message = "활성 여부는 'Y' 또는 'N'이어야 합니다.")
     private String activeYn;
 
-
-    public static AdminCouponResDto from(Coupon coupon) {
-        return AdminCouponResDto.builder()
-                .cpNo(coupon.getCpNo())
-                .cpnNm(coupon.getCpnNm())
-                .discount(coupon.getDiscount())
-                .discountAt(coupon.getDiscountAt())
-                .cpnStartDt(coupon.getCpnStartDt())
-                .cpnEndDt(coupon.getCpnEndDt())
-                .cpnDsc(coupon.getCpnDsc())
-                .build();
-    }
 }

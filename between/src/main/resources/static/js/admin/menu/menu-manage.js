@@ -36,12 +36,11 @@ $(function () {
      * @param callback
      */
     function getTreeData(nodeId, callback) {
-        console.log(nodeId);
 
         $.ajax({
             url: '/admin/menus/root',
             type: 'GET',
-            data: { id : nodeId },
+            data: { nodeId : nodeId },
             dataType: 'json',
             success: function (data) {
                 console.log(data);
@@ -57,6 +56,17 @@ $(function () {
     $('#addBtn').on('click', function() {
         prepareNewMenu();
     });
+
+    // 저장
+    $('#saveBtn').on('click', function() {
+        saveMenu();
+    });
+
+    //삭제
+    $('#deleteBtn').on('click', function() {
+        deleteMenu();
+    })
+
 }); // End of $(function() { ... });
 
 /**
@@ -72,47 +82,68 @@ function resetForm() {
 
 /**
  * 메뉴 상세 정보를 로드하여 폼에 채웁니다. (AJAX 필요)
- * @param {string} menuId 조회할 메뉴의 ID (menuNo)
+ * @param {string} menuNo 조회할 메뉴의 ID (menuNo)
  */
-function loadMenuDetails(menuId) {
-    console.log("loadDetail => ", menuId);
+function loadMenuDetails(menuNo) {
+    console.log("loadDetail => ", menuNo);
 
     $.ajax({
-        url: `/admin/menus/details/${menuId}`,
+        url: `/admin/menus/details/${menuNo}`,
         type: 'GET',
         dataType: 'json',
         success: function (data) {
             console.log("detail result => ", data);
+            console.log("detail result menuNo => ", data.adminMenuResDto.menuNo);
+            $('#menuNo').val(data.adminMenuResDto.menuNo);
+            $('#menuNm').val(data.adminMenuResDto.menuNm);
+            $('#upperMenuNo').val(data.adminMenuResDto.upperMenuNo === '#' ? '' : data.adminMenuResDto.upperMenuNo); // 루트는 상위 없음
+            $('#upperMenuDisplay').val(data.adminMenuResDto.upperMenuNo === '#' ? '최상위 메뉴' : data.adminMenuResDto.upperMenuNo);
+            $('#sortOrder').val(data.adminMenuResDto.sortOrder);
+            $('input[name="useAt"][value="' + data.adminMenuResDto.useAt + '"]').prop('checked', true);
+            $('#menuUrl').val(data.adminMenuResDto.menuUrl);
+            $('#menuDsc').val(data.adminMenuResDto.menuDsc);
+            $('#menuType').val(data.adminMenuResDto.menuType);
 
-            $('#menuNo').val(data.menuNo);
-            $('#menuNm').val(data.menuNm);
-            $('#upperMenuNo').val(data.upperMenuNo === '#' ? '' : data.upperMenuNo); // 루트는 상위 없음
-            $('#upperMenuDisplay').val(data.upperMenuNo === '#' ? '최상위 메뉴' : data.upperMenuNm);
-            $('#sortOrder').val(data.sortOrder);
-            $('input[name="useAt"][value="' + data.useAt + '"]').prop('checked', true);
-            $('#menuUrl').val(data.menuUrl);
-            $('#menuDsc').val(data.menuDsc);
-
-
+            //메뉴 역할 정보 표출 메소드
+            populateRoleCheckboxes(data.allRoleDto, data.assignedRoleIds)
         },
         error: function (data) {
             console.log(data);
         }
     })
 
-    // --- AJAX 성공 시 콜백 함수 내에서 아래 로직 실행 ---
-    // 가상의 데이터로 폼 채우기 (실제로는 AJAX 응답 사용)
-    const menuData = { // <<-- 이 부분은 실제 AJAX 응답 데이터로 대체되어야 함
-        menuNo: menuId,
-        menuNm: $('#jstree_div').jstree(true).get_node(menuId).text, // 트리에서 이름 가져오기 (임시)
-        upperMenuNo: $('#jstree_div').jstree(true).get_parent(menuId), // 트리에서 부모 ID 가져오기 (임시)
-        upperMenuNm: $('#jstree_div').jstree(true).get_node($('#jstree_div').jstree(true).get_parent(menuId)).text, // 트리에서 부모 이름 (임시)
-    };
+}
 
+// 역할 체크박스 생성 함수
+function populateRoleCheckboxes(allRoles, assignedRoleIds = []) { // assignedRoleIds 기본값 빈 배열
+    const container = $('#roleCheckboxes');
+    container.empty(); // 기존 내용 비우기
 
-    // --- 폼 채우기 끝 ---
+    if (!allRoles || allRoles.length === 0) {
+        container.text('정의된 역할이 없습니다.');
+        return;
+    }
 
+    allRoles.forEach(role => {
+        const checkboxId = 'role_' + role.roleId;
+        const isChecked = assignedRoleIds.includes(role.roleId); // 역할 ID가 할당 목록에 있는지 확인
 
+        const checkbox = $('<input>')
+            .attr('type', 'checkbox')
+            .attr('name', 'allowedRoles')
+            .attr('id', checkboxId)
+            .val(role.roleId)
+            .prop('checked', isChecked); // 체크 상태 설정
+
+        const label = $('<label>')
+            .attr('for', checkboxId)
+            .text(role.roleName);
+
+        // 스타일링을 위해 div로 감싸기 (선택적)
+        const div = $('<div>').addClass('checkbox-item');
+        div.append(checkbox).append(label);
+        container.append(div);
+    });
 }
 
 /**
@@ -126,14 +157,19 @@ function prepareNewMenu() {
         let parentNode = selectedNode[0];
 
         // 가상 루트 노드를 부모로 선택한 경우 처리
-        if(parentNode.id.startsWith('VIRTUAL_')) {
+        if(!/^\d+$/.test(parentNode.id)) {
             $('#upperMenuNo').val(''); // 실제 부모 ID 없음
             $('#upperMenuDisplay').val(parentNode.text + ' 아래 최상위'); // 표시용
+            $('#menuType').val(parentNode.id);
             // 실제 저장 시 menuType은 parentNode.data.type 사용
         } else {
             $('#upperMenuNo').val(parentNode.id); // 선택된 노드 ID를 상위 ID로
             $('#upperMenuDisplay').val(parentNode.text); // 선택된 노드 이름을 표시
         }
+
+        //메뉴타입 설정은 선택 상단
+
+
     } else {
         // 선택된 노드가 없으면 최상위 메뉴로 추가 (어떤 타입인지는 별도 지정 필요)
         alert("상위 메뉴를 트리에서 선택하거나, 타입을 지정해야 합니다.");
@@ -154,24 +190,36 @@ function saveMenu() {
         menuData[item.name] = item.value;
     });
 
-    const menuId = $('#menuNo').val(); // 숨겨진 menuNo 값 확인
-    const isNew = !menuId; // menuNo가 없으면 새 메뉴
+    const menuNo = $('#menuNo').val(); // 숨겨진 menuNo 값 확인
+    const isNew = !menuNo; // menuNo가 없으면 새 메뉴
 
-    const url = isNew ? '/admin/menus' : '/admin/menus/' + menuId;
+    console.log("isNew = ", isNew);
+    console.log("menuNo = ", menuNo);
+    console.log("menyType = ", $("#menuType").val());
+    const url = isNew ? '/admin/menus/regist' : '/admin/menus/edit/' + menuNo;
     const method = isNew ? 'POST' : 'PUT';
 
     console.log('Saving menu:', method, url, menuData);
-
+    console.log(JSON.stringify(menuData));
     // TODO: 실제 AJAX 요청 보내기
-    // 예: $.ajax({ url: url, method: method, contentType: 'application/json', data: JSON.stringify(menuData), success: function(response) { ... } });
+    $.ajax({
+        url: url,
+        method: method,
+        contentType: 'application/json',
+        data: JSON.stringify(menuData),
+        success: function (data) {
+            alert('메뉴가 ' + (isNew ? '추가' : '수정') + '되었습니다.');
+            // 트리 갱신 또는 리로드
+            // const parentNodeId = menuData.upperMenuNo || '#'; // 상위 ID 없으면 루트 아래
+            // 특정 노드만 리프레시 하거나, 전체 리프레시
+            // $('#menuTreeContainer').jstree('refresh_node', parentNodeId); // 특정 부모만
+            $('#jstree_div').jstree('refresh'); // 전체 리프레시 (간단하지만 비효율적일 수 있음)
+        },
+        error: function (data) {
+            alert("메뉴 등록에 실패하였습니다.")
+        }
+    })
 
-    // --- AJAX 성공 시 콜백 ---
-    alert('메뉴가 ' + (isNew ? '추가' : '수정') + '되었습니다.');
-    // 트리 갱신 또는 리로드
-    const parentNodeId = menuData.upperMenuNo || '#'; // 상위 ID 없으면 루트 아래
-    // 특정 노드만 리프레시 하거나, 전체 리프레시
-    // $('#menuTreeContainer').jstree('refresh_node', parentNodeId); // 특정 부모만
-    $('#jstree_div').jstree('refresh'); // 전체 리프레시 (간단하지만 비효율적일 수 있음)
 
     // 만약 새로 생성된 경우, 생성된 노드를 선택하거나 폼 업데이트 가능
     // if (isNew && response && response.menuNo) {
@@ -179,4 +227,28 @@ function saveMenu() {
     //     // JSTree에서 해당 노드 선택하는 로직 추가 가능
     // }
     // --- 성공 콜백 끝 ---
+}
+
+/**
+ * 삭제
+ */
+function deleteMenu() {
+    const menuNo = $('#menuNo').val(); // 숨겨진 menuNo 값 확인
+    console.log("deleteMenu => ", menuNo);
+    if (confirm('정말 이 역할을 삭제하시겠습니까? (ID: ' + menuNo + ')')) {
+
+        $.ajax({
+            url:`/admin/menus/delete/${menuNo}`,
+            type: 'DELETE',
+            success: function (data) {
+                alert('메뉴가 삭제 되었습니다.');
+                // 트리 갱신 또는 리로드
+                $('#jstree_div').jstree('refresh'); // 전체 리프레시 (간단하지만 비효율적일 수 있음)
+            },
+            error: function (data) {
+                alert('메뉴가 삭제에 실패하였습니다.');
+            }
+        })
+    }
+
 }

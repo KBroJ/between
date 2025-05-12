@@ -11,5 +11,6 @@ import java.util.List;
 @Repository
 public interface MenuRepository extends JpaRepository<Menu, Long> {
 
+    //사용하는 메뉴 조회, Sort 기준은 sortOrder 오름차순
     List<Menu> findByUseAt(String useAt, Sort sort);
 }

@@ -4,12 +4,14 @@ package com.wb.between.admin.menu.dto;
 import com.wb.between.menu.domain.Menu;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
 @Getter
+@Setter
 @Builder
-public class AdminMenuResponseDto {
+public class AdminMenuRegistReqDto {
 
     private Long menuNo;
 
@@ -29,8 +31,8 @@ public class AdminMenuResponseDto {
 
     private List<String> roleName;
 
-    public static AdminMenuResponseDto from(Menu menu) {
-        return AdminMenuResponseDto.builder()
+    public static AdminMenuRegistReqDto from(Menu menu) {
+        return AdminMenuRegistReqDto.builder()
                 .menuNo(menu.getMenuNo())
                 .upperMenuNo(menu.getUpperMenuNo())
                 .menuNm(menu.getMenuNm())

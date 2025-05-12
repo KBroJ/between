@@ -4,7 +4,7 @@
       layout:decorate="~{layout/admin/admin}">
 <head>
   <title>관리자 화면</title>
-  <link rel="stylesheet" th:href="@{/css/admin/role-manage.css}">
+  <link rel="stylesheet" th:href="@{/css/admin/role/role-manage.css}">
 </head>
 <body>
 
@@ -21,7 +21,8 @@
         <button type="submit" id="searchBtn">검색</button> <!-- 2. 검색 버튼 -->
       </div>
       <!-- 1. 등록 버튼 (검색 영역 오른쪽에 배치) -->
-      <button type="button" id="registerBtn" class="register-button">역할 등록</button>
+      <button type="button" id="registerBtn" class="register-button"
+              onclick="location.href='/admin/roles/regist'">역할 등록</button>
     </form>
 
     <!-- 결과 테이블 영역 -->
@@ -34,7 +35,7 @@
           <th scope="col">역할명</th>
           <th scope="col">역할설명</th>
           <th scope="col">등록일</th>
-          <th scope="col">수정</th>
+          <th scope="col">관리</th>
         </tr>
         </thead>
         <tbody id="resultsBody">
@@ -46,34 +47,48 @@
           <td th:text="${role.roleName}"></td>
           <td th:text="${role.description}"></td>
           <td th:text="${#temporals.format(role.createDt, 'yyyy.MM.dd HH:mm')}"></td>
-          <td><button type="button" class="btn-edit" data-group-id="3">수정</button></td>
+          <td>
+            <a th:href="@{/admin/roles/edit/{id}(id=${role.roleId})}" class="btn-edit">수정</a>
+            <button type="button" class="btn-delete" th:data-role-id="${role.roleId}">삭제</button>
+          </td>
         </tr>
-        <tr th:if="${adminRoleList.empty}">
+        <tr th:if="${#lists.isEmpty(adminRoleList)}">
           <td colspan="6" class="no-data">조회된 역할 목록이 없습니다.</td>
         </tr>
-        <!-- ... 추가 예시 행 ... -->
         </tbody>
       </table>
     </div>
 
-    <!-- 페이지네이션 영역 -->
+    <!-- TODO:페이지네이션 영역 수정 -->
     <div class="pagination-area">
-      <a href="#" class="page-link current-page">1</a>
-      <!-- <a href="#" class="page-link">2</a> -->
-      <!-- <a href="#" class="page-link">3</a> -->
+      <!-- 페이징 버튼 -->
+      <nav th:if="${adminRoleList.totalPages > 0}" class="pagination-nav" aria-label="Page navigation">
+        <ul class="pagination">
+          <li class="page-item" th:classappend="${adminRoleList.first} ? 'disabled' : ''">
+            <a class="page-link" th:href="@{/admin/roles(page=0, searchRoleName=${searchRoleName})}" aria-label="First"><span>&laquo;</span></a>
+          </li>
+          <li class="page-item" th:classappend="${adminRoleList.first} ? 'disabled' : ''">
+            <a class="page-link" th:href="${adminRoleList.first} ? '#' : @{/admin/roles(page=${adminRoleList.number - 1}, searchRoleName=${searchRoleName})}" aria-label="Previous"><span>&lt;</span></a>
+          </li>
+          <li class="page-item" th:each="pageNumber : ${#numbers.sequence(0, adminRoleList.totalPages - 1)}"
+              th:classappend="${pageNumber == adminRoleList.number} ? 'active' : ''">
+            <a class="page-link" th:href="@{/admin/roles(page=${pageNumber}, searchRoleName=${searchRoleName})}"
+               th:text="${pageNumber + 1}"></a>
+          </li>
+          <li class="page-item" th:classappend="${adminRoleList.last} ? 'disabled' : ''">
+            <a class="page-link" th:href="${adminRoleList.last} ? '#' : @{/admin/roles(page=${adminRoleList.number + 1}, searchRoleName=${searchRoleName})}" aria-label="Next"><span>&gt;</span></a>
+          </li>
+          <li class="page-item" th:classappend="${adminRoleList.last} ? 'disabled' : ''">
+            <a class="page-link" th:href="@{/admin/roles(page=${adminRoleList.totalPages - 1}, searchRoleName=${searchRoleName})}" aria-label="Last"><span>&raquo;</span></a>
+          </li>
+        </ul>
+      </nav>
     </div>
   </div>
-    <!-- 회원 탈퇴 확인을 위한 간단한 스크립트 예시 -->
-    <script>
-      // function confirmWithdrawal() {
-      //   if (confirm('정말로 회원을 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
-      //     // 실제 탈퇴 처리 로직 호출 (예: form submit 또는 fetch API 사용)
-      //     // location.href = '/mypage/withdraw'; // 예시 URL
-      //     // alert('회원 탈퇴 로직을 구현해야 합니다.');
-      //   }
-      // }
-    </script>
-  </div>
 </section >
+<th:block layout:fragment="page-script">
+  <!-- 커스텀 JavaScript -->
+  <script th:src="@{/js/admin/role/role-manage.js}"></script>
+</th:block>
 </body>
 </html>

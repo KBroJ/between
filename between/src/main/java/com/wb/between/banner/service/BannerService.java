@@ -26,7 +26,7 @@ public class BannerService {
     public List<BannerListResponseDto> findBannerList() {
 
         //배너목록 조회
-        List<Banner> bannerList = bannerRepository.findByUseAt("Y", Sort.by(Sort.Direction.DESC, "createDt"));
+        List<Banner> bannerList = bannerRepository.findByUseAt("Y", Sort.by(Sort.Direction.ASC, "sortOrder"));
         log.debug("bannerList: {}", bannerList);
 
         //결과 없을 경우

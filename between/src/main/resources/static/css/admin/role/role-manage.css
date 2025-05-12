@@ -122,6 +122,17 @@ button {
     background-color: #5a6268;
 }
 
+/* 관리 컬럼의 삭제 버튼 */
+.results-table .btn-delete {
+    background-color: #6c757d;
+    color: white;
+    padding: 5px 10px; /* 테이블 내 버튼 크기 조정 */
+    font-size: 12px;
+}
+.results-table .btn-delete:hover {
+    background-color: #5a6268;
+}
+
 /* 페이지네이션 영역 스타일 */
 .pagination-area {
     text-align: center;
@@ -172,4 +183,67 @@ input[type="text"], input[type="number"], textarea {
     border: 1px solid #ccc;
     border-radius: 3px;
     box-sizing: border-box;
+}
+
+/* 페이징 네비게이션 */
+.pagination-nav {
+    margin-top: 25px;
+    text-align: center;
+}
+
+/* 페이징 리스트 */
+.pagination {
+    display: inline-block;
+    padding-left: 0;
+    margin: 0;
+    list-style: none;
+    border-radius: 4px;
+}
+
+.page-item {
+    display: inline; /* 가로 정렬 */
+}
+
+.page-item .page-link {
+    position: relative;
+    float: left; /* inline 요소 간 간격 제거 */
+    padding: 8px 12px;
+    margin-left: -1px; /* 테두리 겹침 처리 */
+    line-height: 1.42857143;
+    color: #0d6efd;
+    text-decoration: none;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out;
+}
+.page-item:first-child .page-link {
+    margin-left: 0;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+}
+.page-item:last-child .page-link {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.page-item .page-link:hover {
+    z-index: 2;
+    color: #0a58ca;
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+}
+
+.page-item.active .page-link {
+    z-index: 3;
+    color: #fff;
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+    cursor: default;
+    background-color: #fff;
+    border-color: #dee2e6;
 }

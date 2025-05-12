@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin/admin}">
+<head>
+  <title>관리자 화면</title>
+  <link rel="stylesheet" th:href="@{/css/admin/popup/popup-manage.css}">
+</head>
+<body>
+
+<section layout:fragment="admin-content">   <!-- Main Content -->
+
+  <h1 class="main-title">팝업 관리 화면</h1>
+
+  <div class="content-container">
+    <!-- 상단 검색 영역 -->
+    <form id="searchForm" class="search-area">
+      <div class="form-group">
+        <label for="searchPopupName">역할 명</label>
+        <input type="text" id="searchPopupName" name="searchPopupName">
+        <button type="submit" id="searchBtn">검색</button> <!-- 2. 검색 버튼 -->
+      </div>
+      <!-- 1. 등록 버튼 (검색 영역 오른쪽에 배치) -->
+      <button type="button" id="registerBtn" class="register-button"
+              onclick="location.href='/admin/popup/regist'">역할 등록</button>
+    </form>
+
+    <div style="text-align: center; padding: 20px; color: #6c757d;">
+      등록된 팝업이 없습니다.
+    </div>
+    <div class="table-responsive">
+      <table class="custom-table"> <!-- 클래스명 변경 -->
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>제목</th>
+          <th>노출 기간</th>
+          <th style="text-align: center;">노출 여부</th>
+          <th style="text-align: center;">순서</th>
+          <th style="text-align: center;">관리</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="popup : ${popups}">
+          <td th:text="${popup.id}">1</td>
+          <td>
+            <a th:href="@{/admin/popups/{id}/edit(id=${popup.id})}" th:text="${popup.title}">
+              팝업 제목 예시
+            </a>
+          </td>
+          <td th:text="|${#temporals.format(popup.startDate, 'yy.MM.dd')} ~ ${#temporals.format(popup.endDate, 'yy.MM.dd')}|">
+            23.01.01 ~ 23.01.31
+          </td>
+          <td style="text-align: center;">
+            <span th:if="${popup.active}" class="status-badge status-badge-success">활성</span>
+            <span th:unless="${popup.active}" class="status-badge status-badge-secondary">비활성</span>
+          </td>
+          <td style="text-align: center;" th:text="${popup.displayOrder}">0</td>
+          <td class="actions-cell">
+            <a th:href="@{/admin/popups/{id}/edit(id=${popup.id})}" class="btn btn-outline-primary" title="수정">
+              <i class="fas fa-edit"></i>
+            </a>
+            <button type="button" class="btn btn-outline-info" title="미리보기"
+                    th:attr="onclick=|previewPopup('${popup.id}', '${popup.title}', '${#strings.escapeJavaScript(popup.content)}', '${popup.width}', '${popup.height}')|">
+              <i class="fas fa-eye"></i>
+            </button>
+            <form th:action="@{/admin/popups/{id}/delete(id=${popup.id})}" method="post" onsubmit="return confirm('정말로 이 팝업을 삭제하시겠습니까?');">
+              <button type="submit" class="btn btn-outline-danger" title="삭제">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+<!--  <div class="container">-->
+<!--  </div> &lt;!&ndash; /container &ndash;&gt;-->
+</section >
+<th:block layout:fragment="page-script">
+  <!-- 커스텀 JavaScript -->
+<!--  <script th:src="@{/js/admin/banner/banner-manage.js}"></script>-->
+</th:block>
+</body>
+</html>

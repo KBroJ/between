@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin/admin}">
+<head>
+  <title>관리자 화면</title>
+  <link rel="stylesheet" th:href="@{/css/admin/popup/popup-regist.css}">
+</head>
+<body>
+
+<section layout:fragment="admin-content">   <!-- Main Content -->
+
+  <h1 class="main-title">팝업 관리 화면</h1>
+  <div class="form-panel"> <!-- 클래스명 변경 -->
+    <form th:action="@{/admin/popups}"  method="post" id="popupForm">
+      <input type="hidden" />
+
+      <div class="form-group">
+        <label for="title" class="form-label">팝업 제목 <span style="color: #dc3545;">*</span></label>
+        <input type="text" class="form-control" id="title"  required>
+        <div class="field-error">제목 오류</div>
+      </div>
+
+      <div class="form-group">
+        <label for="content" class="form-label">팝업 내용 (HTML 가능)</label>
+        <!-- WYSIWYG 에디터 사용 시 이 부분을 라이브러리 지침에 따름 -->
+        <div class="wysiwyg-editor-wrapper">
+          <textarea class="form-control" id="content" rows="10" placeholder="HTML 태그를 직접 입력하거나, 에디터를 사용하세요."></textarea>
+        </div>
+        <div class="field-error">내용 오류</div>
+      </div>
+
+      <div class="form-row form-group"> <!-- form-row 추가 -->
+        <div class="form-col form-col-6"> <!-- form-col 추가 -->
+          <label for="startDate" class="form-label">노출 시작일 <span style="color: #dc3545;">*</span></label>
+          <input type="date" class="form-control" id="startDate"  required>
+          <div  class="field-error">시작일 오류</div>
+        </div>
+        <div class="form-col form-col-6"> <!-- form-col 추가 -->
+          <label for="endDate" class="form-label">노출 종료일 <span style="color: #dc3545;">*</span></label>
+          <input type="date" class="form-control" id="endDate"  required>
+          <div  class="field-error">종료일 오류</div>
+        </div>
+      </div>
+
+      <div class="form-row form-group align-items-center"> <!-- align-items-center는 CSS에서 flex 관련 처리 필요 -->
+        <div class="form-col form-col-3">
+          <label class="form-label">노출 여부</label>
+          <div class="form-switch"> <!-- 스위치 사용 시 -->
+            <input class="form-check-input" type="checkbox" role="switch" id="active" >
+            <label class="form-check-label" for="active">활성</label>
+          </div>
+          <!-- 일반 체크박스 사용 시
+          <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="active" th:field="*{active}" th:checked="*{active}">
+              <label class="form-check-label" for="active">활성</label>
+          </div>
+          -->
+        </div>
+        <div class="form-col form-col-3">
+          <label for="displayOrder" class="form-label">노출 순서</label>
+          <input type="number" class="form-control" id="displayOrder"  value="0" min="0">
+          <small class="form-text">숫자가 낮을수록 먼저 노출됩니다.</small>
+        </div>
+      </div>
+
+      <div class="form-row form-group">
+        <div class="form-col form-col-3">
+          <label for="width" class="form-label">팝업 너비 (px)</label>
+          <input type="number" class="form-control" id="width"  placeholder="예: 400">
+          <small class="form-text">비워두면 자동</small>
+        </div>
+        <div class="form-col form-col-3">
+          <label for="height" class="form-label">팝업 높이 (px)</label>
+          <input type="number" class="form-control" id="height"  placeholder="예: 300">
+          <small class="form-text">비워두면 자동</small>
+        </div>
+        <div class="form-col form-col-6" style="align-self: center;"> <!-- 인라인 스타일보다 클래스 권장 -->
+          <label class="form-label">'오늘 하루 보지 않기' 버튼</label>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="useCloseToday" >
+            <label class="form-check-label" for="useCloseToday">사용</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> 저장</button>
+        <button type="button" class="btn btn-info" onclick="previewFormPopup()">
+          <i class="fas fa-eye"></i> 미리보기
+        </button>
+        <a th:href="@{/admin/popups}" class="btn btn-secondary"><i class="fas fa-list"></i> 목록으로</a>
+      </div>
+    </form>
+  </div>
+
+
+
+<!--  <div class="container">-->
+<!--  </div> &lt;!&ndash; /container &ndash;&gt;-->
+</section >
+<th:block layout:fragment="page-script">
+  <!-- 커스텀 JavaScript -->
+<!--  <script th:src="@{/js/admin/banner/banner-manage.js}"></script>-->
+</th:block>
+</body>
+</html>

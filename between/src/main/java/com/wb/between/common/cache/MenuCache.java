@@ -24,7 +24,7 @@ public class MenuCache {
 
     //스프링이 빈을 생성하고 의존성 주입이 끝난 직후 실행
     //초기화 코드 및 캐시 세팅에 사용
-    @PostConstruct
+//    @PostConstruct
     public void init() {
         loadMenus(); // 서버 시작 시 최초 캐싱
     }
@@ -43,18 +43,18 @@ public class MenuCache {
         // 2. 메뉴별 역할 정보 조회 (추후)
 
         // 3. 역할 목록 정의 (DB에서 가져오거나 하드코딩)
-        List<String> allRoles = List.of("일반", "관리자", "user", "ROLE_ADMIN", "ROLE_USER", "ROLE_MANAGER", "ROLE_ANONYMOUS");
+        List<String> allRoles = List.of("user", "ROLE_ADMIN", "ROLE_USER", "ROLE_MANAGER", "ROLE_ANONYMOUS");
 
-
+        //TODO: 권한에 따른 메뉴처리 추가 필요
+        
         for(String role : allRoles) {
             List<MenuListResponseDto> menusForRole = menuListResponseDtoList.stream()
                     .filter(menu -> {
-                        if("user".equals(role) || "일반".equals(role)) {
+                        if("user".equals(role) || "일반".equals(role) || "ROLE_USER".equals(role)) {
                             return !menu.getMenuNm().equals("로그인") &&
-                                    !menu.getMenuNm().equals("회원가입");
-                            //TODO: 유저권한 정리될 때까지 상관없이 메뉴 표출
-//                                    !menu.getMenuNm().equals("관리");
-                        } else if("admin".equals(role) || "관리자".equals(role)) {
+                                    !menu.getMenuNm().equals("회원가입") &&
+                                    !menu.getMenuNm().equals("관리");
+                        } else if("admin".equals(role) || "관리자".equals(role) || "ROLE_ADMIN".equals(role)) {
                             return !menu.getMenuNm().equals("로그인") &&
                                     !menu.getMenuNm().equals("회원가입");
                         } else {

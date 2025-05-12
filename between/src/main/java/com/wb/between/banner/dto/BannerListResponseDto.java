@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Getter
@@ -17,15 +18,17 @@ public class BannerListResponseDto {
 
     private String bImageUrl;
 
-    private Date startDt;
+    private LocalDateTime startDt;
 
-    private Date endDt;
+    private LocalDateTime endDt;
 
     private String register;
 
-    private Date createDt;
+    private LocalDateTime createDt;
 
     private String useAt;
+
+    private Integer sortOrder;
 
     public static BannerListResponseDto from(Banner banner) {
         return BannerListResponseDto.builder()
@@ -37,6 +40,7 @@ public class BannerListResponseDto {
                 .register(banner.getRegister())
                 .createDt(banner.getCreateDt())
                 .useAt(banner.getUseAt())
+                .sortOrder(banner.getSortOrder())
                 .build();
 
     }

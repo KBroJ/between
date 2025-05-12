@@ -1,0 +1,235 @@
+.form-panel { /* panel 클래스 대신 사용 가능 */
+    background-color: #ffffff;
+    padding: 25px 30px; /* 패딩 조정 */
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* 좀 더 부드러운 그림자 */
+}
+
+.form-section-title { /* dashboard-header 클래스 대신 사용 가능 */
+    font-size: 22px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.form-group {
+    margin-bottom: 20px; /* 각 폼 요소 그룹 간격 */
+}
+
+.form-label {
+    display: block;
+    font-weight: 500;
+    color: #343a40;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    box-sizing: border-box; /* 패딩, 보더가 너비에 포함되도록 */
+}
+
+.form-control:focus {
+    border-color: #86b7fe; /* 부트스트랩 포커스 색상 유사하게 */
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, .25);
+}
+
+textarea.form-control {
+    min-height: 120px; /* textarea 기본 높이 */
+    resize: vertical; /* 세로로만 크기 조절 가능 */
+}
+
+/* 날짜 입력 필드 등 특정 타입에 대한 스타일 추가 가능 */
+input[type="date"].form-control,
+input[type="number"].form-control {
+    /* 필요한 경우 특정 스타일 추가 */
+}
+
+.form-row { /* 행으로 여러 필드를 배치할 때 */
+    display: flex;
+    flex-wrap: wrap; /* 화면 작을 때 줄바꿈 */
+    margin-right: -10px; /* 컬럼 간격 조정을 위한 음수 마진 */
+    margin-left: -10px;
+}
+
+.form-col { /* 행 내의 컬럼 */
+    flex-basis: 0;
+    flex-grow: 1;
+    max-width: 100%;
+    padding-right: 10px; /* 컬럼 간격 */
+    padding-left: 10px;
+    box-sizing: border-box;
+}
+/* 예시: 2단 컬럼 */
+.form-col-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+}
+.form-col-3 {
+    flex: 0 0 25%;
+    max-width: 25%;
+}
+
+
+.form-check { /* 라디오/체크박스 그룹 */
+    display: flex;
+    align-items: center;
+    padding-left: 0; /* 기본 패딩 제거 */
+}
+.form-check-input {
+    width: 1em;
+    height: 1em;
+    margin-top: 0.25em; /* 텍스트와 수직 정렬 */
+    margin-right: 0.5em;
+    vertical-align: top;
+    background-color: #fff;
+    border: 1px solid rgba(0,0,0,.25);
+    appearance: none; /* 기본 브라우저 스타일 제거 */
+    border-radius: 0.25em;
+}
+.form-check-input[type="radio"] {
+    border-radius: 50%;
+}
+.form-check-input:checked {
+    background-color: #0d6efd; /* 부트스트랩 primary color */
+    border-color: #0d6efd;
+}
+/* 체크 표시 (SVG 사용 예시) */
+.form-check-input:checked[type="checkbox"] {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e");
+}
+.form-check-input:checked[type="radio"] {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='2' fill='%23fff'/%3e%3c/svg%3e");
+}
+.form-check-label {
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+/* 스위치 스타일 (선택 사항 - 복잡할 수 있음) */
+.form-switch {
+    display: flex;
+    align-items: center;
+}
+.form-switch .form-check-input {
+    width: 2.5em; /* 스위치 너비 */
+    height: 1.25em; /* 스위치 높이 */
+    border-radius: 1.25em; /* 둥근 모서리 */
+    background-image: none; /* 기본 체크 모양 제거 */
+    background-color: #adb5bd; /* 비활성 배경색 */
+    transition: background-position .15s ease-in-out;
+    position: relative; /* 내부 원 위치 기준 */
+    cursor: pointer;
+}
+.form-switch .form-check-input::before { /* 스위치 내부 원 */
+    content: "";
+    position: absolute;
+    width: 1em;
+    height: 1em;
+    background-color: white;
+    border-radius: 50%;
+    top: 0.125em;
+    left: 0.125em;
+    transition: transform .15s ease-in-out;
+}
+.form-switch .form-check-input:checked {
+    background-color: #0d6efd; /* 활성 배경색 */
+    background-position: right center; /* 내부 원 이동 효과를 위한 트릭(실제로는 ::before를 transform) */
+}
+.form-switch .form-check-input:checked::before {
+    transform: translateX(1.25em); /* 내부 원 이동 */
+}
+.form-switch .form-check-label {
+    margin-left: 0.5em;
+}
+
+
+.form-text {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+.field-error {
+    display: block;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    color: #dc3545; /* 부트스트랩 danger color */
+}
+
+.button-group { /* 버튼 그룹 스타일 */
+    margin-top: 30px;
+    text-align: left; /* 기본 왼쪽 정렬 */
+}
+.btn {
+    display: inline-block;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    background-color: transparent;
+    border: 1px solid transparent;
+    padding: 0.5rem 1rem; /* 버튼 크기 */
+    font-size: 0.95rem;
+    border-radius: 0.25rem;
+    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+.btn-primary {
+    color: #fff;
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+.btn-secondary {
+    color: #fff;
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+.btn-secondary:hover {
+    background-color: #5c636a;
+    border-color: #565e64;
+}
+.btn-info {
+    color: #000;
+    background-color: #0dcaf0;
+    border-color: #0dcaf0;
+}
+.btn-info:hover {
+    color: #000;
+    background-color: #31d2f2;
+    border-color: #25cff2;
+}
+.btn + .btn { /* 버튼 사이 간격 */
+    margin-left: 0.5rem;
+}
+.btn i { /* 아이콘과 텍스트 간격 */
+    margin-right: 0.35em;
+}
+
+/* WYSIWYG 에디터 영역 스타일 (에디터 라이브러리에 따라 다름) */
+/* 예: #content + .note-editor (Summernote) */
+.wysiwyg-editor-wrapper {
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    /* 여기에 에디터 툴바 및 콘텐츠 영역 스타일 정의 */
+}

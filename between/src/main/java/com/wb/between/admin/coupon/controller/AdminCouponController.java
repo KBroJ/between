@@ -16,7 +16,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin/coupons")
@@ -130,7 +133,7 @@ public class AdminCouponController {
                              BindingResult bindingResult,
                              Model model) {
         log.debug("editCoupon|cpNo = {}", cpNo);
-        log.debug("adminCouponRegistReqDto {}", adminCouponEditReqDto.getCpnNm());
+        log.debug("editCoupon|adminCouponRegistReqDto {}", adminCouponEditReqDto.getCpnNm());
 
         if (bindingResult.hasErrors()) {
             // 유효성 검사 실패 시, 다시 등록 폼으로 이동 (오류 메시지 표시됨)

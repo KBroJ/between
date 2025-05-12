@@ -46,5 +46,6 @@ public class Coupon {
     private String activeYn;
 
     @OneToMany(mappedBy = "coupon", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
     private Set<UserCoupon> usercoupon = new HashSet<>();
 }
