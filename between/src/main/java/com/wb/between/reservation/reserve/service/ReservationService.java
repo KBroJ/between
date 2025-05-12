@@ -1,6 +1,7 @@
 package com.wb.between.reservation.reserve.service;
 
 import com.wb.between.pay.domain.Payment;
+import com.wb.between.pay.dto.KakaoPayCancelResponseDto;
 import com.wb.between.pay.repository.PaymentRepository;
 import com.wb.between.pay.service.KakaoPayService;
 import com.wb.between.reservation.reserve.domain.Reservation;
@@ -15,6 +16,7 @@ import com.wb.between.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // 중요!
@@ -226,7 +228,6 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(resNo)
                 .orElseThrow(() -> new EntityNotFoundException("취소할 예약 정보를 찾을 수 없습니다: " + resNo));
 
-
         // 2. 본인 예약만 취소할 수 있게
         if (!reservation.getUserNo().equals(currentUserId)) {
             throw new SecurityException("해당 예약을 취소할 권한이 없습니다.");
@@ -243,6 +244,8 @@ public class ReservationService {
 
         // 4. 연결된 Payment 정보 조회 (카카오페이 취소에 필요한 정보 가져오기)
         Optional<Payment> paymentOpt = paymentRepository.findByResNo(resNo);
+        boolean kakaoCancelSuccess = false; // 카카오 취소 성공 여부 플래그
+
         if (paymentOpt.isPresent()) {
             Payment payment = paymentOpt.get();
             System.out.println("[Service] 관련 결제 정보 찾음: PaymentKey=" + payment.getPaymentKey());
@@ -256,13 +259,27 @@ public class ReservationService {
                 paidAmount = 0; // 오류 시 0원으로 간주 (또는 예외 처리)
             }
 
-            if (paidAmount > 0 && "KAKAO".equals(payment.getPayProvider())) {
+            if (paidAmount > 0 && "KAKAO".equals(payment.getPayProvider()) && !"CANCELED".equals(payment.getPayStatus())) {
                 try {
-                    String tid = payment.getPaymentKey(); // tid가 저장된 필드 사용
+                    String tid  =payment.getTid();
+                    if(tid == null || tid.isBlank()){
+                        throw new IllegalStateException("취소에 필요한 카카오페이 거래번호(tid)가 저장되어 있지 않습니다.");
+                    }
                     int cancelAmount = Integer.parseInt(payment.getPayPrice());
-                   //  kakaoPayService.cancelKakaoPayment(tid, cancelAmount, 0); // 카카오 취소 API 호출
-                    System.out.println("카카오페이 결제 취소 API 호출 성공 (가정)");
-                    payment.setPayStatus("CANCELED"); // Payment 상태 변경
+                    int taxFreeAmount = 0; // 비과세 금액 계산 로직 필요시 추가
+                    
+                    // 카카오페이 취소 API 호출
+                    KakaoPayCancelResponseDto cancleResponse = kakaoPayService.canclePayment(tid, paidAmount, taxFreeAmount, "사용자 예약 취소");
+
+                    /*payment.setPayStatus("CANCELED"); // Payment 상태 변경*/
+                    if(cancleResponse != null && "CANCEL_PAYMENT".equals(cancleResponse.getStatus())){
+                        kakaoCancelSuccess = true;
+                        System.out.println("[예약 Service] 카카오페이 결제 취소 성공");
+                    } else {
+                        System.err.println("[Service] 카카오페이 취소는 성공했으나 응답 상태 이상: " + cancleResponse);
+                        throw new RuntimeException("카카오페이 취소는 성공했으나 응답 상태가 올바르지 않습니다.");
+                    }
+
                     payment.setPayCanclDt(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)); // 시간 기록
                     paymentRepository.save(payment);
 
@@ -274,8 +291,15 @@ public class ReservationService {
 
             } else {
                 System.out.println("[Service] 0원 예약 또는 카카오페이 결제 건이 아니므로 외부 API 취소 호출 생략.");
+                kakaoCancelSuccess = true; // 내부 처리만 하면 되므로 성공으로 간주
             }
-            // ----------------------------------------------------------
+
+            if (kakaoCancelSuccess) {
+                payment.setPayStatus("CANCELED");
+                payment.setPayCanclDt(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
+                paymentRepository.save(payment);
+                System.out.println("[Service] Payment 상태 'CANCELED' 업데이트 완료");
+            }
 
             // 6. Payment 테이블 상태 업데이트
             payment.setPayStatus("CANCELED"); // 결제 상태 '취소'
@@ -285,14 +309,19 @@ public class ReservationService {
 
         } else {
             System.out.println("[Service] 해당 예약(" + resNo + ")에 대한 결제 정보 없음. Reservation 상태만 변경.");
-
+            kakaoCancelSuccess = true;
         }
 
-        // 7. Reservation 테이블 상태 '취소'로 업데이트
-        reservation.setResStatus(false); // false = 취소 상태로 가정
-        reservation.setMoDt(LocalDateTime.now());
-        reservationRepository.save(reservation);
-        System.out.println("Reservation 상태 업데이트 완료 (취소)");
+        if (kakaoCancelSuccess) {
+            reservation.setResStatus(false); // false = 취소 상태로 가정
+            reservationRepository.save(reservation);
+            System.out.println("[Service] Reservation 상태 '취소' 업데이트 완료: ResNo=" + resNo);
+        } else {
+            System.err.println("[Service] Reservation 상태 업데이트 실패 (Kakao 취소 실패)");
+            throw new RuntimeException("결제 취소는 실패했으나 예약 상태 변경 시도 오류 (내부 로직 오류)");
+        }
+
+        System.out.println("[Service] 예약 취소 처리 완료: ResNo=" + resNo);
     }
 
     /**

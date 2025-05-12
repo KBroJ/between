@@ -18,7 +18,10 @@ public class Payment {
 
     @Id // 기본 키
     @Column(length = 255)
-    private String paymentKey; // 카카오페이: aid 또는 tid (aid가 승인 후 고유값)
+    private String paymentKey; // 카카오페이: aid
+
+    @Column(length = 255)
+    private String tid; // 카카오페이 결제 고유 번호
 
     @Column(nullable = false)
     private Long resNo; // 연결된 예약 번호 (Reservation 테이블 FK)

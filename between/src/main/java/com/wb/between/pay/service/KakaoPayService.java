@@ -1,6 +1,7 @@
 package com.wb.between.pay.service;
 
 import com.wb.between.pay.dto.KakaoPayApproveResponseDto;
+import com.wb.between.pay.dto.KakaoPayCancelResponseDto;
 import com.wb.between.pay.dto.KakaoPayReadyRequestDto;
 import com.wb.between.pay.dto.KakaoPayReadyResponseDto;
 
@@ -38,6 +39,7 @@ public class KakaoPayService {
     // API 엔드포인트
     private static final String READY_ENDPOINT = "/v1/payment/ready";
     private static final String APPROVE_ENDPOINT = "/v1/payment/approve";
+    private static final String CANCEL_ENDPOINT = "/v1/payment/cancel";
 
     private final RestTemplate restTemplate;
 
@@ -144,6 +146,57 @@ public class KakaoPayService {
         } else {
             System.err.println("카카오페이 승인 API 실패: " + responseEntity.getStatusCode() + ", Body: " + responseEntity.getBody());
             throw new RuntimeException("카카오페이 결제 승인에 실패했습니다. 응답코드: " + responseEntity.getStatusCode());
+        }
+    }
+    
+    /* 카카오페이 결제 취소 API 호출
+    *  @param tid 취소할 결제의 거래 고유 번호 (Payment 테이블의 paymentKey 또는 별도 tid 필드)
+     * @param cancelAmount 취소할 금액
+     * @param cancelTaxFreeAmount 취소할 비과세 금액
+     * @param payload 취소 요청 시 전달할 추가 데이터 (옵션)
+     * @return 카카오페이 취소 응답 DTO
+     * @throws RuntimeException API 호출 실패 시
+    * */
+    public KakaoPayCancelResponseDto canclePayment(String tid, int cancelAmount, int cancelTaxFreeAmount, String payload){
+        System.out.printf("카카오페이 취소 API 호출 시도: tid=%s, amount=%d, tax_free=%d%n", tid, cancelAmount, cancelTaxFreeAmount);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "KakaoAK " + kakaoAdminKey);
+        headers.add("Content-Type", "application/x-www-form-urlencoded;charset=utf-8");
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("cid", "TC0ONETIME"); // 테스트 CID
+        params.add("tid", tid);
+        params.add("cancel_amount", String.valueOf(cancelAmount));
+        params.add("cancel_tax_free_amount", String.valueOf(cancelTaxFreeAmount));
+
+        if (payload != null) {
+            params.add("payload", payload);
+        }
+
+        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(params, headers);
+
+        ResponseEntity<KakaoPayCancelResponseDto> responseEntity;
+
+        try {
+            responseEntity = restTemplate.postForEntity(
+                    KAKAO_PAY_HOST + CANCEL_ENDPOINT,
+                    requestEntity,
+                    KakaoPayCancelResponseDto.class // 취소 응답 DTO
+            );
+        } catch (Exception e) {
+            System.err.println("카카오페이 취소 API 호출 중 예외 발생: " + e.getMessage());
+            throw new RuntimeException("카카오페이 취소 통신 중 오류가 발생했습니다.", e);
+        }
+
+        if (responseEntity.getStatusCode() == HttpStatus.OK && responseEntity.getBody() != null) {
+            System.out.println("카카오페이 취소 API 성공: " + responseEntity.getBody());
+            // 상태가 "CANCEL_PAYMENT" 인지 등 추가 확인 가능
+            return responseEntity.getBody();
+        } else {
+            System.err.println("카카오페이 취소 API 실패: " + responseEntity.getStatusCode() + ", Body: " + responseEntity.getBody());
+            // 실패 응답 처리
+            throw new RuntimeException("카카오페이 결제 취소에 실패했습니다. 응답코드: " + responseEntity.getStatusCode());
         }
     }
 }

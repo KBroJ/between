@@ -77,6 +77,7 @@ public class PaymentService {
             // --- 4. Payment Entity 생성 ---
             Payment payment = Payment.builder()
                     .paymentKey(approveResponse.getAid())
+                    .tid(approveResponse.getTid())
                     .resNo(reservation.getResNo())
                     .payPrice(String.valueOf(approvedAmount))
                     .payStatus("DONE")

@@ -5,6 +5,8 @@
 
     <head>
         <title>예약 상세 내역</title>
+        <meta name="_csrf" th:content="${_csrf?.token}"/>
+        <meta name="_csrf_header" th:content="${_csrf?.headerName}"/>
         <link rel="stylesheet" th:href="@{/css/mypage/my-reservations.css}">
         <link rel="stylesheet" th:href="@{/css/mypage/my-reservation-detail.css}">
     </head>

@@ -32,9 +32,8 @@ public class Seat {
     @Column(nullable = false, length = 100)
     private String register; // 등록자 정보
 
-    // --- !!! useAt 필드 수정 !!! ---
     @Column(name = "useAt", nullable = false, length = 1)
-    @Convert(converter = YesNoConverter.class) // !!! 이 줄 추가 !!!
+    @Convert(converter = YesNoConverter.class)
     private boolean useAt;
 
     @Column(length = 100)
@@ -46,6 +45,9 @@ public class Seat {
 
     @Column(name = "gridColumn", length = 50)
     private String gridColumn;
+
+    @Column(name = "floor")
+    private Integer floor;
 
     // 기본 생성자, 다른 생성자 등 필요시 추가
     public Seat() {} // JPA는 기본 생성자가 필요할 수 있음

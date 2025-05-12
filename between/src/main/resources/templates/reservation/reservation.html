@@ -57,13 +57,16 @@
     <div class="col-lg-8">
       <div class="card-common seat-map-card">
         <h4 class="mb-3 fw-bold"><i class="fas fa-chair me-2 text-primary"></i>좌석 선택하기</h4>
+        <ul class="nav nav-tabs mb-3" id="floorTabs" role="tablist">
+          <li class="nav-item"><span class="nav-link disabled">층 로딩 중...</span></li>
+        </ul>
         <div class="seat-legend mb-4">
           <span><i class="icon available"></i> 선택 가능</span>
           <span><i class="icon selected"></i> 선택 함</span>
           <span><i class="icon unavailable"></i> 선택 불가</span>
         </div>
         <div class="seat-map-container" id="seat-map-view">
-          <p class="text-muted small p-3">날짜를 선택해주세요.</p>
+          <p class="text-muted small p-3">날짜와 층을 선택해주세요.</p>
         </div>
       </div>
     </div>
@@ -78,9 +81,9 @@
         <h5 class="fw-bold"><i class="fas fa-tags me-1"></i>요금제 선택</h5>
         <hr class="my-3">
         <div class="form-check">
-          <input class="form-check-input" type="radio" name="planType" id="hourlyPlan" value="HOURLY"
+          <input class="form-check-input" type="radio" name="planType" id="hourlyPlan" value="HOURLY" checked="checked"
                  th:checked="${originalReservation?.planType == 'HOURLY'}"
-                 th:disabled="${isModificationMode}"> <label class="form-check-label" for="hourlyPlan">시간제 <span class="text-muted small">(1시간당 2,000원)</span></label>
+                 th:disabled="${isModificationMode}" /> <label class="form-check-label" for="hourlyPlan">시간제 <span class="text-muted small">(1시간당 2,000원)</span></label>
         </div>
         <div class="form-check">
           <input class="form-check-input" type="radio" name="planType" id="dailyPlan" value="DAILY"

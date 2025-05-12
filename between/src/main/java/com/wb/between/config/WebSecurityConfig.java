@@ -24,6 +24,22 @@ public class WebSecurityConfig {
     private final UserDetailService userDetailService;
     private final CustomOAuth2UserService customOAuth2UserService;
 
+    // 사용자
+    private final String[] USER_LIST = {
+            "/css/**", "/js/**", "/img/**",
+            "/", "/main",
+            "/signup", "/findUserInfo","/checkEmail", "/send-verification",
+            "/signup/verify-code", "/findUserInfo/verify-code",
+            "/findUserInfo/reqSendEmail", "/findUserInfo/verifyPwdCode", "/api/resetPwd",
+            "/login", "/faqList", "/error", "/favicon.ico",  "/api/**",
+            "/oauth2/**", "/admin/**"
+    };
+    
+    // 관리자 
+    private final String[] ADMIN_LIST = {
+
+    };
+
     // 스프링 시큐리티 기능 비활성화
     @Bean
     public WebSecurityCustomizer configure() {
@@ -36,15 +52,7 @@ public class WebSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(
-                                "/css/**", "/js/**", "/img/**",
-                                "/", "/main",
-                                "/signup", "/findUserInfo","/checkEmail", "/send-verification",
-                                "/signup/verify-code", "/findUserInfo/verify-code",
-                                "/findUserInfo/reqSendEmail", "/findUserInfo/verifyPwdCode", "/api/resetPwd",
-                                "/login", "/faqList", "/error", "/favicon.ico",  "/api/**",
-                                "/oauth2/**"
-                        ).permitAll() // "/login" 누구나 접근 가능하게
+                        .requestMatchers(USER_LIST).permitAll() // "/login" 누구나 접근 가능하게
                         .anyRequest().authenticated()             // 나머지 요청은 인증 필요
                 )
                 // 4. 폼 기반 로그인 설정
@@ -59,7 +67,7 @@ public class WebSecurityConfig {
                         .invalidateHttpSession(true)        // 로그아웃 시 세션 무효화
                 )
                 // 6. CSRF 비활성화
-                .csrf(AbstractHttpConfigurer::disable) // .csrf(csrf -> csrf.disable()) 와 동일, 메서드 레퍼런스 사용
+               // .csrf(AbstractHttpConfigurer::disable) // .csrf(csrf -> csrf.disable()) 와 동일, 메서드 레퍼런스 사용
 
                 // 7. OAuth2 소셜 로그인 설정 추가
                 .oauth2Login(oauth2 -> oauth2

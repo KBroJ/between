@@ -1,5 +1,6 @@
-package com.wb.between.reservation.seat.controller; // 패키지 경로는 실제 프로젝트에 맞게 변경하세요
+package com.wb.between.reservation.seat.contorller;
 
+import com.wb.between.reservation.seat.dto.FloorDto;
 import com.wb.between.reservation.seat.dto.SeatDto;     // SeatDto 경로 확인
 import com.wb.between.reservation.seat.service.SeatService; // SeatService 경로 확인
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -26,16 +28,27 @@ public class SeatController {
     @GetMapping("/seats")
     public ResponseEntity<?> getSeats(
             // branchId 파라미터 제거됨
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date, @RequestParam Integer floor) {
 
         try {
             // 서비스 호출 시 branchId 제거됨
-            List<SeatDto> seatStatus = seatService.getSeatStatus(date);
+            List<SeatDto> seatStatus = seatService.getSeatStatus(date, floor);
             return ResponseEntity.ok(seatStatus);
         } catch (Exception e) {
             System.err.println("Error fetching seat status: " + e.getMessage());
             e.printStackTrace(); // 개발 중 에러 확인을 위해 추가
             return ResponseEntity.internalServerError().body("좌석 정보 조회 중 오류가 발생했습니다.");
+        }
+    }
+
+    @GetMapping("/floors")
+    public ResponseEntity<?> getFloors(){
+        try{
+            List<FloorDto> floors = seatService.getActiveFloors();
+            return ResponseEntity.ok(floors);
+        } catch (Exception e){
+            e.printStackTrace();;
+            return ResponseEntity.internalServerError().body(Map.of("message", "층 정보를 불러오는데 실패했습니다."));
         }
     }
 }

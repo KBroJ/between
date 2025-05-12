@@ -27,6 +27,7 @@
     const couponSelect = document.getElementById('couponSelect');
     const discountInfoDiv = document.getElementById('discount-info');
     const modificationNotice = document.getElementById('modification-notice');
+    const floorTabsContainer = document.getElementById('floorTabs');
 
 
     // --- 유틸리티 함수 ---
@@ -44,7 +45,16 @@
     // --- Flatpickr (달력) 관련 함수 ---
     function initializeCalendar(enabledDates = [], initialDate = null) { if (!calendarInput) return; if (flatpickrInstance) flatpickrInstance.destroy(); flatpickrInstance = flatpickr(calendarInput, { locale: "ko", dateFormat: "Y-m-d", minDate: "today", enable: enabledDates, defaultDate: initialDate, onChange: handleDateChange, onMonthChange: handleMonthYearChange, onYearChange: handleMonthYearChange, onClose: handleCalendarClose }); updateCalendarInput(initialDate); }
     function updateCalendarInput(dateStr) { if (dateStr && /^\d{4}-\d{2}-\d{2}$/.test(dateStr)) { if(calendarInput) calendarInput.value = dateStr; selectedDate = dateStr; } else { if(calendarInput) calendarInput.value = ''; selectedDate = null; } }
-    function handleDateChange(selectedDates, dateStr, instance) { console.log("날짜 선택됨:", dateStr); updateCalendarInput(dateStr); loadSeatStatus(); updateSummary(); }
+    function handleDateChange(selectedDates, dateStr, instance) {
+        console.log("날짜 선택됨:", dateStr);
+        updateCalendarInput(dateStr);
+        if (selectedFloor) { // 층이 선택되어 있을 때만 좌석 로드
+            loadSeatStatus();
+        } else {
+            if(seatMapView) seatMapView.innerHTML = '<p class="text-muted small p-3">층을 먼저 선택해주세요.</p>';
+        }
+        updateSummary();
+    }
     function handleMonthYearChange(selectedDates, dateStr, instance) { const ny = instance.currentYear, nm = instance.currentMonth + 1; if (currentYear !== ny || currentMonth !== nm) { console.log(`달력 변경: ${ny}-${nm}`); currentYear = ny; currentMonth = nm; loadCalendarDataAndInitialize(ny, nm); } }
     function handleCalendarClose(selectedDates, dateStr, instance) { if (!calendarInput?.value) { updateCalendarInput(null); loadSeatStatus(); updateSummary(); } }
     function loadCalendarDataAndInitialize(year, month, initialDateToSelect = null) {
@@ -124,34 +134,64 @@ function handlePlanChange() {
 
      // --- 좌석/시간 관련 함수 ---
      /** 좌석 상태 로드 */
-     function loadSeatStatus() { const date = selectedDate; clearTimeSelection(); if(!seatMapView) return; seatMapView.innerHTML = '<p class="text-muted small p-3">...</p>'; if (!date) { seatMapView.innerHTML = '<p>날짜를 선택해주세요.</p>'; return; } console.log(`좌석 로드: ${date}`); const apiUrl = `/api/seats?date=${date}`; fetchData(apiUrl).then(d => renderSeats(d)).catch(e => { if(seatMapView) seatMapView.innerHTML = '<p>좌석 로드 실패</p>'; }); }
+   function loadSeatStatus() {
+        const date = selectedDate;  // 예: "2025-04-10"
+        const floor = selectedFloor; // 예: 1
+
+        clearTimeSelection(); // 시간 선택 초기화
+        if (!seatMapView) {
+            console.error("좌석 배치도 영역을 찾을 수 없습니다.");
+            return;
+        }
+        seatMapView.innerHTML = '<p class="text-muted small p-3"><i class="fas fa-spinner fa-spin me-1"></i> 좌석 로딩 중...</p>';
+
+        // 날짜와 층이 모두 유효한 값인지 확인
+        if (!date || !floor || floor <= 0) { // floor가 null이거나 0 이하이면 에러 처리
+             seatMapView.innerHTML = `<p class="text-muted small p-3">날짜와 층을 올바르게 선택해주세요. (날짜: ${date}, 층: ${floor})</p>`;
+             console.warn(`좌석 로드 중단: 유효하지 않은 날짜 또는 층 (date=${date}, floor=${floor})`);
+             return;
+        }
+
+
+        console.log(`좌석 로드 요청: 날짜=<span class="math-inline">\{date\}, 층\=</span>{floor}`);
+        const apiUrl = `/api/seats?date=${date}&floor=${floor}`;
+         console.log(">>> API 호출 URL:", apiUrl); // 이 로그에 실제 날짜와 층 번호가 보여야 함!
+        // --------------------------------------
+        fetchData(apiUrl)
+            .then(seatsData => {
+                renderSeats(seatsData); // 받아온 좌석 정보로 렌더링
+            })
+            .catch(error => {
+                console.error(`좌석 로드 실패 (날짜: ${date}, 층: ${floor}):`, error);
+                if(seatMapView) seatMapView.innerHTML = `<p class="text-danger small p-3">좌석 정보 로드 실패 (층: ${floor})</p>`;
+            });
+    }
+
+
      /** 좌석 정보 렌더링  */
          function renderSeats(seats = []) {
-             if (!seatMapView) {
-                 console.error("좌석 배치도 영역(seatMapView)을 찾을 수 없습니다!");
-                 return;
-             }
-             seatMapView.innerHTML = ''; // 이전 좌석 비우기
+         if (!seatMapView) return;
+             seatMapView.innerHTML = ''; // 초기화
 
-             // --- Grid 컨테이너 스타일은 CSS에서 설정하는 것을 권장 ---
-             // seatMapView.style.display = 'grid';
-             // seatMapView.style.gridTemplateColumns = 'repeat(12, 1fr)'; // 예: 기본 12 컬럼
-             // seatMapView.style.gridAutoRows = 'minmax(45px, auto)';
-             // seatMapView.style.gap = '8px';
-             // ------------------------------------------------------
+             // Grid 컨테이너 스타일 설정 (DB에 gridRow/Column 정보 있다고 가정)
+             seatMapView.style.display = 'grid';
+             // !!! 중요: CSS 또는 여기서 실제 배치에 맞게 컬럼/행 수 정의 !!!
+             seatMapView.style.gridTemplateColumns = 'repeat(12, 1fr)'; // 예: 12 컬럼
+             seatMapView.style.gridAutoRows = 'minmax(45px, auto)';   // 예: 행 높이 자동
+             seatMapView.style.gap = '8px';
 
              if (!seats || seats.length === 0) {
-                 seatMapView.innerHTML = '<p class="text-muted small p-3">등록된 좌석 정보가 없습니다.</p>';
+                 seatMapView.innerHTML = '<p class="text-muted small p-3">해당 층에 이용 가능한 좌석이 없습니다.</p>'; // 문구 수정
                  return;
              }
-             console.log("좌석 렌더링 시작 (변경 모드:", isModificationMode);
+             console.log(`${selectedFloor}층 좌석 렌더링 시작`);
 
-             // 변경 모드일 경우 원본 좌석 ID 가져오기 (문자열)
              const originalSeatIdStr = isModificationMode ? String(originalReservationData?.itemId) : null;
+             console.log("[renderSeats] originalSeatIdStr 값:", originalSeatIdStr); // 확인용 로그
 
              seats.forEach(item => {
                  // 1. 좌석 div 요소 생성 및 기본 정보 설정
-                 const div = document.createElement('div');
+               const div = document.createElement('div'); div.textContent = item.name; const typeCls=item.type?.toLowerCase()||'seat'; const statusCls=item.status?.toLowerCase()||'unavailable'; div.className=`${typeCls} ${statusCls} seat-item`; div.dataset.seatId=item.id; div.dataset.seatName=item.name; div.dataset.seatType=item.type; if(item.gridRow)div.style.gridRow=item.gridRow; if(item.gridColumn)div.style.gridColumn=item.gridColumn; if(statusCls==='available'&&typeCls!=='area'){div.style.cursor='pointer'; div.addEventListener('click',()=>selectSeat(div));}else{div.style.cursor='not-allowed'; div.style.opacity='0.6'; if(statusCls==='static')div.style.opacity='0.8';} if(isModificationMode&&String(originalReservationData?.itemId)===item.id){div.classList.add('originally-booked');} seatMapView.appendChild(div);
                  div.textContent = item.name; // 좌석 이름
                  const typeClass = item.type?.toLowerCase() || 'seat'; // 타입 클래스
                  const statusClass = item.status ? item.status.toLowerCase() : 'unavailable'; // 상태 클래스
@@ -159,6 +199,8 @@ function handlePlanChange() {
                  div.dataset.seatId = item.id; // 데이터 속성
                  div.dataset.seatName = item.name;
                  div.dataset.seatType = item.type;
+
+                 console.log(`  [Render] 좌석: ${item.name}, 상태: ${statusClass}, 타입: ${typeClass}`);
 
                  // 2. DB 위치 정보(gridRow, gridColumn) 스타일 적용
                  const isValidGridValue = (val) => val && typeof val === 'string' && val.trim() !== '' && val.toLowerCase() !== 'null';
@@ -177,6 +219,9 @@ function handlePlanChange() {
                  if (statusClass === 'available' && typeClass !== 'area') {
                      div.style.cursor = 'pointer';
                      div.addEventListener('click', () => selectSeat(div));
+
+                      console.log(`    -> ${item.name} 좌석에 클릭 리스너 추가 시도...`);
+                      div.addEventListener('click', () => selectSeat(div));
                  } else {
                      div.style.cursor = 'not-allowed';
                      div.style.opacity = '0.6';
@@ -184,11 +229,10 @@ function handlePlanChange() {
                  }
 
                  // 4. 변경 모드일 때, 기존 예약 좌석 특별 표시
-                 if (isModificationMode && item.id === originalSeatIdStr) {
-                     div.classList.add('originally-booked'); // CSS 클래스 추가
-                     console.log(`[renderSeats] 기존 예약 좌석 발견! ID: ${item.id}, 클래스 추가 시도.`);
-                     console.log(`기존 예약 좌석(${item.name}) 특별 표시 적용됨`);
-                 }
+               if (isModificationMode && item.id === originalSeatIdStr) {
+                    div.classList.add('originally-booked'); // CSS 클래스 추가
+                    console.log(`[renderSeats] 기존 예약 좌석(${item.name}) 특별 표시 적용됨. ID: ${item.id}`);
+                  }
 
                  // 5. 생성된 좌석 div를 좌석판에 추가
                  seatMapView.appendChild(div);
@@ -199,7 +243,27 @@ function handlePlanChange() {
          }
 
      /** 좌석 선택 (단일) */
-     function selectSeat(seatElement) { if (seatElement.classList.contains('unavailable') || seatElement.classList.contains('static')) return; const current = document.querySelector('.seat-item.selected'); if (current === seatElement) { seatElement.classList.remove('selected'); clearTimeSelection(); updateSummary(); calculateTotal(); return; } if (current) current.classList.remove('selected'); seatElement.classList.add('selected'); if (selectedPlanType === 'HOURLY') loadAvailableTimes(); else clearTimeSelection(); updateSummary(); }
+     function selectSeat(seatElement) {
+      console.log("selectSeat 함수 호출됨! 대상 좌석:", seatElement?.dataset?.seatId);
+       if (
+         seatElement.classList.contains("unavailable") ||
+         seatElement.classList.contains("static")
+       )
+         return;
+       const current = document.querySelector(".seat-item.selected");
+       if (current === seatElement) {
+         seatElement.classList.remove("selected");
+         clearTimeSelection();
+         updateSummary();
+         calculateTotal();
+         return;
+       }
+       if (current) current.classList.remove("selected");
+       seatElement.classList.add("selected");
+       if (selectedPlanType === "HOURLY") loadAvailableTimes();
+       else clearTimeSelection();
+       updateSummary();
+     }
      /** 시간 선택 초기화 */
      function clearTimeSelection() { if(timeSlotsDiv) timeSlotsDiv.innerHTML = ''; document.querySelectorAll('input[name="times"]:checked').forEach(cb => cb.checked = false); if(timeSelectionGuide) timeSelectionGuide.textContent = '시간제 선택 시...'; }
 
@@ -858,46 +922,139 @@ async function loadReservationForModification(resNo) {
  }
 
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', async function() {
         console.log("DOM 로드 완료. 초기화 시작.");
 
-        if (typeof isModificationMode !== 'undefined' && isModificationMode === true) {
-            console.log("예약 변경 모드로 페이지 로드");
-            if (typeof originalReservationData !== 'undefined' && originalReservationData) {
-                 console.log("원본 예약 데이터 확인됨:", originalReservationData);
+        // 1. 기본 이벤트 리스너 등록
+       calendarIcon?.addEventListener('click', openCalendar);
+       planRadios.forEach(radio => { radio.addEventListener('change', handlePlanChange); });
+       couponSelect?.addEventListener('change', handleCouponChange);
+       paymentButton?.addEventListener('click', proceedToPayment);
+       // 층 탭 리스너는 동적 생성 후 등록
 
-                 selectedDate = originalReservationData.reservationDate;
-                 selectedPlanType = originalReservationData.planType;
-                // --------------------------------------------------------------
-            } else {
-                console.error("예약 변경 페이지에 기존 예약한 정보가 없습니다.");
-                alert("예약 정보를 불러오는 데 실패했습니다. 다시 시도해주세요.");
-                window.location.href = "/";
-                return; // 초기화 중단
+       try {
+           // 2. 쿠폰 로드 (병렬 가능)
+           loadAvailableCoupons();
+
+           // 3. 층 정보 로드 및 탭 생성 -> selectedFloor 설정됨 (await)
+           await loadFloorTabs();
+
+           // 4. 달력 초기화 -> selectedDate 설정됨 & 첫 좌석 로드 트리거 (await)
+           const initialYear = new Date().getFullYear();
+           const initialMonth = new Date().getMonth() + 1;
+           // 변경 모드면 원본 날짜, 아니면 오늘 날짜
+           const dateToSelect = isModificationMode ? originalReservationData.reservationDate : new Date().toISOString().split('T')[0];
+           await loadCalendarDataAndInitialize(initialYear, initialMonth, dateToSelect);
+
+           // 5. 초기 상태 반영
+           handlePlanChange();
+           updateSummary();
+
+       } catch (error) {
+           console.error("페이지 초기화 중 오류 발생:", error);
+           alert("페이지 초기화 중 오류가 발생했습니다. 새로고침 해주세요.");
+       }
+
+       console.log("초기화 로직 완료.");
+   });
+
+    /** 층 정보 로드 및 탭 동적 생성 (async 함수로 변경) */
+    async function loadFloorTabs() {
+        console.log("층 정보 로드 및 탭 생성 시도...");
+        if (!floorTabsContainer) { console.error("Floor tabs container not found!"); return; }
+        floorTabsContainer.innerHTML = '<li class="nav-item"><span class="nav-link disabled">층 로딩 중...</span></li>'; // 로딩 표시
+
+        try {
+            // !!! 실제 백엔드 API 호출 !!!
+            const floors = await fetchData('/api/floors'); // GET /api/floors 호출
+
+            availableFloors = floors; // 받아온 층 정보 저장
+            floorTabsContainer.innerHTML = ''; // 로딩 메시지 제거 및 탭 비우기
+
+            if (!floors || floors.length === 0) {
+                console.warn("활성화된 층 정보를 찾을 수 없습니다.");
+                // 층 정보 없을 때 처리 (예: 에러 메시지 표시)
+                floorTabsContainer.innerHTML = '<li class="nav-item"><span class="nav-link disabled text-danger">층 정보 없음</span></li>';
+                selectedFloor = null; // 선택된 층 없음
+                if(seatMapView) seatMapView.innerHTML = '<p class="text-danger small p-3">이용 가능한 층 정보가 없습니다.</p>';
+                return; // 층 정보 없으면 종료
             }
-            // 버튼 텍스트 변경
-            if(paymentButton) paymentButton.innerHTML = '<i class="fas fa-save me-2"></i> 변경 저장하기';
 
+            // 받아온 층 정보로 탭 동적 생성
+            floors.forEach((floorInfo, index) => {
+                // floorInfo 객체 구조는 백엔드 FloorDto와 일치해야 함
+                addFloorTab(floorInfo.floor, floorInfo.floorName, index === 0); // 첫 번째 탭 활성화
+            });
+
+            // 새로 생성된 탭 버튼들에 이벤트 리스너 다시 등록
+            const newFloorTabButtons = document.querySelectorAll('#floorTabs .nav-link');
+            newFloorTabButtons.forEach(button => {
+                 button.addEventListener('click', handleFloorTabClick);
+            });
+
+            // 기본(첫 번째) 선택 층 설정
+            const initialActiveTab = document.querySelector('#floorTabs .nav-link.active');
+            selectedFloor = initialActiveTab ? parseInt(initialActiveTab.dataset.floor) : null; // 첫 탭의 층 번호
+            console.log(`동적으로 로드된 초기 선택 층: ${selectedFloor}`);
+
+            // !!! 중요: 층 로드 완료 후, 날짜가 이미 선택되어 있다면 좌석 로드 시도 !!!
+            if (selectedDate && selectedFloor) {
+                console.log("층 로드 완료, 날짜도 선택되어 있어 초기 좌석 로드 실행.");
+                loadSeatStatus();
+            } else if (!selectedDate) {
+                console.log("층 로드는 완료되었으나 날짜가 아직 선택되지 않음.");
+                if(seatMapView) seatMapView.innerHTML = '<p class="text-muted small p-3">날짜를 선택해주세요.</p>';
+            }
+
+        } catch (error) {
+             console.error("층 정보 로드 또는 탭 생성 실패:", error);
+             floorTabsContainer.innerHTML = '<li class="nav-item"><span class="nav-link disabled text-danger">층 정보 로드 실패</span></li>';
+             selectedFloor = null;
+             if(seatMapView) seatMapView.innerHTML = '<p class="text-danger small p-3">층 정보를 불러오는 데 실패했습니다.</p>';
+        }
+    }
+
+    /** 탭 항목(li > button) 생성 및 추가 헬퍼 함수 */
+    function addFloorTab(floorNumber, floorName, isActive = false) {
+        if (!floorTabsContainer) return;
+        const li = document.createElement('li'); li.className = 'nav-item'; li.setAttribute('role', 'presentation');
+        const button = document.createElement('button'); button.className = `nav-link ${isActive ? 'active' : ''}`;
+        button.id = `floor-${floorNumber}-tab`; button.type = 'button'; button.role = 'tab';
+        button.dataset.floor = floorNumber; // data-floor 속성에 층 번호 저장
+        button.textContent = floorName; // 탭에 표시될 이름
+        // Bootstrap 5 탭 연동 위한 속성 (탭 내용 영역 ID는 필요에 따라 조정)
+        button.dataset.bsToggle = 'tab'; button.dataset.bsTarget = '#seat-map-pane'; // 탭 내용 ID
+        button.setAttribute('aria-controls', 'seat-map-pane');
+        button.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        li.appendChild(button); floorTabsContainer.appendChild(li);
+    }
+
+    /** 층 탭 클릭 처리 함수 */
+    function handleFloorTabClick(event) {
+        const clickedFloor = event.target.dataset.floor;
+        if (!clickedFloor || selectedFloor == clickedFloor) return; // 같은 탭 무시
+
+        console.log(`층 변경: ${clickedFloor}층 선택됨`);
+        selectedFloor = parseInt(clickedFloor); // 전역 변수 업데이트
+
+        // 클릭된 탭 활성화 (다른 탭 비활성화)
+        const allTabs = document.querySelectorAll('#floorTabs .nav-link');
+        allTabs.forEach(button => {
+            button.classList.toggle('active', button.dataset.floor == selectedFloor);
+            button.setAttribute('aria-selected', button.dataset.floor == selectedFloor);
+        });
+
+        // 선택된 층의 좌석 정보 새로 로드
+        if (selectedDate) { // 날짜가 선택되어 있을 때만 로드
+             loadSeatStatus();
         } else {
-                console.log("신규 예약 모드로 페이지 로드");
+            if(seatMapView) seatMapView.innerHTML = '<p class="text-muted small p-3">날짜를 먼저 선택해주세요.</p>';
         }
 
-        // 이벤트 리스너 등록
-        calendarIcon?.addEventListener('click', openCalendar);
-        planRadios.forEach(radio => { radio.addEventListener('change', handlePlanChange); });
-        couponSelect?.addEventListener('change', handleCouponChange);
-        paymentButton?.addEventListener('click', proceedToPayment);
-
-        // ------------------------------------------
-
-        // --- 초기화 함수 호출 ---
-        const initialYear = new Date().getFullYear();
-        const initialMonth = new Date().getMonth() + 1;
-        // 변경 모드면 원본 날짜, 아니면 오늘 날짜 기본 선택
-        const dateToSelect = isModificationMode ? originalReservationData.reservationDate : new Date().toISOString().split('T')[0];
-        loadCalendarDataAndInitialize(initialYear, initialMonth, dateToSelect);
-        loadAvailableCoupons();
-        handlePlanChange(); // 초기 요금제 UI 반영
-        updateSummary();
-        console.log("초기화 로직 완료.");
-    });
+        // 층 변경 시 우측 선택 정보 초기화
+        const currentSelectedSeat = document.querySelector('.seat-item.selected');
+        if(currentSelectedSeat) currentSelectedSeat.classList.remove('selected');
+        clearTimeSelection(); selectedCoupon = null;
+        if(couponSelect) couponSelect.value = ""; if(discountInfoDiv) discountInfoDiv.textContent = '';
+        updateSummary(); calculateTotal();
+    }

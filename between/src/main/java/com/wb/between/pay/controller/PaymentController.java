@@ -143,7 +143,7 @@ public class PaymentController {
             HttpSession session // 세션 사용 위해 파라미터 추가
     ) {
         // 기본 리다이렉트 URL은 실패 페이지로 설정
-        String finalRedirectUrl = "/payment-fail.html"; // !!! 실제 실패 페이지 경로로 수정 !!!
+        String finalRedirectUrl = "/payment-fail.html"; //
         String partnerOrderId = null; // try 블록 밖에서도 사용하기 위해 미리 선언
 
         try {
