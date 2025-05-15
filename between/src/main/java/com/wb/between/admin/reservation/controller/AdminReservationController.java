@@ -1,26 +1,31 @@
 package com.wb.between.admin.reservation.controller;
 
-import com.wb.between.admin.reservation.dto.ReservationDetailDto;
-import com.wb.between.admin.reservation.dto.ReservationFilterParamsDto;
-import com.wb.between.admin.reservation.dto.ReservationListDto;
-import com.wb.between.admin.reservation.dto.SeatDto;
+import com.wb.between.admin.reservation.dto.*;
 import com.wb.between.admin.reservation.service.AdminReservationService;
 import com.wb.between.admin.user.service.AdminUserService;
+import com.wb.between.reservation.reserve.domain.Reservation;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 @Slf4j
 @Controller
@@ -87,6 +92,103 @@ public class AdminReservationController {
             // TODO: 적절한 500 에러 페이지
             return "error/500"; // 예시 500 페이지
         }
+    }
+
+
+    /**
+     * 관리자에 의한 예약 정보 수정 (HTML Form 제출 방식)
+     */
+    @PostMapping("/{resNo}/update")
+    public ResponseEntity<?> updateReservationByAdmin(
+            @PathVariable Long resNo,
+            @RequestParam("seatNo") Long seatNo,
+            @RequestParam("resStart") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime resStart,
+            @RequestParam("resEnd") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime resEnd,
+            @RequestParam("planType") String planType,
+            @RequestParam("moReason") String moReason,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        log.error("AdminReservationController|updateReservationByAdmin|관리자 예약 수정 시작 =========================>");
+        log.error("AdminReservationController|updateReservationByAdmin|userDetails : {}", userDetails);
+        log.error("AdminReservationController|updateReservationByAdmin|수정권한 체크 : {}", isAdmin(userDetails));
+
+    /*
+        // 권한 확인
+        if (!isAdmin(userDetails)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("success", false, "message", "수정 권한이 없습니다."));
+        }
+    */
+        try {
+            ReservationReqDto adminUpdateDto = new ReservationReqDto();
+            adminUpdateDto.setSeatNo(seatNo);
+            adminUpdateDto.setResStart(resStart);
+            adminUpdateDto.setResEnd(resEnd);
+            adminUpdateDto.setPlanType(planType);
+            adminUpdateDto.setMoReason(moReason);
+
+            Reservation updatedReservation = adminReservationService.updateReservationByAdmin(resNo, adminUpdateDto, userDetails.getUsername());
+
+            // Ajax로 응답을 받아 처리하고 싶다면 JSON 응답, 그렇지 않고 일반 form submit 후 리다이렉션이라면 다른 방식
+            // 여기서는 JSON 응답 후 프론트에서 처리한다고 가정
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "예약이 성공적으로 변경되었습니다.");
+            response.put("reservationId", updatedReservation.getResNo());
+            // response.put("redirectUrl", "/admin/reservationDetail/" + updatedReservation.getResNo()); // 프론트 리다이렉션용 URL
+            return ResponseEntity.ok(response);
+
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "message", e.getMessage()));
+        } catch (RuntimeException e) { // 유효성, 중복 등
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            log.error("관리자 예약 수정 중 예기치 않은 시스템 오류 발생 - resNo: {}", resNo, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", "예기치 않은 오류로 예약 변경에 실패했습니다."));
+        }
+    }
+
+    /**
+     * 관리자에 의한 예약 취소 (JSON 요청 방식)
+     */
+    @PostMapping("/{resNo}/cancel")
+    public ResponseEntity<?> cancelReservationByAdmin(
+            @PathVariable Long resNo,
+            @RequestBody ReservationReqDto cancelDto, // JSON 요청 본문
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        log.error("AdminReservationController|cancelReservationByAdmin|관리자 예약 취소 시작 =========================>");
+        log.error("AdminReservationController|updateReservationByAdmin|userDetails : {}", userDetails);
+        log.error("AdminReservationController|updateReservationByAdmin|수정권한 체크 : {}", isAdmin(userDetails));
+
+    /*
+        // 권한 확인
+        if (!isAdmin(userDetails)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("success", false, "message", "취소 권한이 없습니다."));
+        }
+    */
+        try {
+            adminReservationService.cancelReservationByAdmin(resNo, cancelDto, userDetails.getUsername());
+            return ResponseEntity.ok(Map.of("success", true, "message", "예약이 성공적으로 취소되었습니다."));
+
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "message", e.getMessage()));
+        } catch (IllegalStateException e) { // 이미 취소되었거나 취소 불가 상태
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        } catch (RuntimeException e) { // 카카오페이 취소 실패 등 서비스 내부 오류
+            return ResponseEntity.internalServerError().body(Map.of("success", false, "message", "예약 취소 처리 중 오류: " + e.getMessage()));
+        } catch (Exception e) {
+            log.error("관리자 예약 취소 중 예기치 않은 시스템 오류 발생 - resNo: {}", resNo, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", "예기치 않은 오류로 예약 취소에 실패했습니다."));
+        }
+    }
+
+    // 관리자 권한 확인을 위한 헬퍼 메소드 (실제 구현은 Spring Security 설정에 따름)
+    private boolean isAdmin(UserDetails userDetails) {
+        if (userDetails == null) return false;
+
+        return userDetails.getAuthorities().stream()
+//                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("관리자"));
     }
 
 }

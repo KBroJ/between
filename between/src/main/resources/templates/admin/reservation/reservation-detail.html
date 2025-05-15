@@ -7,7 +7,11 @@
         <title>예약 상세 정보</title>
         <th:block layout:fragment="page-css">
             <link rel="stylesheet" th:href="@{/css/admin/reservation/reservation-detail.css}">
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
         </th:block>
+
+        <meta name="_csrf" th:content="${_csrf?.token}"/>
+        <meta name="_csrf_header" th:content="${_csrf?.headerName}"/>
     </head>
 
     <body>
@@ -16,7 +20,7 @@
                 예약 상세 정보(예약번호:<span th:text="${reservationDetail.resNo}">[ResNo]</span>)
             </h1>
 
-            <form id="reservationUpdateForm" th:action="@{/api/admin/reservations/{resNo}/update(resNo=${reservationDetail.resNo})}" method="post">
+            <form id="reservationUpdateForm" th:attr="data-resno=${reservationDetail.resNo}">
                 <div class="detail-card">
                     <div class="detail-section">
                         <h2 class="section-title">예약자 정보</h2>
@@ -69,6 +73,8 @@
                             </div>
 
                             <th:block th:if="${reservationDetail.canModify}">
+
+                                <!--
                                 <div class="info-item">
                                     <label class="info-label" for="resStart">예약 시작</label>
                                     <input type="datetime-local" id="resStart" name="resStart"
@@ -81,7 +87,22 @@
                                            th:value="${#temporals.format(reservationDetail.resEnd, 'yyyy-MM-dd''T''HH:mm')}"
                                            class="form-control info-value-input">
                                 </div>
+                                -->
+                                <div class="info-item">
+                                    <label class="info-label" for="resStart">예약 시작</label>
+                                    <input type="text" id="resStart" name="resStart"
+                                           th:value="${#temporals.format(reservationDetail.resStart, 'yyyy-MM-dd HH:00')}"
+                                           class="form-control info-value-input flatpickr-datetime-hour" placeholder="시작 날짜 및 시간">
+                                </div>
+                                <div class="info-item">
+                                    <label class="info-label" for="resEnd">예약 종료</label>
+                                    <input type="text" id="resEnd" name="resEnd"
+                                           th:value="${#temporals.format(reservationDetail.resEnd, 'yyyy-MM-dd HH:00')}"
+                                           class="form-control info-value-input flatpickr-datetime-hour" placeholder="종료 날짜 및 시간">
+                                </div>
+
                             </th:block>
+
                             <th:block th:unless="${reservationDetail.canModify}">
                                 <div class="info-item">
                                     <span class="info-label">예약 기간</span>
@@ -221,6 +242,8 @@
         </div>
 
         <th:block layout:fragment="page-script">
+            <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+            <script src="https://npmcdn.com/flatpickr/dist/l10n/ko.js"></script>
             <script th:src="@{/js/admin/reservation/reservation-detail.js}"></script>
         </th:block>
 

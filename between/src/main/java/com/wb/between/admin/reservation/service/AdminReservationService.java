@@ -1,11 +1,12 @@
 package com.wb.between.admin.reservation.service;
 
-import com.wb.between.admin.reservation.dto.ReservationDetailDto;
-import com.wb.between.admin.reservation.dto.ReservationFilterParamsDto;
-import com.wb.between.admin.reservation.dto.ReservationListDto;
-import com.wb.between.admin.reservation.dto.SeatDto;
+import com.wb.between.admin.reservation.dto.*;
 import com.wb.between.admin.reservation.repository.AdminReservationRepository;
+import com.wb.between.pay.domain.Payment;
+import com.wb.between.pay.repository.PaymentRepository;
+import com.wb.between.pay.service.KakaoPayService;
 import com.wb.between.reservation.reserve.domain.Reservation;
+import com.wb.between.reservation.reserve.repository.ReservationRepository;
 import com.wb.between.reservation.seat.domain.Seat;
 import com.wb.between.reservation.seat.repository.SeatRepository;
 import com.wb.between.user.domain.User;
@@ -13,6 +14,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -24,10 +26,12 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -38,6 +42,16 @@ public class AdminReservationService {
 
     private final AdminReservationRepository adminReservationRepository; // 예약 관련 데이터베이스 작업을 위한 리포지토리
     private final SeatRepository seatRepository;
+
+
+    @Autowired
+    private ReservationRepository reservationRepository; // 결제 정보 조회/수정 위해 추가
+    @Autowired
+    private PaymentRepository paymentRepository; // 결제 정보 조회/수정 위해 추가
+    @Autowired
+    private KakaoPayService kakaoPayService; // 카카오페이 취소 API 호출 위해 추가
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
+
 
     /**
      * 필터링/페이징된 예약 목록 조회
@@ -272,6 +286,146 @@ public class AdminReservationService {
             return phoneNo.substring(0, 3) + "-" + phoneNo.substring(3, 6) + "-" + phoneNo.substring(6, 10);
         }
         return phoneNo;
+    }
+
+
+    /**
+     * 관리자에 의한 예약 정보 변경 처리
+     * @param resNo 변경할 예약 번호
+     * @param reservationReqDto 관리자가 수정한 정보 및 사유
+     * @param adminUsername 작업을 수행하는 관리자 username (로그용)
+     * @return 업데이트된 Reservation 객체
+     */
+    @Transactional
+    public Reservation updateReservationByAdmin(Long resNo, ReservationReqDto reservationReqDto, String adminUsername) {
+        log.info("관리자 {}에 의한 예약 {} 수정 요청. 사유: {}", adminUsername, resNo, reservationReqDto.getMoReason());
+
+        Reservation reservation = adminReservationRepository.findById(resNo)
+                .orElseThrow(() -> new EntityNotFoundException("변경할 예약 정보를 찾을 수 없습니다: " + resNo));
+
+        // 관리자 권한으로 수정하는 것이므로, 예약 소유권 체크는 생략 (또는 관리자 역할 확인)
+
+        // 변경될 좌석/시간이 예약 가능한지 DB에서 최종 확인 (자기 자신 제외)
+        if (reservationReqDto.getSeatNo() != null && reservationReqDto.getResStart() != null && reservationReqDto.getResEnd() != null) {
+            long overlappingCount = reservationRepository.countOverlappingReservationsExcludingSelf(
+                    reservationReqDto.getSeatNo(),
+                    reservationReqDto.getResStart(),
+                    reservationReqDto.getResEnd(),
+                    resNo // 자기 자신 예약 제외
+            );
+            if (overlappingCount > 0) {
+                throw new RuntimeException("관리자 수정: 변경하려는 시간에 이미 다른 예약이 존재합니다.");
+            }
+        }
+
+        // 예약 정보 수정
+        if (reservationReqDto.getSeatNo() != null) {
+            reservation.setSeatNo(reservationReqDto.getSeatNo());
+        }
+        if (reservationReqDto.getResStart() != null) {
+            reservation.setResStart(reservationReqDto.getResStart());
+        }
+        if (reservationReqDto.getResEnd() != null) {
+            reservation.setResEnd(reservationReqDto.getResEnd());
+        }
+        if (reservationReqDto.getPlanType() != null && !reservationReqDto.getPlanType().isEmpty()) {
+            reservation.setPlanType(reservationReqDto.getPlanType());
+        }
+        reservation.setMoReason(reservationReqDto.getMoReason()); // 수정 사유 저장
+        reservation.setResStatus(true); // 관리자가 수정 시 확정 상태로 (정책에 따라)
+        // moDt는 @UpdateTimestamp에 의해 자동 업데이트
+
+        Reservation updatedReservation = adminReservationRepository.save(reservation);
+        log.info("관리자 {}에 의해 예약 {}이(가) 성공적으로 수정되었습니다.", adminUsername, resNo);
+        return updatedReservation;
+    }
+
+    /**
+     * 관리자에 의한 예약 취소 처리
+     * @param resNo 취소할 예약 번호
+     * @param reservationReqDto 관리자 취소 요청 정보(사유 포함)
+     * @param adminUsername 작업을 수행하는 관리자 username (로그용)
+     */
+    @Transactional
+    public void cancelReservationByAdmin(Long resNo, ReservationReqDto reservationReqDto, String adminUsername) {
+        log.info("관리자 {}에 의한 예약 {} 취소 요청. 사유: {}", adminUsername, resNo, reservationReqDto.getMoReason());
+
+        Reservation reservation = adminReservationRepository.findById(resNo)
+                .orElseThrow(() -> new EntityNotFoundException("취소할 예약 정보를 찾을 수 없습니다: " + resNo));
+
+        // 관리자 권한으로 취소하는 것이므로, 예약 소유권 체크는 생략 (또는 관리자 역할 확인)
+        if (Boolean.FALSE.equals(reservation.getResStatus())) {
+            throw new IllegalStateException("이미 취소 처리된 예약입니다.");
+        }
+
+        // 연결된 Payment 정보 조회 및 카카오페이 취소 로직
+        Optional<Payment> paymentOpt = paymentRepository.findByResNo(resNo);
+        boolean paymentCancellationSuccess = true; // 결제가 없거나, 0원이거나, 성공적으로 취소된 경우 true
+
+        if (paymentOpt.isPresent()) {
+            Payment payment = paymentOpt.get();
+            int paidAmount = 0;
+            try { paidAmount = Integer.parseInt(payment.getPayPrice()); } catch (Exception e) { /* 0원 처리 */ }
+
+            if (paidAmount > 0 && "KAKAO".equals(payment.getPayProvider()) && !"CANCELED".equals(payment.getPayStatus())) {
+                try {
+                    String tid = payment.getTid();
+                    if (tid == null || tid.isBlank()) {
+                        log.warn("예약 {}의 카카오페이 거래번호(tid)가 없어 결제 취소를 진행할 수 없습니다. (관리자: {})", resNo, adminUsername);
+                        // throw new IllegalStateException("카카오페이 거래번호(tid)가 없어 결제 취소를 진행할 수 없습니다.");
+                        // 관리자 취소 시, TID 없어도 예약 상태는 변경해야 할 수 있으므로 예외 대신 경고 로깅 후 진행
+                    } else {
+                        // 카카오페이 취소 API 호출
+                        kakaoPayService.canclePayment(tid, paidAmount, 0, reservationReqDto.getMoReason());
+                        log.info("관리자 {}에 의해 예약 {}의 카카오페이 결제가 취소되었습니다. (TID: {})", adminUsername, resNo, tid);
+                    }
+                    payment.setPayStatus("CANCELED");
+                    payment.setPayCanclDt(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
+                    paymentRepository.save(payment);
+                } catch (Exception e) {
+                    log.error("관리자 {}에 의한 예약 {}의 카카오페이 결제 취소 중 오류 발생: {}", adminUsername, resNo, e.getMessage(), e);
+                    paymentCancellationSuccess = false; // 결제 취소 실패 플래그
+                    // throw new RuntimeException("카카오페이 결제 취소 중 오류: " + e.getMessage(), e); // 여기서 바로 예외를 던지면 예약 상태 변경 안됨.
+                }
+            } else { // 결제금액 0원이거나 카카오페이 아니거나 이미 취소된 경우
+                if(paymentOpt.isPresent() && paidAmount > 0 && !"CANCELED".equals(payment.getPayStatus())){
+                    payment.setPayStatus("CANCELED");
+                    payment.setPayCanclDt(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
+                    paymentRepository.save(payment);
+                }
+                log.info("예약 {}은(는) 카카오페이 결제 취소 대상이 아닙니다. (관리자: {})", resNo, adminUsername);
+            }
+        } else {
+            log.info("예약 {}에 대한 결제 정보가 없습니다. (관리자: {})", resNo, adminUsername);
+        }
+
+        // 예약 상태 변경 및 사유 기록
+        if (paymentCancellationSuccess) { // 결제 취소가 성공했거나 필요 없었던 경우에만 예약 상태 변경
+            reservation.setResStatus(false); // 취소 상태
+            reservation.setMoReason(reservationReqDto.getMoReason()); // 취소 사유 저장
+
+            // moDt는 @UpdateTimestamp에 의해 자동 업데이트
+            adminReservationRepository.save(reservation);
+            log.info("관리자 {}에 의해 예약 {}이(가) 성공적으로 취소 상태로 변경되었습니다.", adminUsername, resNo);
+        } else {
+            // 카카오페이 취소 실패 시 예약 상태를 변경하지 않거나, 별도 상태(예: 취소실패)로 관리할 수 있음
+            // 여기서는 예외를 던져서 트랜잭션 롤백 유도
+            throw new RuntimeException("결제 취소에 실패하여 예약 상태를 변경할 수 없습니다. 예약번호: " + resNo);
+        }
+    }
+
+    // --- 가격 계산 헬퍼 메소드 (실제 로직 구현 필요) ---
+    private String calculateBasePrice(String planType, List<String> selectedTimes) {
+        switch (planType) {
+            case "HOURLY": return String.valueOf((selectedTimes != null ? selectedTimes.size() : 0) * 2000);
+            case "DAILY": return "10000";
+            case "MONTHLY": return "99000";
+            default: return "0";
+        }
+    }
+
+    private String calculateFinalPrice(String basePriceStr, String discountPriceStr) {
+        return String.valueOf(Integer.parseInt(basePriceStr) - Integer.parseInt(discountPriceStr));
     }
 
 }

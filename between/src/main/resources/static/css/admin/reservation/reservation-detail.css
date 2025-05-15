@@ -64,7 +64,7 @@
     font-size: 0.9rem;
     height: 36px;
     box-sizing: border-box;
-    max-width: 280px;
+    max-width: 140px;
 }
 select.info-value-input.form-control {}
 input[type="datetime-local"].info-value-input.form-control {
