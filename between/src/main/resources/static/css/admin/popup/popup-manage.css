@@ -7,12 +7,14 @@
     padding-bottom: 10px;
 }
 
+
 .content-container {
     background-color: #fff;
     padding: 20px;
     border: 1px solid #ccc;
     border-radius: 5px;
 }
+
 
 /* 검색 영역 스타일 */
 .search-area {
@@ -50,256 +52,125 @@
     margin-right: 10px; /* 검색 버튼과의 간격 */
 }
 
-
-.page-header { /* dashboard-header 클래스 대신 사용 가능 */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 22px;
-    font-weight: 600;
-    color: #2c3e50;
-    margin-bottom: 25px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #e9ecef;
-}
-.page-header .btn { /* 헤더 내 버튼 스타일 조정 */
-    font-size: 0.9rem;
-    padding: 0.4rem 0.8rem;
-}
-
-/* 알림 메시지 스타일 (성공/에러) */
-.alert {
-    padding: 1rem 1rem;
-    margin-bottom: 1rem;
-    border: 1px solid transparent;
-    border-radius: 0.25rem;
-    position: relative;
-}
-.alert-success {
-    color: #0f5132;
-    background-color: #d1e7dd;
-    border-color: #badbcc;
-}
-.alert-danger {
-    color: #842029;
-    background-color: #f8d7da;
-    border-color: #f5c2c7;
-}
-.alert .btn-close { /* 닫기 버튼 (JS로 기능 구현 필요) */
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding: 1rem 1rem;
-    background: transparent;
-    border: 0;
-    cursor: pointer;
-    font-size: 1.2rem;
-    font-weight: bold;
-    line-height: 1;
-    color: inherit; /* 부모 색상 상속 */
-    opacity: 0.5;
-}
-.alert .btn-close:hover {
-    opacity: 0.75;
-}
-
-
-.filter-bar {
-    margin-bottom: 20px;
-    padding: 15px;
-    background-color: #f8f9fa; /* 밝은 배경색 */
-    border-radius: 6px;
-    border: 1px solid #e9ecef;
-}
-.filter-form {
-    display: flex;
-    align-items: center;
-}
-.filter-form label {
-    margin-right: 10px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: #495057;
-}
-.filter-form select {
-    padding: 0.375rem 0.75rem;
-    font-size: 0.9rem;
-    line-height: 1.5;
-    color: #495057;
-    background-color: #fff;
-    border: 1px solid #ced4da;
-    border-radius: 0.25rem;
-    margin-right: 10px;
-    min-width: 150px; /* 최소 너비 */
-}
-/* .filter-form .btn { font-size: 0.9rem; } */
-
-
-.content-panel { /* panel 클래스 대신 사용 가능 */
-    background-color: #ffffff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-.panel-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #343a40;
-    margin-top: 0;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #f1f3f5;
-}
-
-.table-responsive {
-    overflow-x: auto; /* 테이블이 너무 길면 가로 스크롤 */
-    -webkit-overflow-scrolling: touch;
-}
-.custom-table {
-    width: 100%;
-    margin-bottom: 1rem;
-    color: #212529;
-    border-collapse: collapse; /* 셀 사이 간격 제거 */
-}
-.custom-table th,
-.custom-table td {
-    padding: 0.75rem; /* 셀 패딩 */
-    vertical-align: middle; /* 수직 가운데 정렬 */
-    border-top: 1px solid #dee2e6; /* 상단 보더 */
-    text-align: left; /* 기본 왼쪽 정렬 */
-}
-.custom-table thead th {
-    vertical-align: bottom;
-    border-bottom: 2px solid #dee2e6; /* thead 하단 보더 강조 */
-    background-color: #f8f9fa; /* thead 배경색 */
-    font-weight: 600; /* thead 폰트 굵게 */
-    font-size: 0.9rem;
-    color: #495057;
-}
-.custom-table tbody tr:hover {
-    background-color: #f1f3f5; /* 마우스 오버 효과 */
-}
-.custom-table td a {
-    color: #0d6efd; /* 링크 색상 */
-    text-decoration: none;
-    font-weight: 500;
-}
-.custom-table td a:hover {
-    text-decoration: underline;
-}
-
-/* 상태 배지 스타일 */
-.status-badge {
-    display: inline-block;
-    padding: 0.3em 0.65em;
-    font-size: 75%;
-    font-weight: 700;
-    line-height: 1;
-    text-align: center;
-    white-space: nowrap;
-    vertical-align: baseline;
-    border-radius: 0.375rem; /* 둥근 모서리 */
-}
-.status-badge-success {
-    color: #fff;
-    background-color: #198754; /* 부트스트랩 success */
-}
-.status-badge-secondary {
-    color: #fff;
-    background-color: #6c757d; /* 부트스트랩 secondary */
-}
-
-.actions-cell { /* 관리 버튼들이 있는 셀 */
-    text-align: center; /* 버튼들 가운데 정렬 */
-    white-space: nowrap; /* 버튼들이 한 줄에 표시되도록 */
-}
-.actions-cell .btn {
-    padding: 0.25rem 0.5rem; /* 작은 버튼 */
-    font-size: 0.8rem;
-    margin-right: 0.25rem;
-}
-.actions-cell .btn:last-child {
-    margin-right: 0;
-}
-.actions-cell form { /* 삭제 버튼 폼 */
-    display: inline-block; /* 다른 버튼과 같은 줄에 표시 */
-    margin: 0;
-}
-
-/* 버튼 스타일 (form.html의 .btn과 유사하게 가져오되, 필요한 것만) */
-.btn {
-    display: inline-block; font-weight: 400; line-height: 1.5; color: #212529; text-align: center;
-    text-decoration: none; vertical-align: middle; cursor: pointer; user-select: none;
-    background-color: transparent; border: 1px solid transparent; padding: 0.5rem 1rem;
-    font-size: 0.95rem; border-radius: 0.25rem;
-    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
-}
-.btn-primary { color: #fff; background-color: #0d6efd; border-color: #0d6efd; }
-.btn-primary:hover { background-color: #0b5ed7; border-color: #0a58ca; }
-.btn-outline-primary { color: #0d6efd; border-color: #0d6efd; }
-.btn-outline-primary:hover { color: #fff; background-color: #0d6efd; border-color: #0d6efd; }
-.btn-outline-info { color: #0dcaf0; border-color: #0dcaf0; }
-.btn-outline-info:hover { color: #000; background-color: #0dcaf0; border-color: #0dcaf0; }
-.btn-outline-danger { color: #dc3545; border-color: #dc3545; }
-.btn-outline-danger:hover { color: #fff; background-color: #dc3545; border-color: #dc3545; }
-.btn i { margin-right: 0.35em; }
-
-
-/* 모달 스타일 (간단한 버전 - 미리보기용) */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* 반투명 배경 */
-    display: none; /* 기본 숨김 */
-    justify-content: center;
-    align-items: center;
-    z-index: 1050; /* 다른 요소 위에 표시 */
-}
-.modal-content-wrapper {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-    max-width: 90%; /* 최대 너비 */
-    width: 500px; /* 기본 너비 */
-    max-height: 80vh; /* 최대 높이 */
-    display: flex;
-    flex-direction: column;
-}
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #e9ecef;
-    margin-bottom: 15px;
-}
-.modal-title {
-    font-size: 1.25rem;
-    font-weight: 500;
-    margin: 0;
-}
-.modal-close-btn {
-    background: transparent;
+/* 기본 버튼 스타일 (이전과 유사하게) */
+button {
+    padding: 8px 15px;
     border: none;
-    font-size: 1.5rem;
-    font-weight: bold;
-    line-height: 1;
-    color: #000;
-    opacity: 0.5;
+    border-radius: 3px;
     cursor: pointer;
+    font-size: 14px;
 }
-.modal-close-btn:hover {
-    opacity: 0.75;
+
+#searchBtn {
+    background-color: #007bff;
+    color: white;
 }
-.modal-body {
-    overflow-y: auto; /* 내용 길면 스크롤 */
-    flex-grow: 1; /* 남은 공간 채우기 */
+#searchBtn:hover {
+    background-color: #0056b3;
 }
-.modal-body img { /* 모달 내 이미지 반응형 */
-    max-width: 100%;
-    height: auto;
+
+.register-button { /* 등록 버튼 별도 스타일 */
+    background-color: #17a2b8; /* 정보성 색상 */
+    color: white;
+}
+.register-button:hover {
+    background-color: #138496;
+}
+
+/* 테이블 영역 스타일 */
+.table-area {
+    width: 100%;
+    overflow-x: auto; /* 테이블 내용 많을 시 가로 스크롤 */
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse; /* 테두리 겹치기 */
+    margin-bottom: 20px;
+    font-size: 14px;
+    table-layout: fixed; /* 컬럼 너비 고정 시 유용 */
+}
+
+.results-table th,
+.results-table td {
+    border: 1px solid #ddd; /* 테이블 셀 테두리 */
+    padding: 10px; /* 셀 안쪽 여백 */
+    text-align: center; /* 기본 가운데 정렬 */
+    white-space: nowrap; /* 줄바꿈 방지 (필요 시) */
+    overflow: hidden; /* 내용 넘칠 때 숨김 */
+    text-overflow: ellipsis; /* 넘치는 텍스트 ... 처리 */
+}
+
+.results-table th {
+    background-color: #f2f2f2; /* 헤더 배경색 */
+    font-weight: bold;
+}
+
+/* 특정 컬럼 텍스트 정렬 조정 */
+.results-table td:nth-child(2), /* 권한 그룹 명 */
+.results-table td:nth-child(3) { /* 권한 그룹 설명 */
+    text-align: left;
+}
+
+/* 관리 컬럼의 수정 버튼 */
+.results-table .btn-edit {
+    background-color: #6c757d;
+    color: white;
+    padding: 5px 10px; /* 테이블 내 버튼 크기 조정 */
+    font-size: 12px;
+}
+.results-table .btn-edit:hover {
+    background-color: #5a6268;
+}
+
+/* 페이지네이션 영역 스타일 */
+.pagination-area {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.pagination-area .page-link {
+    display: inline-block;
+    padding: 5px 10px;
+    margin: 0 3px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    color: #007bff;
+    text-decoration: none;
+    border-radius: 3px;
+}
+
+.pagination-area .page-link:hover {
+    background-color: #e9ecef;
+}
+
+.pagination-area .current-page {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+    font-weight: bold;
+}
+
+/* --- 이전에 정의된 다른 스타일들 ... --- */
+
+/* 메뉴 관리 화면과 공유하는 스타일 조정 (필요 시) */
+/* 예: .form-group, label, input[type="text"] 등의 공통 스타일 */
+.form-group {
+    margin-bottom: 15px; /* 기본 폼 그룹 마진 */
+    display: flex;
+    align-items: center;
+    /* flex-wrap: wrap; */ /* 필요 시 */
+}
+
+label {
+    /* 이전 스타일 유지 또는 조정 */
+}
+
+input[type="text"], input[type="number"], textarea {
+    /* 이전 스타일 유지 또는 조정 */
+    /* flex: 1; */ /* 필요에 따라 */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-sizing: border-box;
 }
