@@ -3,7 +3,6 @@ package com.wb.between.admin.popup.controller;
 import com.wb.between.admin.popup.dto.AdminPopupEditReqDto;
 import com.wb.between.admin.popup.dto.AdminPopupRegReqDto;
 import com.wb.between.admin.popup.dto.AdminPopupResDto;
-import com.wb.between.admin.popup.repository.AdminPopupRepository;
 import com.wb.between.admin.popup.service.AdminPopupService;
 import com.wb.between.common.exception.CustomException;
 import jakarta.validation.Valid;
@@ -27,7 +26,6 @@ public class AdminPopupController {
 
     /**
      * 관리자 > 팝업 관리
-     * @return
      */
     @GetMapping
     public String getAdminPopupPageView(Model model) {
@@ -40,7 +38,6 @@ public class AdminPopupController {
 
     /**
      * 관리자 > 팝업 관리 > 팝업 등록
-     * @return
      */
     @GetMapping("/regist")
     public String getAdminPopupRegistPageView(Model model) {
@@ -50,14 +47,10 @@ public class AdminPopupController {
 
     /**
      * 관리자 > 팝업관리 > 팝업등록
-     * @param adminPopupRegReqDto
-     * @param bindingResult
-     * @param model
-     * @return
      */
     @PostMapping("/regist")
     public String registPopup(@Valid @ModelAttribute("popupInfo") AdminPopupRegReqDto adminPopupRegReqDto,
-                              BindingResult bindingResult, Model model) {
+                              BindingResult bindingResult) {
         
         if (bindingResult.hasErrors()) {
             List<FieldError> fieldErrors = bindingResult.getFieldErrors();
@@ -82,8 +75,6 @@ public class AdminPopupController {
 
     /**
      * 관리자 > 팝업 관리 > 팝업수정
-     * @param popupId
-     * @return
      */
     @GetMapping("/edit/{popupId}")
     public String getAdminPopupEditPageView(@PathVariable("popupId") Long popupId, Model model) {
@@ -98,14 +89,11 @@ public class AdminPopupController {
 
     /**
      * 관리자 > 팝업 관리 > 팝업수정
-     * @param popupId
-     * @return
      */
     @PutMapping("/edit/{popupId}")
     public String editPopup(@PathVariable("popupId") Long popupId,
                             @Valid @ModelAttribute("popupInfo") AdminPopupEditReqDto adminPopupEditReqDto,
-                            BindingResult bindingResult,
-                            Model model) {
+                            BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
             return "admin/popup/popup-edit";

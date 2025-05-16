@@ -24,7 +24,6 @@ public class AdminPopupService {
 
     /**
      * 팝업 목록 조회
-     * @return
      */
     @Transactional(readOnly = true)
     public List<AdminPopupResDto> findPopupList(){
@@ -34,7 +33,6 @@ public class AdminPopupService {
 
     /**
      * 팝업등록
-     * @param adminPopupRegReqDto
      */
     @Transactional
     public void registPopup(AdminPopupRegReqDto adminPopupRegReqDto) {
@@ -57,8 +55,6 @@ public class AdminPopupService {
 
     /**
      * 팝업 단일 조회
-     * @param popupId
-     * @return
      */
     @Transactional(readOnly = true)
     public AdminPopupResDto findPopup(Long popupId) {
@@ -68,8 +64,6 @@ public class AdminPopupService {
 
     /**
      * 팝업 수정
-     * @param popupId
-     * @param adminPopupEditReqDto
      */
     @Transactional
     public void editPopup(Long popupId, AdminPopupEditReqDto adminPopupEditReqDto) {

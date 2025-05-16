@@ -1,6 +1,5 @@
 package com.wb.between.admin.popup.dto;
 
-import com.wb.between.popup.domain.Popups;
 import lombok.Builder;
 import lombok.Getter;
 

@@ -48,8 +48,8 @@
           <td th:text="${popups.title}"></td>
           <td th:text="${popups.contentType}"></td>
 <!--          <td th:text="${popups.contentBody}"></td>-->
-          <td th:text="${popups.startDt}"></td>
-          <td th:text="${popups.endDt}"></td>
+          <td th:text="${#temporals.format(popups.startDt, 'yyyy.MM.dd HH:mm')}"></td>
+          <td th:text="${#temporals.format(popups.endDt, 'yyyy.MM.dd HH:mm')}"></td>
           <td th:text="${popups.useAt}"></td>
           <td>
             <a th:href="@{/admin/popup/edit/{popupId}(popupId=${popups.popupId})}" class="btn-edit">수정</a>
