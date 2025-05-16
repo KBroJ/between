@@ -151,7 +151,7 @@ public class MypageController {
      * @param model
      * @return
      */
-    @GetMapping("/confirmAccountDeletion")
+    @GetMapping("/")
     public String confirmAccountDeletion(Model model) {
         return "mypage/confirm-account-deletion";
     }

@@ -24,11 +24,14 @@
             <link rel="stylesheet" th:href="@{/css/admin/user/user-detail.css}">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
         </th:block>
+
+        <meta name="_csrf" th:content="${_csrf?.token}"/>
+        <meta name="_csrf_header" th:content="${_csrf?.headerName}"/>
     </head>
 
     <body>
         <section layout:fragment="admin-content">
-            <div class="detail-card">
+            <div class="detail-card" th:attr="data-userno=${user.userNo}">
                 <h2 class="card-title">
                     <i class="fa-solid fa-user-circle card-title-icon"></i>
                     <span th:text="${user.name}">홍길동</span>님의 상세 정보

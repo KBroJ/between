@@ -11,6 +11,7 @@ import com.wb.between.reservation.seat.domain.Seat;
 import com.wb.between.reservation.seat.repository.SeatRepository;
 import com.wb.between.user.domain.User;
 import com.wb.between.user.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
@@ -234,6 +235,76 @@ public class AdminUserService {
         return "알 수 없음";
     }
 
+    /**
+     * 관리자가 특정 사용자의 계정을 탈퇴 처리(비활성화)합니다. => Soft Delete
+     * @param userNo 탈퇴시킬 사용자의 ID
+     * @param adminUsername 작업을 수행하는 관리자의 username (로그용)
+     * @throws EntityNotFoundException 해당 사용자가 없을 경우
+     * @throws IllegalStateException 이미 탈퇴 처리된 사용자일 경우
+     */
+/*
+    @Transactional // 상태 변경이 있으므로 트랜잭션 적용
+    public void deactivateUserAccount(Long userNo, String adminUsername) {
+        log.info("관리자 {}에 의한 사용자 {} 계정 비활성화 서비스 시작", adminUsername, userNo);
+
+        User user = userRepository.findByUserNo(userNo)
+                .orElseThrow(() -> new EntityNotFoundException("탈퇴 처리할 사용자를 찾을 수 없습니다. 사용자 번호: " + userNo));
+
+        // 이미 탈퇴 상태인 경우
+        if ("탈퇴".equals(user.getUserStts())) {
+            log.warn("사용자 {}는 이미 탈퇴 처리된 상태입니다.", userNo);
+            throw new IllegalStateException("이미 탈퇴 처리된 사용자입니다.");
+        }
+
+        // 사용자 상태를 "탈퇴"로 변경
+        user.setUserStts("탈퇴");
+        user.setUpdateDt(LocalDateTime.now());
+
+        userRepository.save(user); // 변경된 상태 저장
+
+        log.info("관리자 {}에 의해 사용자 {}의 계정이 성공적으로 '탈퇴' 상태로 변경되었습니다.", adminUsername, userNo);
+
+        // 추가 작업: 해당 사용자의 활성 세션 무효화, 관련 데이터 익명화 또는 정리 등 (필요시)
+    }
+*/
+    /**
+     * 관리자가 특정 사용자의 계정을 영구적으로 삭제 => Hard Delete
+     *
+     * @param userNo 삭제할 사용자의 ID
+     * @param adminUsername 작업을 수행하는 관리자의 username (로그용)
+     * @throws EntityNotFoundException 해당 사용자가 없을 경우
+     * @throws RuntimeException 데이터베이스 제약 조건 등으로 삭제 실패 시
+     */
+    @Transactional // DB 데이터 변경이 있으므로 트랜잭션 적용
+    public void deleteUserAccountPermanently(Long userNo, String adminUsername) {
+        log.info("관리자 {}에 의한 사용자 {} 계정 영구 삭제 서비스 시작", adminUsername, userNo);
+
+        User userToDelete = userRepository.findByUserNo(userNo) // 또는 adminUserRepository
+                .orElseThrow(() -> new EntityNotFoundException("삭제할 사용자를 찾을 수 없습니다. 사용자 번호: " + userNo));
+
+        // (선택 사항) 삭제 전 수행해야 할 비즈니스 로직:
+        // 1. 해당 사용자의 모든 예약을 취소 상태로 변경하거나 삭제 (DB CASCADE 설정이 없다면)
+        //    List<Reservation> userReservations = reservationRepository.findByUserNoOrderByResDtDesc(userNo, Pageable.unpaged());
+        //    for (Reservation res : userReservations) {
+        //        // 예약 취소 로직 (결제 취소 포함) 호출 또는 상태 변경
+        //        // 예: cancelReservationByAdmin(res.getResNo(), new AdminReservationCancelRequestDto("회원 계정 삭제로 인한 자동 취소"), adminUsername);
+        //        // 또는 reservationRepository.delete(res); (연관된 Payment도 고려)
+        //    }
+        // 2. 기타 연관 데이터 처리 (게시글, 댓글 등)
+
+        try {
+            userRepository.delete(userToDelete); // 사용자 레코드 실제 삭제
+            log.info("관리자 {}에 의해 사용자 {}의 계정이 성공적으로 DB에서 영구 삭제되었습니다.", adminUsername, userNo);
+        } catch (Exception e) {
+            // 데이터베이스 제약 조건 위반 등 삭제 실패 시
+            log.error("사용자 {} 영구 삭제 중 오류 발생 (관리자: {}): {}", userNo, adminUsername, e.getMessage(), e);
+            throw new RuntimeException("사용자 계정 삭제 중 오류가 발생했습니다. 데이터베이스 제약 조건을 확인하거나 관련 데이터를 먼저 정리해야 할 수 있습니다.", e);
+        }
+    }
+
+
+
+// =====================================================================================================================
 
     // 휴대폰 번호 커스텀
     private String PhoneNumber(String phoneNo) {
@@ -246,5 +317,7 @@ public class AdminUserService {
     }
 
     // TODO: 회원 정보 수정(등급/상태) 및 탈퇴 처리 로직 구현 필요
+
+
 
 }

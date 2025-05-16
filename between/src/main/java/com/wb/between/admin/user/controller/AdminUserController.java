@@ -4,18 +4,22 @@ import com.wb.between.admin.user.dto.UserDetailDto;
 import com.wb.between.admin.user.dto.UserFilterParamsDto;
 import com.wb.between.admin.user.dto.UserListDto;
 import com.wb.between.admin.user.service.AdminUserService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @Slf4j
 @Controller
@@ -90,6 +94,60 @@ public class AdminUserController {
     }
 
     // TODO: 사용자 목록 페이지, API 엔드포인트(수정/삭제) 등 필요시 추가 구현
+    /**
+     * 관리자에 의한 회원 탈퇴 처리 (계정 비활성화)
+     * @param userNo 탈퇴 처리할 사용자 번호
+     * @param userDetails 현재 로그인한 관리자 정보
+     * @return 처리 결과 ResponseEntity
+     */
+    @DeleteMapping("/user/{userNo}/withdraw") // RESTful하게 DELETE 사용, 또는 @PostMapping("/{userNo}/withdraw")
+    public ResponseEntity<?> withdrawUserByAdmin(
+            @PathVariable Long userNo,
+            @AuthenticationPrincipal UserDetails userDetails) {
 
+        String adminUsername = userDetails.getUsername();
+
+        log.info("관리자 {}에 의한 회원 {} 탈퇴 처리 요청 시작", userDetails.getUsername(), userNo);
+
+    /*
+        // 관리자 권한 확인
+        if (!isAdmin(userDetails)) {
+            log.warn("권한 없는 사용자 {}의 회원 {} 탈퇴 시도", userDetails.getUsername(), userNo);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("success", false, "message", "회원 탈퇴 처리 권한이 없습니다."));
+        }
+    */
+        try {
+//            adminUserService.deactivateUserAccount(userNo, userDetails.getUsername());    // Soft delete
+            adminUserService.deleteUserAccountPermanently(userNo, adminUsername);           // Hard delete
+
+
+            // 성공 시 204 No Content 또는 메시지와 함께 200 OK 반환 가능
+            return ResponseEntity.ok(Map.of("success", true, "message", "회원이 성공적으로 탈퇴 처리되었습니다."));
+
+        } catch (EntityNotFoundException e) {
+            log.warn("회원 {} 탈퇴 처리 실패: 사용자를 찾을 수 없음", userNo, e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "message", e.getMessage()));
+        } catch (IllegalStateException e) { // 이미 탈퇴된 경우 등
+            log.warn("회원 {} 탈퇴 처리 실패: {}", userNo, e.getMessage(), e);
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            log.error("회원 {} 탈퇴 처리 중 예기치 않은 오류 발생 (관리자: {})", userNo, userDetails.getUsername(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", "회원 탈퇴 처리 중 오류가 발생했습니다."));
+        }
+    }
+
+
+
+
+
+
+    // 관리자 권한 확인을 위한 헬퍼 메소드 (실제 구현은 Spring Security 설정에 따름)
+    private boolean isAdmin(UserDetails userDetails) {
+        if (userDetails == null) return false;
+
+        return userDetails.getAuthorities().stream()
+//                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("관리자"));
+    }
 
 }
