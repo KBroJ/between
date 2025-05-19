@@ -12,6 +12,7 @@ import com.wb.between.user.domain.User;
 import com.wb.between.user.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -55,7 +56,7 @@ public class PaymentController {
         Reservation pendingReservation = null;
 
         try {
-             String username = userDetails.getUsername();
+            String username = userDetails.getUsername();
 
             User user = userRepository.findByEmail(username) // 이메일로 사용자 조회
                     .orElseThrow(() -> new UsernameNotFoundException("예약 서비스에서 사용자를 찾을 수 없습니다: " + username));
@@ -73,7 +74,7 @@ public class PaymentController {
             reserveDto.setSelectedTimes(requestDto.getSelectedTimes());
             reserveDto.setCouponId(requestDto.getCouponId());
             reserveDto.setUserId(Long.parseLong(partnerUserId)); // 서비스는 Long 타입 userId 기대
-            
+
             // 임직원이면 카카오페이 생략하게 처리
             pendingReservation = reservationService.createReservationWithLock(reserveDto, username);
             Long resNo = pendingReservation.getResNo(); // 생성된 예약 번호 가져오기
@@ -81,13 +82,14 @@ public class PaymentController {
                 throw new IllegalStateException("예약 정보 저장 후 예약 번호를 가져올 수 없습니다.");
             }
             boolean reservationConfirmed = Boolean.TRUE.equals(pendingReservation.getResStatus());
-            int finalAmount = Integer.parseInt(pendingReservation.getTotalPrice());
-            
-            if(reservationConfirmed && finalAmount == 0){
+
+            int finalAmountFromDB = Integer.parseInt(pendingReservation.getTotalPrice());
+
+            if (reservationConfirmed && finalAmountFromDB == 0) {
                 System.out.println("임직원 및 결제 0원 처리 실행");
-                try{
+                try {
                     paymentService.zeroPricePayment(pendingReservation);
-                } catch (Exception exception){
+                } catch (Exception exception) {
                     System.err.println("!!! 0원 결제 기록 저장 실패 ResNo: " + resNo + ", Error: " + exception.getMessage());
                 }
 
@@ -98,12 +100,14 @@ public class PaymentController {
                 response.put("paymentSkipped", true); // 결제 건너뜀
                 return ResponseEntity.ok(response);
 
-            } else if (reservationConfirmed && finalAmount > 0){
+            } else if (reservationConfirmed && finalAmountFromDB > 0) {
                 System.err.println("[Controller] 오류: 예약은 확정 상태이나 금액이 0보다 큽니다. ResNo: " + resNo);
                 throw new IllegalStateException("잘못된 예약 상태입니다(확정/금액있음).");
             } else {
                 // 주문 고유번호 생성
                 partnerOrderId = "RESERVE_" + resNo + "_" + System.currentTimeMillis();
+
+                requestDto.setTotalAmount(finalAmountFromDB);
 
 
                 System.out.printf("결제 준비 시작: 주문번호=%s, 사용자ID=%s, 금액=%d%n",
@@ -122,8 +126,20 @@ public class PaymentController {
 
                 // 4. 성공 응답 (리다이렉트 URL 포함) 프론트엔드로 전달
                 System.out.println("카카오페이 준비 성공, 리다이렉트 URL 전달: " + readyResponse.getNextRedirectPcUrl());
-                return ResponseEntity.ok(readyResponse);
+
+                Map<String, Object> finalResponseToFrontend = new HashMap<>();
+                finalResponseToFrontend.put("success", true);
+                finalResponseToFrontend.put("next_redirect_pc_url", readyResponse.getNextRedirectPcUrl());
+                finalResponseToFrontend.put("tid", readyResponse.getTid()); // tid도 함께 전달 (프론트에서 필요시)
+                finalResponseToFrontend.put("paymentSkipped", false); // 결제 필요함
+                return ResponseEntity.ok(finalResponseToFrontend);
             }
+        } catch (RuntimeException e) {
+            String errorMessage = e.getMessage() != null ? e.getMessage() : "알 수 없는 예약 오류입니다.";
+            if (e.getMessage() != null && (e.getMessage().contains("다른 사용자") || e.getMessage().contains("이미 예약"))) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("success", false, "message", errorMessage));
+            }
+            return ResponseEntity.internalServerError().body(Map.of("success", false, "message", "결제 준비 중 내부 오류 발생: " + errorMessage));
         } catch (Exception e) {
             System.err.println("카카오페이 준비 실패: " + e.getMessage());
             e.printStackTrace();

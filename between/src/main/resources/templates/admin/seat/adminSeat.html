@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin/admin}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 - 좌석 관리</title>
+    <meta name="_csrf" th:content="${_csrf?.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf?.headerName}"/>
+    <th:block layout:fragment="page-css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+        <link rel="stylesheet" th:href="@{/css/admin/seat/adminSeat.css}">
+    </th:block>
+</head>
+<body>
+<section layout:fragment="admin-content">
+    <div class="admin-content-container">
+        <h1 class="h3 mb-4 fw-bold border-bottom pb-2">
+            <i class="fas fa-couch me-2"></i>좌석 관리
+        </h1>
+
+        <div class="row mb-3 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group input-group-sm" style="max-width: 250px;">
+                    <label class="input-group-text" for="floorFilter"><i class="fas fa-layer-group me-1"></i>층 선택</label>
+                    <select class="form-select" id="floorFilter">
+                        <option value="">전체 층</option>
+                    <!--    <option value="1">1층</option>
+                        <option value="2">2층</option>-->
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6 text-end">
+                <a th:href="@{/admin/adminSeatForm}" href="/admin/adminSeatForm" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i> 새 좌석 등록
+                </a>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover table-striped align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th scope="col" style="width: 5%;">번호</th>
+                    <th scope="col" style="width: 7%;">층</th>
+                    <th scope="col" style="width: 15%;">좌석명</th>
+                    <th scope="col" style="width: 10%;">타입</th>
+                    <th scope="col" style="width: 10%;">그리드(행/열)</th>
+                    <th scope="col" style="width: 10%;">시간당(원)</th>
+                    <th scope="col" style="width: 10%;">일일권(원)</th>
+                    <th scope="col" style="width: 10%;">월정액(원)</th>
+                    <th scope="col" style="width: 8%;">사용</th>
+                    <th scope="col" style="width: 15%;" class="text-center">관리</th>
+                </tr>
+                </thead>
+                <tbody id="seat-list-body">
+                <tr>
+                    <td colspan="10" class="text-center text-muted py-4">
+                        <i class="fas fa-spinner fa-spin me-1"></i> 좌석 목록을 불러오는 중...
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="modal fade" id="editSeatModal" tabindex="-1" aria-labelledby="editSeatModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="editSeatModalLabel">좌석 정보 수정</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="edit-seat-loading" class="text-center py-5" style="display: none;">
+                            <i class="fas fa-spinner fa-spin fa-2x text-muted"></i>
+                            <p class="mt-2 text-muted">좌석 정보를 불러오는 중...</p>
+                        </div>
+                        <div id="edit-seat-error" class="alert alert-danger mt-3" style="display: none;"></div>
+
+                        <form id="seat-edit-modal-form" style="display: none;">
+                            <input type="hidden" id="edit-seat-seatno" name="seatNo">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="edit-seatNm" class="form-label">좌석 이름</label>
+                                    <input type="text" class="form-control" id="edit-seatNm" name="seatNm" required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="edit-floor" class="form-label">층 번호</label>
+                                    <input type="number" class="form-control" id="edit-floor" name="floor" required min="1">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="edit-seatSort" class="form-label">좌석 종류</label>
+                                    <select class="form-select" id="edit-seatSort" name="seatSort" required>
+                                        <option value="개인">개인석</option>
+                                        <option value="회의실">회의실</option>
+                                        <option value="AREA">고정 영역</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="edit-gridRow" class="form-label">행(Row) 위치</label>
+                                    <input type="text" class="form-control" id="edit-gridRow" name="gridRow" placeholder="예: 1 또는 1 / 3">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="edit-gridColumn" class="form-label">열(Column) 위치</label>
+                                    <input type="text" class="form-control" id="edit-gridColumn" name="gridColumn" placeholder="예: 3 또는 1 / 5">
+                                </div>
+                            </div>
+                            <div class="mb-3 form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="edit-useAt" name="useAt">
+                                <label class="form-check-label" for="edit-useAt">사용 여부 (체크 시 사용)</label>
+                            </div>
+                            <hr>
+                            <h6 class="mb-3">요금 정보</h6>
+                            <div class="row price-input-group">
+                                <div class="col-md-4 mb-3">
+                                    <label for="edit-hourlyPrice" class="form-label">시간당 가격</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" class="form-control" id="edit-hourlyPrice" min="0" placeholder="숫자만 입력">
+                                        <span class="input-group-text">원</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="edit-dailyPrice" class="form-label">일일권 가격</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" class="form-control" id="edit-dailyPrice" min="0" placeholder="숫자만 입력">
+                                        <span class="input-group-text">원</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="edit-monthlyPrice" class="form-label">월정액권 가격</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" class="form-control" id="edit-monthlyPrice" min="0" placeholder="숫자만 입력">
+                                        <span class="input-group-text">원</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                        <button type="submit" form="seat-edit-modal-form" class="btn btn-primary" id="saveSeatChangesBtn">수정 완료</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+</section>
+<th:block layout:fragment="page-script">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/admin/seat/adminSeat.js}"></script> {/* 예시 경로 */}
+</th:block>
+</body>
+</html>

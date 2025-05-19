@@ -54,5 +54,21 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByUserNoOrderByResDtDesc(Long userNo, Pageable pageable);
 
 
+    //  특정 기간 내에 해당 좌석에 어떤 예약이 있는지 확인 (resStatus = true 인 것만)
+    @Query("SELECT COUNT(r) FROM Reservation r WHERE r.seatNo = :seatNo AND r.resStatus = true " +
+            "AND r.resEnd > :checkStartDateTime AND r.resStart < :checkEndDateTime")
+    long countAnyOverlappingReservations(@Param("seatNo")Long seatNo, @Param("checkStartDateTime") LocalDateTime checkStartDateTime,
+                                         @Param("checkEndDateTime") LocalDateTime checkEndDateTime);
+
+    // 특정 좌석이 주어진 날짜에 일일권 또는 월정액권일 경우 하루종일 예약되어 있는지 확인
+    @Query("SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END " +
+            "FROM Reservation r WHERE r.seatNo = :seatNo AND r.resStatus = true " +
+            "AND (" +
+            "  (r.planType = 'DAILY' AND FUNCTION('DATE', r.resStart) = :targetDate)" +
+            "  OR " +
+            "  (r.planType = 'MONTHLY' AND :targetDate >= FUNCTION('DATE', r.resStart) AND :targetDate < FUNCTION('DATE', r.resEnd))" +
+            ")")
+    boolean isSeatBlockedForEntireDay(@Param("seatNo") Long seatNo, @Param("targetDate") LocalDate targetDate);
+
 }
 

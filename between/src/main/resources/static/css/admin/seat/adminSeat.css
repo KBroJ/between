@@ -1,0 +1,8 @@
+.admin-content-container { max-width: 1200px; margin: auto; background-color: #fff; padding: 2rem; border-radius: 0.5rem; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+.table th, .table td { vertical-align: middle; font-size: 0.9rem; }
+.table th { white-space: nowrap; }
+.action-buttons a, .action-buttons button { margin: 0 2px; }
+.text-success-emphasis { color: var(--bs-success-text-emphasis); }
+.text-danger-emphasis { color: var(--bs-danger-text-emphasis); }
+/* 더 작은 버튼을 위한 스타일 */
+.btn-xs { padding: 0.1rem 0.4rem; font-size: 0.75rem; }

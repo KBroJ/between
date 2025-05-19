@@ -29,6 +29,16 @@
     const modificationNotice = document.getElementById('modification-notice');
     const floorTabsContainer = document.getElementById('floorTabs');
 
+    const hourlyPlanPriceSpan = document.getElementById('hourlyPlanPrice');
+    const dailyPlanPriceSpan = document.getElementById('dailyPlanPrice');
+    const monthlyPlanPriceSpan = document.getElementById('monthlyPlanPrice');
+
+    const DEFAULT_PRICES = {
+        HOURLY: 2000,
+        DAILY: 10000,
+        MONTHLY: 99000
+    };
+
 
     // --- 유틸리티 함수 ---
     /** 서버 API 호출 함수 */
@@ -191,14 +201,27 @@ function handlePlanChange() {
 
              seats.forEach(item => {
                  // 1. 좌석 div 요소 생성 및 기본 정보 설정
-               const div = document.createElement('div'); div.textContent = item.name; const typeCls=item.type?.toLowerCase()||'seat'; const statusCls=item.status?.toLowerCase()||'unavailable'; div.className=`${typeCls} ${statusCls} seat-item`; div.dataset.seatId=item.id; div.dataset.seatName=item.name; div.dataset.seatType=item.type; if(item.gridRow)div.style.gridRow=item.gridRow; if(item.gridColumn)div.style.gridColumn=item.gridColumn; if(statusCls==='available'&&typeCls!=='area'){div.style.cursor='pointer'; div.addEventListener('click',()=>selectSeat(div));}else{div.style.cursor='not-allowed'; div.style.opacity='0.6'; if(statusCls==='static')div.style.opacity='0.8';} if(isModificationMode&&String(originalReservationData?.itemId)===item.id){div.classList.add('originally-booked');} seatMapView.appendChild(div);
-                 div.textContent = item.name; // 좌석 이름
-                 const typeClass = item.type?.toLowerCase() || 'seat'; // 타입 클래스
-                 const statusClass = item.status ? item.status.toLowerCase() : 'unavailable'; // 상태 클래스
-                 div.className = `${typeClass} ${statusClass} seat-item`; // 기본 클래스 설정
-                 div.dataset.seatId = item.id; // 데이터 속성
-                 div.dataset.seatName = item.name;
-                 div.dataset.seatType = item.type;
+               const div = document.createElement('div');
+                div.textContent = item.name; const typeCls=item.type?.toLowerCase()||'seat';
+                const statusCls=item.status?.toLowerCase()||'unavailable';
+                div.className=`${typeCls} ${statusCls} seat-item`;
+                div.dataset.seatId=item.id;
+                div.dataset.seatName=item.name; div.dataset.seatType=item.type;
+                if(item.gridRow)div.style.gridRow=item.gridRow;
+                if(item.gridColumn)div.style.gridColumn=item.gridColumn;
+                if(statusCls==='available'&&typeCls!=='area'){div.style.cursor='pointer';
+                div.addEventListener('click',()=>selectSeat(div));}else{div.style.cursor='not-allowed';
+                div.style.opacity='0.6'; if(statusCls==='static')div.style.opacity='0.8';} if(isModificationMode&&String(originalReservationData?.itemId)===item.id){div.classList.add('originally-booked');} seatMapView.appendChild(div);
+                div.textContent = item.name; // 좌석 이름
+                const typeClass = item.type?.toLowerCase() || 'seat'; // 타입 클래스
+                const statusClass = item.status ? item.status.toLowerCase() : 'unavailable'; // 상태 클래스
+                div.className = `${typeClass} ${statusClass} seat-item`; // 기본 클래스 설정
+                div.dataset.seatId = item.id; // 데이터 속성
+                div.dataset.seatName = item.name;
+                div.dataset.seatType = item.type;
+                div.dataset.hourlyPrice = (item.hourlyPrice && parseInt(item.hourlyPrice) > 0) ? String(item.hourlyPrice) : String(DEFAULT_PRICES.HOURLY);
+                div.dataset.dailyPrice = (item.dailyPrice && parseInt(item.dailyPrice) > 0) ? String(item.dailyPrice) : String(DEFAULT_PRICES.DAILY);
+                div.dataset.monthlyPrice = (item.monthlyPrice && parseInt(item.monthlyPrice) > 0) ? String(item.monthlyPrice) : String(DEFAULT_PRICES.MONTHLY);
 
                  console.log(`  [Render] 좌석: ${item.name}, 상태: ${statusClass}, 타입: ${typeClass}`);
 
@@ -244,25 +267,60 @@ function handlePlanChange() {
 
      /** 좌석 선택 (단일) */
      function selectSeat(seatElement) {
-      console.log("selectSeat 함수 호출됨! 대상 좌석:", seatElement?.dataset?.seatId);
-       if (
-         seatElement.classList.contains("unavailable") ||
-         seatElement.classList.contains("static")
-       )
-         return;
-       const current = document.querySelector(".seat-item.selected");
-       if (current === seatElement) {
-         seatElement.classList.remove("selected");
-         clearTimeSelection();
-         updateSummary();
-         calculateTotal();
-         return;
-       }
-       if (current) current.classList.remove("selected");
-       seatElement.classList.add("selected");
-       if (selectedPlanType === "HOURLY") loadAvailableTimes();
-       else clearTimeSelection();
-       updateSummary();
+         // 클릭한 좌석의 선택 상태 토글
+              const currentSelectedSeat = document.querySelector('.seat-item.selected');
+              let isNowSelected = false; // 현재 클릭으로 인해 좌석이 선택되었는지 여부
+
+              if (currentSelectedSeat === seatElement) { // 이미 선택된 좌석을 다시 클릭 -> 선택 해제
+                  seatElement.classList.remove('selected');
+                  isNowSelected = false;
+                  console.log("좌석 선택 해제됨");
+              } else { // 다른 좌석을 클릭했거나 아무것도 선택 안된 상태에서 클릭 -> 선택
+                  if (currentSelectedSeat) {
+                      currentSelectedSeat.classList.remove('selected'); // 기존 선택 해제
+                  }
+                  seatElement.classList.add('selected'); // 새 좌석 선택
+                  isNowSelected = true;
+                  console.log("새 좌석 선택됨");
+              }
+
+              if (isNowSelected) { // 새로 좌석이 선택된 경우
+                  // dataset에서 가격 문자열을 가져와서 숫자로 변환, 실패 시 0 (또는 기본값 사용 가능)
+                  const hourly = parseInt(seatElement.dataset.hourlyPrice) || DEFAULT_PRICES.HOURLY;
+                  const daily = parseInt(seatElement.dataset.dailyPrice) || DEFAULT_PRICES.DAILY;
+                  const monthly = parseInt(seatElement.dataset.monthlyPrice) || DEFAULT_PRICES.MONTHLY;
+
+                  console.log(`[selectSeat] 선택된 좌석의 dataset 가격: H=${seatElement.dataset.hourlyPrice}, D=${seatElement.dataset.dailyPrice}, M=${seatElement.dataset.monthlyPrice}`);
+                  console.log(`[selectSeat] Parsed/Defaulted 가격: H=${hourly}, D=${daily}, M=${monthly}`);
+
+                  // HTML의 span 태그 내용 업데이트
+                  if (hourlyPlanPriceSpan) {
+                      hourlyPlanPriceSpan.textContent = hourly.toLocaleString('ko-KR');
+                      console.log("hourlyPlanPriceSpan 업데이트:", hourly.toLocaleString('ko-KR'));
+                  } else { console.error("hourlyPlanPriceSpan 요소를 찾을 수 없습니다!"); }
+
+                  if (dailyPlanPriceSpan) {
+                      dailyPlanPriceSpan.textContent = daily.toLocaleString('ko-KR');
+                      console.log("dailyPlanPriceSpan 업데이트:", daily.toLocaleString('ko-KR'));
+                  } else { console.error("dailyPlanPriceSpan 요소를 찾을 수 없습니다!"); }
+
+                  if (monthlyPlanPriceSpan) {
+                      monthlyPlanPriceSpan.textContent = monthly.toLocaleString('ko-KR');
+                      console.log("monthlyPlanPriceSpan 업데이트:", monthly.toLocaleString('ko-KR'));
+                  } else { console.error("monthlyPlanPriceSpan 요소를 찾을 수 없습니다!"); }
+
+                  // 시간제 요금제일 경우 예약 가능 시간 로드
+                  if (selectedPlanType === 'HOURLY') {
+                      loadAvailableTimes();
+                  }
+
+              } else { // 좌석 선택이 해제된 경우 기본 고지 가격으로 복원
+                  console.log("좌석 선택 해제됨. 요금 안내 가격 기본값으로 복원.");
+                  if (hourlyPlanPriceSpan) hourlyPlanPriceSpan.textContent = DEFAULT_PRICES.HOURLY.toLocaleString('ko-KR');
+                  if (dailyPlanPriceSpan) dailyPlanPriceSpan.textContent = DEFAULT_PRICES.DAILY.toLocaleString('ko-KR');
+                  if (monthlyPlanPriceSpan) monthlyPlanPriceSpan.textContent = DEFAULT_PRICES.MONTHLY.toLocaleString('ko-KR');
+                  clearTimeSelection(); // 시간 선택도 초기화
+              }
      }
      /** 시간 선택 초기화 */
      function clearTimeSelection() { if(timeSlotsDiv) timeSlotsDiv.innerHTML = ''; document.querySelectorAll('input[name="times"]:checked').forEach(cb => cb.checked = false); if(timeSelectionGuide) timeSelectionGuide.textContent = '시간제 선택 시...'; }
@@ -417,7 +475,32 @@ function renderTimeSlots(timeSlots = [], isSelectedDateToday, currentHour) {
 
      // --- 요약 및 금액 계산 함수 ---
      /** 할인 전 기본 가격 */
-     function calculateBasePrice() { const c=document.querySelectorAll('input[name="times"]:checked').length; const i=document.querySelector('.seat-item.selected'); let p=0; if(i){ switch(selectedPlanType){ case 'HOURLY': p=c*2000;break; case 'DAILY': p=10000;break; case 'MONTHLY': p=99000;break; }} return p; }
+     function calculateBasePrice() {
+         const selectedTimesCount = document.querySelectorAll('input[name="times"]:checked').length;
+         const selectedSeatElement = document.querySelector('.seat-item.selected');
+         let basePrice = 0;
+
+         console.log("[calculateBasePrice] 함수 시작");
+         console.log("  > 선택된 요금제:", selectedPlanType);
+         console.log("  > 선택된 시간 수:", selectedTimesCount);
+
+         if (selectedSeatElement) { // 좌석이 선택되었을 때만
+             const hourly = parseInt(selectedSeatElement.dataset.hourlyPrice) || 0;
+             const daily = parseInt(selectedSeatElement.dataset.dailyPrice) || 0;
+             const monthly = parseInt(selectedSeatElement.dataset.monthlyPrice) || 0;
+
+
+            switch (selectedPlanType) {
+                case 'HOURLY': basePrice = selectedTimesCount * hourly; break;
+                case 'DAILY': basePrice = daily; break;
+                case 'MONTHLY': basePrice = monthly; break;
+            }
+         }
+         console.log("[calculateBasePrice] 계산된 basePrice:", basePrice);
+         return basePrice;
+     }
+
+
      /** 쿠폰 할인액 */
      function calculateDiscount(basePrice) { let d=0; if (selectedCoupon&&basePrice>0){ if(selectedCoupon.type==='amount')d=selectedCoupon.value; else if(selectedCoupon.type==='percent')d=Math.floor(basePrice*(selectedCoupon.value/100)); d=Math.min(basePrice,d); } return d; }
      /** 예약 요약 업데이트 */
@@ -428,11 +511,16 @@ function renderTimeSlots(timeSlots = [], isSelectedDateToday, currentHour) {
              let totalPrice = 0; // 최종 결제 금액
              let totalCount = 0; // 예약 건수
 
+             console.log("[calculateTotal] 함수 시작");
+             console.log("  > 현재 로그인 사용자 권한:", LOGGED_IN_USER_AUTH); // HTML 인라인 스크립트에서 설정된 전역 변수
+
              if (selectedItem) { // 좌석/룸이 선택된 경우에만 계산 시작
                  totalCount = 1; // 기본 1건
                  const basePrice = calculateBasePrice(); // 할인 전 기본 요금 계산
                  const couponDiscount = calculateDiscount(basePrice); // 쿠폰 할인액 계산
                  let priceAfterCoupon = basePrice - couponDiscount; // 쿠폰 적용 후 가격
+
+                 console.log("  > basePrice:", basePrice, "couponDiscount:", couponDiscount, "priceAfterCoupon:", priceAfterCoupon);
 
                  if (typeof LOGGED_IN_USER_AUTH !== 'undefined' && LOGGED_IN_USER_AUTH === "임직원") {
                      console.log("임직원 확인됨 -> 최종 가격 0원 처리");
@@ -456,6 +544,7 @@ function renderTimeSlots(timeSlots = [], isSelectedDateToday, currentHour) {
                  finalPrice = 0;
              }
 
+              console.log("[calculateTotal] 최종 계산된 totalCount:", totalCount, "finalPrice:", finalPrice);
              // 최종 계산된 건수와 금액을 화면에 업데이트
              if(totalCountSpan) totalCountSpan.textContent = totalCount;
              if(totalPriceSpan) totalPriceSpan.textContent = finalPrice.toLocaleString(); // 0 또는 실제 금액
@@ -509,7 +598,7 @@ function renderTimeSlots(timeSlots = [], isSelectedDateToday, currentHour) {
              selectedTimes: selectedPlanType === 'HOURLY' ? selectedTimeValues : [],
              couponId: selectedCoupon?.id || null
          };
-
+         console.log(">>> proceedToPayment - 백엔드로 보낼 paymentReadyData.totalAmount:", paymentReadyData.totalAmount); // <<$#@%#$%$#%@#%#$%#$< 이 로그 확인!
         console.log("백엔드로 카카오페이 결제 준비 요청:", paymentReadyData);
         if(paymentButton) { paymentButton.disabled = true; paymentButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> 결제 준비 중...'; }
 

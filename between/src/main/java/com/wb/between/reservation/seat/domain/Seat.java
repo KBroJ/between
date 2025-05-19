@@ -1,5 +1,6 @@
 package com.wb.between.reservation.seat.domain;
 
+import com.wb.between.admin.price.domain.Price;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,6 +10,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.YesNoConverter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -48,6 +51,9 @@ public class Seat {
 
     @Column(name = "floor")
     private Integer floor;
+
+    @OneToMany(mappedBy = "seat", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Price> prices = new ArrayList<>();
 
     // 기본 생성자, 다른 생성자 등 필요시 추가
     public Seat() {} // JPA는 기본 생성자가 필요할 수 있음

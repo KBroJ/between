@@ -1,6 +1,6 @@
 package com.wb.between.admin.price.domain;
 
-import com.wb.between.admin.reservation.domain.adminSeat;
+import com.wb.between.admin.seat.domain.adminSeat;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

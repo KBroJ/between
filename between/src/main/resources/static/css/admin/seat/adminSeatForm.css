@@ -1,0 +1,6 @@
+body { padding-top: 20px; padding-bottom: 60px; background-color: #f8f9fa; }
+.form-container { max-width: 800px; margin: auto; background-color: #fff; padding: 2rem; border-radius: 0.5rem; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+.form-label { font-weight: 500; }
+.form-text { font-size: 0.875em; }
+.price-group .input-group-text { min-width: 90px; justify-content: center; }
+.button-group { margin-top: 2rem; }

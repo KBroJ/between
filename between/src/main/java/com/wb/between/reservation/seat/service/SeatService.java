@@ -7,6 +7,7 @@ import com.wb.between.reservation.reserve.repository.ReservationRepository;
 import com.wb.between.reservation.seat.domain.Seat;
 import com.wb.between.reservation.seat.dto.FloorDto;
 import com.wb.between.reservation.seat.dto.SeatDto;
+import com.wb.between.reservation.seat.dto.SeatResponseDto;
 import com.wb.between.reservation.seat.repository.SeatRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,22 +41,33 @@ public class SeatService {
      * @param date 조회 날짜 (참고용)
      * @return 좌석 정보(SeatDto) 리스트
      */
-    @Transactional(readOnly = true)
-    public List<SeatDto> getSeatStatus(LocalDate date, Integer floor) {
-        System.out.printf("[SeatService] DB 좌석 조회 요청 - 날짜: %s, 층: %d (기본 상태만 확인)%n", date, floor);
+    @Transactional(readOnly = true) // 지연 로딩된 prices 컬렉션 접근 위해 필요 (또는 JOIN FETCH 사용)
+    public List<SeatResponseDto> getSeatStatus(LocalDate date, Integer floor) {
+        System.out.printf("[SeatService] 사용자 예약 페이지 좌석 조회 - 날짜: %s, 층: %d%n", date, floor);
 
-        // 1. 해당 '층'의 사용 중인 좌석 조회
-        List<Seat> activeSeatsOnFloor = seatRepository.findByFloorAndUseAtTrue(floor);
+        List<Seat> activeSeatsOnFloor;
+        if (floor != null && floor > 0) { // 특정 층 조회
+            activeSeatsOnFloor = seatRepository.findByFloorAndUseAtTrueWithPrices(floor);
+        } else { // 전체 층 조회 (또는 기본 층만 보여줄 경우 이 분기 제거)
+            // activeSeatsOnFloor = seatRepository.findByUseAtTrueWithPrices(); // 예시
+            // 여기서는 특정 층 조회가 필수라고 가정하고, floor가 null이면 빈 리스트 반환 또는 에러 처리
+            if (floor == null) {
+                System.out.println("[SeatService] 층 정보가 없습니다. 빈 목록을 반환합니다.");
+                return List.of();
+            }
+            // 위에서 이미 floor > 0 체크 했으므로, 실제로는 floor가 null이 아닌 경우만 이 서비스에 도달해야 함
+            // Controller 단에서 floor 파라미터를 필수로 받거나 기본값을 설정하는 것이 좋음
+            activeSeatsOnFloor = seatRepository.findByFloorAndUseAtTrueWithPrices(floor);
+        }
+        // ---------------------------------------------------------
+
         if (activeSeatsOnFloor.isEmpty()) {
             System.out.println("[SeatService] 해당 층에 활성 좌석 없음 (floor: " + floor +")");
             return List.of();
         }
-        System.out.printf("[SeatService] 활성 좌석 %d건 조회 완료 (층 %d)%n", activeSeatsOnFloor.size(), floor);
 
-
-
-        // 2. DTO 변환 (예약 상태 고려 없이 AVAILABLE/STATIC만 설정)
-        List<SeatDto> seatDtos = activeSeatsOnFloor.stream()
+        // DTO 변환 (이 과정에서 SeatResponseDto 생성자가 seat.getPrices()를 호출)
+        List<SeatResponseDto> seatDtos = activeSeatsOnFloor.stream()
                 .map(seat -> {
                     String status;
                     String seatType = mapSeatSortToType(seat.getSeatSort());
@@ -63,24 +75,15 @@ public class SeatService {
                     if (!seat.isUseAt() || "AREA".equals(seatType)) {
                         status = "STATIC";
                     } else {
-                        // 예약 여부 확인 없이 무조건 AVAILABLE
-                        status = "AVAILABLE";
+                        status = "AVAILABLE"; // 실제 시간별 예약 가능 여부는 TimeService가 담당
                     }
-                    // ---------------------------------
 
-                    // Entity -> DTO 변환
-                    return new SeatDto(
-                            String.valueOf(seat.getSeatNo()),
-                            seat.getSeatNm(),
-                            status, // AVAILABLE 또는 STATIC
-                            seatType,
-                            seat.getGridRow(),
-                            seat.getGridColumn()
-                    );
+                    // SeatResponseDto 생성자는 이제 seat.getPrices()를 통해 가격 정보를 채울 수 있음
+                    return new SeatResponseDto(seat, status);
                 })
                 .collect(Collectors.toList());
 
-        System.out.println("[SeatService] 최종 반환 DTO 목록 수: " + seatDtos.size());
+        System.out.println("[SeatService] 반환 DTO 목록 수: " + seatDtos.size());
         return seatDtos;
     }
 

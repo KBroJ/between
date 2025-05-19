@@ -45,9 +45,6 @@ public class Reservation {
     @UpdateTimestamp // 레코드 수정 시 자동 업데이트
     private LocalDateTime moDt; // 예약 변경/취소 시각
 
-    @Column(length = 500)
-    private String moReason; // 관리자 조치 사유 (수정 또는 취소)
-
     @Column // nullable = true 기본값
     private Boolean resStatus; // 예약 상태 (null: 보류, 1: 완료 (true), 0 : 취소 (false))
 

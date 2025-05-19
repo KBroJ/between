@@ -22,8 +22,8 @@ public class TimeService {
     @Autowired
     private ReservationRepository reservationRepository;
 
-    private static final LocalTime OPEN_TIME = LocalTime.of(9, 0);
-    private static final LocalTime CLOSE_TIME = LocalTime.of(22, 0);
+    private static final LocalTime OPEN_TIME = LocalTime.MIDNIGHT; // 운영 시간
+    private static final LocalTime CLOSE_TIME = LocalTime.MAX; // 운영 시간
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
     /**
@@ -39,34 +39,49 @@ public class TimeService {
         catch (NumberFormatException e) { return List.of(); }
         System.out.printf("DB 연동 시간 슬롯 상태 조회 요청 - 날짜: %s, 좌석번호: %d%n", date, seatNo);
 
+
+        if (reservationRepository.isSeatBlockedForEntireDay(seatNo, date)) {
+            System.out.println("[TimeService] 해당 날짜(" + date + ")는 일일권/월정액권으로 전체 예약됨. 모든 시간 BOOKED 처리.");
+            List<TimeDto> allBookedSlots = new ArrayList<>();
+            for (int hour = 0; hour < 24; hour++) { // 24시간 기준
+                LocalTime currentTimeSlot = LocalTime.of(hour, 0);
+                allBookedSlots.add(new TimeDto(currentTimeSlot.format(TIME_FORMATTER), "BOOKED"));
+            }
+            return allBookedSlots; // 모든 시간 슬롯을 "BOOKED"로 반환
+        }
+
+
         // 1. 해당 좌석/날짜의 확정된 예약 정보 조회
-        Boolean confirmedStatus = true; // !!! 실제 '확정' 상태값 확인 !!!
+        Boolean confirmedStatus = true;
         List<Reservation> reservations = reservationRepository.findBySeatNoAndDateAndStatus(seatNo, date, confirmedStatus);
 
         // 2. 예약된 시간 슬롯("HH:mm") Set 생성
         Set<String> reservedStartTimes = new HashSet<>();
         for (Reservation res : reservations) {
-            LocalDateTime start = res.getResStart(); LocalDateTime end = res.getResEnd();
-            LocalDateTime current = start;
-            while (current.isBefore(end)) {
-                if (current.toLocalDate().equals(date)) { reservedStartTimes.add(current.format(TIME_FORMATTER)); }
-                current = current.plusHours(1);
+            LocalDateTime start = res.getResStart();
+            LocalDateTime end = res.getResEnd();
+            LocalDateTime currentSlotInReservation = start;
+            // 예약 기간 내의 모든 시간 슬롯을 추가
+            while (currentSlotInReservation.isBefore(end)) {
+                // 조회하려는 날짜(date)에 해당하는 시간만 포함
+                if (currentSlotInReservation.toLocalDate().equals(date)) {
+                    reservedStartTimes.add(currentSlotInReservation.format(TIME_FORMATTER));
+                }
+                currentSlotInReservation = currentSlotInReservation.plusHours(1);
             }
         }
         System.out.println("DB 기반 예약된 시간(Set): " + reservedStartTimes);
 
         // 3. 모든 시간 슬롯 생성 및 상태 결정
         List<TimeDto> timeSlots = new ArrayList<>();
-        LocalTime currentTimeSlot = OPEN_TIME;
         LocalDate today = LocalDate.now();
         LocalTime now = LocalTime.now(); // 현재 시각
 
-        while (currentTimeSlot.isBefore(CLOSE_TIME)) {
+        for (int hour = 0; hour < 24; hour++) {
+            LocalTime currentTimeSlot = LocalTime.of(hour, 0); // 예: 00:00, 01:00, ..., 23:00
             String timeSlotString = currentTimeSlot.format(TIME_FORMATTER);
             String status;
 
-            // --- 상태 결정 로직 (우선순위: 과거 > 예약됨 > 가능) ---
-            // 1) 오늘 이전 날짜거나, 오늘이면서 이미 지나간 시간인가?
             if (date.isBefore(today) || (date.equals(today) && currentTimeSlot.isBefore(now))) {
                 status = "PAST";
                 // 2) 예약된 시간 목록에 포함되는가?
@@ -79,7 +94,6 @@ public class TimeService {
             // -------------------------------------------------
 
             timeSlots.add(new TimeDto(timeSlotString, status)); // DTO 생성 및 리스트 추가
-            currentTimeSlot = currentTimeSlot.plusHours(1);
         }
 
         System.out.println("반환될 시간 슬롯 상태 목록 수: " + timeSlots.size());

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin/admin}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>관리자 - 새 좌석 등록</title>
+  <meta name="_csrf" th:content="${_csrf?.token}"/>
+  <meta name="_csrf_header" th:content="${_csrf?.headerName}"/>
+  <th:block layout:fragment="page-css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/admin/seat/adminSeatForm.css}">
+  </th:block>
+</head>
+<body>
+<section layout:fragment="admin-content">
+  <div class="form-container">
+    <h1 class="h3 mb-4 fw-bold border-bottom pb-2">
+      <i class="fas fa-plus-square me-2"></i>새 좌석 등록
+    </h1>
+
+    <form id="seat-registration-form">
+      <h5 class="mb-3 mt-4">기본 정보</h5>
+      <div class="row g-3">
+        <div class="col-md-6 mb-3">
+          <label for="seatNm" class="form-label">좌석 이름 <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="seatNm" name="seatNm" placeholder="예: A01, 창가석1, 스터디룸 태양" required>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="floor" class="form-label">층 번호 <span class="text-danger">*</span></label>
+          <input type="number" class="form-control" id="floor" name="floor" placeholder="예: 1, 2" required min="1">
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="seatSort" class="form-label">좌석 종류 <span class="text-danger">*</span></label>
+          <select class="form-select" id="seatSort" name="seatSort" required>
+            <option value="" selected disabled>선택하세요...</option>
+            <option value="개인">개인석</option>
+            <option value="회의실">회의실</option>
+            <option value="AREA">고정 영역 (예: 입구, 복도)</option>
+          </select>
+        </div>
+        <div class="col-md-6 mb-3 d-flex align-items-center">
+          <div class="form-check form-switch mt-4">
+            <input class="form-check-input" type="checkbox" role="switch" id="useAt" name="useAt" checked>
+            <label class="form-check-label" for="useAt">사용 여부 (체크 시 사용)</label>
+          </div>
+        </div>
+      </div>
+
+
+      <h5 class="mb-3 mt-4">좌석 배치 (Grid 설정)</h5>
+      <p class="form-text mb-2">
+        좌석 배치도에서 해당 좌석이 위치할 행과 열을 지정합니다. 여러 칸을 차지하는 경우 '시작번호 / 끝번호+1' 형식으로 입력합니다.
+        <br>예: 1행만 차지: "1", 1~2행 차지: "1 / 3", 2~3열 차지: "2 / 4"
+      </p>
+      <div class="row g-3">
+        <div class="col-md-6 mb-3">
+          <label for="gridRow" class="form-label">행(Row) 위치</label>
+          <input type="text" class="form-control" id="gridRow" name="gridRow" placeholder="예: 1 또는 1 / 3">
+          <div class="form-text">예: "1" (1행), "2 / 4" (2행부터 3행까지)</div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="gridColumn" class="form-label">열(Column) 위치</label>
+          <input type="text" class="form-control" id="gridColumn" name="gridColumn" placeholder="예: 3 또는 1 / 5">
+          <div class="form-text">예: "3" (3열), "1 / 5" (1열부터 4열까지)</div>
+        </div>
+      </div>
+
+
+      <h5 class="mb-3 mt-4">요금 정보</h5>
+      <div class="row g-3 price-group">
+        <div class="col-md-4 mb-3">
+          <label for="hourlyPrice" class="form-label">시간당 가격</label>
+          <div class="input-group">
+            <input type="number" class="form-control" id="hourlyPrice" name="hourlyPrice" placeholder="예: 2000" min="0">
+            <span class="input-group-text">원</span>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <label for="dailyPrice" class="form-label">일일권 가격</label>
+          <div class="input-group">
+            <input type="number" class="form-control" id="dailyPrice" name="dailyPrice" placeholder="예: 10000" min="0">
+            <span class="input-group-text">원</span>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <label for="monthlyPrice" class="form-label">월정액권 가격</label>
+          <div class="input-group">
+            <input type="number" class="form-control" id="monthlyPrice" name="monthlyPrice" placeholder="예: 99000" min="0">
+            <span class="input-group-text">원</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-text mb-3">
+        해당 요금제를 사용하지 않는 좌석/룸의 경우 가격을 비워두거나 0으로 입력하세요.
+      </div>
+
+
+
+      <div class="d-flex justify-content-end gap-2 button-group">
+        <a th:href="@{/admin/seats}" href="/admin/adminSeat" class="btn btn-secondary">
+          <i class="fas fa-list me-1"></i> 목록
+        </a>
+        <button type="submit" class="btn btn-primary" id="registerSeatBtn">
+          <i class="fas fa-check me-1"></i> 등록하기
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<th:block layout:fragment="page-script">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  {/**/}
+  <script th:src="@{/js/admin/seat/adminSeatForm.js}"></script> {/* 예시 경로 */}
+</th:block>
+</body>
+</html>

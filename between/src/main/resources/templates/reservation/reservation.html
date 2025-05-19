@@ -83,17 +83,17 @@
         <div class="form-check">
           <input class="form-check-input" type="radio" name="planType" id="hourlyPlan" value="HOURLY" checked="checked"
                  th:checked="${originalReservation?.planType == 'HOURLY'}"
-                 th:disabled="${isModificationMode}" /> <label class="form-check-label" for="hourlyPlan">시간제 <span class="text-muted small">(1시간당 2,000원)</span></label>
+                 th:disabled="${isModificationMode}" /> <label class="form-check-label" for="hourlyPlan">시간제  <span class="text-muted small">(1시간당 <span id="hourlyPlanPrice">2,000</span>원)</span></label>
         </div>
         <div class="form-check">
           <input class="form-check-input" type="radio" name="planType" id="dailyPlan" value="DAILY"
                  th:checked="${originalReservation?.planType == 'DAILY'}"
-                 th:disabled="${isModificationMode}"> <label class="form-check-label" for="dailyPlan">일일권 <span class="text-muted small">(10,000원 / 당일)</span></label>
+                 th:disabled="${isModificationMode}"> <label class="form-check-label" for="dailyPlan">일일권 <span class="text-muted small">(<span id="dailyPlanPrice">10,000</span>원 / 당일)</span></label>
         </div>
         <div class="form-check">
           <input class="form-check-input" type="radio" name="planType" id="monthlyPlan" value="MONTHLY"
                  th:checked="${originalReservation?.planType == 'MONTHLY'}"
-                 th:disabled="${isModificationMode}"> <label class="form-check-label" for="monthlyPlan">월정액권 <span class="text-muted small">(99,000원 / 1개월)</span></label>
+                 th:disabled="${isModificationMode}"> <label class="form-check-label" for="monthlyPlan">월정액권  <span class="text-muted small">(<span id="monthlyPlanPrice">99,000</span>원 / 1개월)</span></label>
         </div>
       </div>
       <div class="card-common coupon-card">
