@@ -58,7 +58,7 @@ public interface AdminReservationRepository extends JpaRepository<Reservation, L
             "AND u.userNo IS NOT NULL AND s.seatNo IS NOT NULL") // 명시적으로 사용)
     long countReservationNow(@Param("now") LocalDateTime now, boolean resStatus);
 
-    @Query("SELECT r.totalPrice FROM Reservation r " +
+    @Query("SELECT r FROM Reservation r " +
             "JOIN r.user u " +
             "JOIN r.seat s " +
             "WHERE r.resDt >= :startDate AND r.resDt < :endDate " +
