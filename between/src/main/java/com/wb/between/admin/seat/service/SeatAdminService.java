@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -114,5 +115,18 @@ public class SeatAdminService {
             throw new EntityNotFoundException("삭제할 좌석을 찾을 수 없습니다. ID: " + SeatNo);
         }
         adminSeatRepository.deleteById(SeatNo);
+    }
+
+    /**
+     * 전체 좌석 수 조회
+     */
+    @Transactional(readOnly = true)
+    public long countByUseAt(){
+        LocalDateTime now = LocalDateTime.now();
+
+        //1. 전체 운영 가능한 좌석 수
+        long totalSeat = adminSeatRepository.countByUseAt(true);
+      
+        return totalSeat;
     }
 }

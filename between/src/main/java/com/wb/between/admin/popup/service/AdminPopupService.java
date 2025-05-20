@@ -9,6 +9,8 @@ import com.wb.between.common.exception.ErrorCode;
 import com.wb.between.popup.domain.Popups;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,9 +28,9 @@ public class AdminPopupService {
      * 팝업 목록 조회
      */
     @Transactional(readOnly = true)
-    public List<AdminPopupResDto> findPopupList(){
-        List<Popups> popupsList = adminPopupRepository.findAll(Sort.by(Sort.Direction.ASC, "startDt"));
-        return popupsList.stream().map(AdminPopupResDto::from).toList();
+    public Page<AdminPopupResDto> findPopupList(Pageable pageable, String searchPopupName) {
+        Page<Popups> popupsList = adminPopupRepository.findPopupWithFilter(pageable, searchPopupName);
+        return popupsList.map(AdminPopupResDto::from);
     }
 
     /**

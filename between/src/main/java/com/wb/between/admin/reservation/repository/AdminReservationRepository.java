@@ -8,6 +8,11 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 public interface AdminReservationRepository extends JpaRepository<Reservation, Long>, JpaSpecificationExecutor<Reservation> {
 
@@ -27,4 +32,39 @@ public interface AdminReservationRepository extends JpaRepository<Reservation, L
     @EntityGraph(attributePaths = {"user", "seat"}) // 특정 조회 시 함께 가져올 연관 엔티티 속성들을 지정(user와 seat 필드를 Eager 로딩하도록 지정)
     Page<Reservation> findAll(Specification<Reservation> spec, Pageable pageable);
 
+    /**
+     * 대시보드 - 최근 예약 5개 조회
+     */
+    @EntityGraph(attributePaths = {"user", "seat"}) // 특정 조회 시 함께 가져올 연관 엔티티 속성들을 지정(user와 seat 필드를 Eager 로딩하도록 지정)
+    List<Reservation> findTop5ByOrderByResDtDesc();
+
+    /**
+     * 오늘 예약 건수 조회
+     */
+    @Query("SELECT COUNT(r) FROM Reservation r " +
+            "JOIN r.user u " +
+            "JOIN r.seat s " +
+            "WHERE r.resDt BETWEEN :start AND :end " +
+            "AND u.userNo IS NOT NULL AND s.seatNo IS NOT NULL") // 명시적으로 사용
+    long countByResDt(@Param("start")LocalDateTime start, @Param("end") LocalDateTime end);
+
+    /**
+     * 현재 예약 건수 조회
+     */
+    @Query("SELECT COUNT(r) FROM Reservation r " +
+            "JOIN r.user u " +
+            "JOIN r.seat s " +
+            "WHERE r.resStart <= :now AND r.resEnd > :now " +
+            "AND u.userNo IS NOT NULL AND s.seatNo IS NOT NULL") // 명시적으로 사용)
+    long countReservationNow(@Param("now") LocalDateTime now, boolean resStatus);
+
+    @Query("SELECT r.totalPrice FROM Reservation r " +
+            "JOIN r.user u " +
+            "JOIN r.seat s " +
+            "WHERE r.resDt >= :startDate AND r.resDt < :endDate " +
+            "AND u.userNo IS NOT NULL AND s.seatNo IS NOT NULL") // 명시적으로 사용
+    List<Reservation> totalPrice(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
 }

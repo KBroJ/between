@@ -5,6 +5,7 @@
 <head>
   <title>관리자 화면</title>
   <link rel="stylesheet" th:href="@{/css/admin/popup/popup-manage.css}">
+  <link rel="stylesheet" th:href="@{/css/common/pagination.css}">
 </head>
 <body>
 
@@ -63,6 +64,13 @@
         </tbody>
       </table>
     </div>
+
+    <!-- 페이지네이션 영역 -->
+    <div class="pagination-area">
+      <div th:replace="~{common/pagination :: paginationWidget(pInfo=${paginationInfo})}">
+      </div>
+    </div>
+
   </div>
 
 

@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -426,6 +427,68 @@ public class AdminReservationService {
 
     private String calculateFinalPrice(String basePriceStr, String discountPriceStr) {
         return String.valueOf(Integer.parseInt(basePriceStr) - Integer.parseInt(discountPriceStr));
+    }
+
+    /**
+     * 대시보드 - 최근 예약 5개 조회
+     */
+    @Transactional(readOnly = true)
+    public List<ReservationListDto> dashboardReservation() {
+        List<Reservation> reservationList = adminReservationRepository.findTop5ByOrderByResDtDesc();
+        return reservationList.stream().map(this::mapToReservationListDto).toList();
+    }
+
+    /**
+     * 오늘 예약 건수 조회
+     */
+    @Transactional(readOnly = true)
+    public long countReservationByResDt() {
+        LocalDateTime start = LocalDate.now().atStartOfDay();             // 오늘 00:00:00
+        log.debug("start day = {}", start);
+
+        LocalDateTime end = LocalDate.now().plusDays(1).atStartOfDay();   // 내일 00:00:00
+        log.debug("end day = {}", end);
+        long todayCount = adminReservationRepository.countByResDt(start, end);
+        log.debug("countReservationByResDt|todayCount = {}", todayCount);
+        return todayCount;
+    }
+
+    /**
+     * 현재 예약 건수 조회
+     */
+    @Transactional(readOnly = true)
+    public long countReservationNow() {
+        LocalDateTime now = LocalDateTime.now();
+        boolean resStatus = true;
+        long todayCount = adminReservationRepository.countReservationNow(now, resStatus);
+        log.debug("countReservationNow|todayCount = {}", todayCount);
+        return todayCount;
+    }
+
+    /**
+     * 오늘 수익 합계 조회
+     */
+    @Transactional(readOnly = true)
+    public BigDecimal revenueByToday() {
+        BigDecimal totalRevenue = BigDecimal.ZERO;
+        LocalDateTime start = LocalDate.now().atStartOfDay();             // 오늘 00:00:00
+        log.debug("start day = {}", start);
+
+        LocalDateTime end = LocalDate.now().plusDays(1).atStartOfDay();   // 내일 00:00:00
+        log.debug("end day = {}", end);
+        List<Reservation> totalPrice = adminReservationRepository.totalPrice(start, end);
+        log.debug("revenueByToday|totalPrice = {}", totalPrice);
+
+        for (Reservation r : totalPrice) {
+            BigDecimal revenue = new BigDecimal(r.getTotalPrice());
+            log.debug("revenue = {}", revenue);
+            totalRevenue = totalRevenue.add(revenue);
+            log.debug("revenueByToday|totalRevenue|for = {}", totalRevenue);
+         }
+
+        log.debug("revenueByToday|totalRevenue = {}", totalRevenue);
+
+        return totalRevenue;
     }
 
 }

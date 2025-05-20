@@ -1,5 +1,9 @@
 package com.wb.between.admin.dashboard.controller;
 
+import com.wb.between.admin.dashboard.dto.DashboardResDto;
+import com.wb.between.admin.dashboard.service.AdminDashboardService;
+import com.wb.between.admin.reservation.service.AdminReservationService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,16 +18,28 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/admin")
+@RequiredArgsConstructor
 public class AdminDashboardController {
 
+    private final AdminDashboardService adminDashboardService;
+
+    /**
+     * 관리자 기본 루트
+     */
     @GetMapping
     public String redirectToAdminDashboard() {
         return "redirect:/admin/dashboard";
     }
 
+    /**
+     * 관리자 대시보드
+     */
     @GetMapping("/dashboard")
     public String getDashboard(Model model) {
         Map<String, Object> dashboardData = getSampleDashboardData();
+
+        DashboardResDto dashboardResData = adminDashboardService.getDashboardData();
+        model.addAttribute("dashboardResData", dashboardResData);
         model.addAttribute("dashboardData", dashboardData);
         return "admin/dashboard/dashboard";
     }
@@ -44,14 +60,6 @@ public class AdminDashboardController {
         kpis.put("pendingInquiries", 3);
         data.put("kpis", kpis);
 
-        // 최근 예약 목록
-        List<Map<String, Object>> recentBookings = Arrays.asList(
-                Map.of("id", 1L, "userName", "홍길동", "spaceName", "회의실 A", "time", "14:00-16:00", "status", "확정"),
-                Map.of("id", 2L, "userName", "김철수", "spaceName", "1인실 B", "time", "09:00-18:00", "status", "확정"),
-                Map.of("id", 3L, "userName", "이영희", "spaceName", "오픈데스크", "time", "10:00-12:00", "status", "대기"),
-                Map.of("id", 4L, "userName", "박보검", "spaceName", "세미나실", "time", "13:00-17:00", "status", "확정")
-        );
-        data.put("recentBookings", recentBookings);
 
         // 빠른 실행 링크
         List<Map<String, String>> quickLinks = Arrays.asList(

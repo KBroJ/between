@@ -27,12 +27,6 @@ public class BannerService {
 
         //배너목록 조회
         List<Banner> bannerList = bannerRepository.findByUseAt("Y", Sort.by(Sort.Direction.ASC, "sortOrder"));
-        log.debug("bannerList: {}", bannerList);
-
-        //결과 없을 경우
-//        if(bannerList.isEmpty()) {
-//            throw new CustomException(ErrorCode.BANNER_NOT_FOUND);
-//        }
 
         return bannerList.stream().map(BannerListResponseDto::from).toList();
     }

@@ -11,7 +11,7 @@
             </li>
             <!-- ROLE_ADMIN 권한이 있는 유저에게만 보이기 -->
             <li sec:authorize="hasRole('ADMIN')">
-                <a th:href="@{/admin/dashboard}" th:text="관리"></a>
+                <a th:href="@{/admin/dashboard}" th:text="관리권한"></a>
             </li>
         </ul>
     </nav>

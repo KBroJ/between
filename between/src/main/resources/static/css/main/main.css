@@ -430,3 +430,122 @@ h3 {
     border: 1px solid #eee; /* Subtle border */
 }
 
+
+/* 모달 팝업 전체를 감싸는 컨테이너 (화면 전체를 덮는 배경) */
+.modal-popup {
+    display: none; /* 기본적으로 숨김 (JavaScript로 제어) */
+    position: fixed; /* 화면에 고정 */
+    z-index: 1000; /* 다른 요소들 위에 표시 */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* 내용이 많을 경우 스크롤 */
+    background-color: rgba(0, 0, 0, 0.6); /* 반투명 검은색 배경 */
+    /* 부드러운 등장을 위한 트랜지션 (선택 사항) */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+/* 팝업이 보여질 때 (JavaScript로 .show 클래스 추가 시) */
+.modal-popup.show {
+    display: flex; /* Flexbox를 사용하여 내용 중앙 정렬 */
+    align-items: center; /* 수직 중앙 정렬 */
+    justify-content: center; /* 수평 중앙 정렬 */
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 실제 팝업 내용이 담기는 박스 */
+.modal-content {
+    background-color: #fefefe;
+    margin: auto; /* 상하좌우 자동 마진 (Flexbox 사용 시 불필요할 수 있음) */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* 기본 너비, 화면 크기에 따라 조정 */
+    max-width: 500px; /* 최대 너비 */
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+    border-radius: 8px;
+    position: relative; /* 닫기 버튼의 절대 위치 기준점 */
+    text-align: left; /* 기본 텍스트 정렬 */
+    /* 부드러운 등장을 위한 트랜지션 (선택 사항) */
+    transform: translateY(-50px);
+    transition: transform 0.3s ease-in-out;
+}
+
+.modal-popup.show .modal-content {
+    transform: translateY(0);
+}
+
+
+/* 닫기 버튼 (X) */
+.close-button {
+    color: #aaa;
+    position: absolute; /* modal-content 기준으로 위치 */
+    top: 10px;
+    right: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    line-height: 1; /* 수직 정렬을 위해 */
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* 팝업 제목 */
+.modal-content h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+    color: #333;
+}
+
+
+.modal-content a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.modal-content a:hover {
+    text-decoration: underline;
+}
+
+/* "오늘 하루 보지 않기" 체크박스 영역 */
+.modal-content div:last-child { /* 마지막 div (체크박스 영역 가정) */
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    text-align: right; /* 오른쪽 정렬 (선택 사항) */
+    font-size: 0.9em;
+}
+
+.modal-content input[type="checkbox"] {
+    margin-right: 5px;
+    vertical-align: middle; /* 라벨과 수직 정렬 */
+}
+
+.modal-content label {
+    color: #666;
+    vertical-align: middle; /* 체크박스와 수직 정렬 */
+}
+
+/* 반응형 디자인 (작은 화면에서 너비 조정) */
+@media screen and (max-width: 600px) {
+    .modal-content {
+        width: 90%;
+        padding: 15px;
+    }
+    .modal-content h2 {
+        font-size: 1.3em;
+    }
+    .close-button {
+        font-size: 24px;
+        top: 8px;
+        right: 10px;
+    }
+}

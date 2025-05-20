@@ -5,16 +5,22 @@ import com.wb.between.admin.popup.dto.AdminPopupRegReqDto;
 import com.wb.between.admin.popup.dto.AdminPopupResDto;
 import com.wb.between.admin.popup.service.AdminPopupService;
 import com.wb.between.common.exception.CustomException;
+import com.wb.between.common.util.pagination.PaginationInfo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Controller
@@ -28,10 +34,25 @@ public class AdminPopupController {
      * 관리자 > 팝업 관리
      */
     @GetMapping
-    public String getAdminPopupPageView(Model model) {
+    public String getAdminPopupPageView(
+            @RequestParam(required = false, defaultValue = "") String searchPopupName,
+            @PageableDefault(size = 10) Pageable pageable,
+            Model model) {
 
-        List<AdminPopupResDto> popupList = adminPopupService.findPopupList();
+        Page<AdminPopupResDto> popupList = adminPopupService.findPopupList(pageable, searchPopupName);
         model.addAttribute("popupList", popupList);
+
+        // --- PaginationInfo를 위한 추가 파라미터 구성 ---
+        Map<String, Object> additionalParams = new HashMap<>();
+        if (searchPopupName != null && !searchPopupName.isEmpty()) {
+            additionalParams.put("searchPopupName", searchPopupName);
+        }
+
+        int pageDisplayWindow = 5; // 예: 한 번에 5개의 페이지 번호를 보여줌
+        PaginationInfo paginationInfo =
+                new PaginationInfo(popupList, "/admin/popup", additionalParams, pageDisplayWindow);
+
+        model.addAttribute("paginationInfo", paginationInfo);
 
         return "admin/popup/popup-manage";
     }

@@ -5,6 +5,7 @@
 <head>
   <title>관리자 화면</title>
   <link rel="stylesheet" th:href="@{/css/admin/permission-manage.css}">
+  <link rel="stylesheet" th:href="@{/css/common/pagination.css}">
 </head>
 <body>
 
@@ -50,7 +51,7 @@
             <button type="button" class="btn-edit">삭제</button>
           </td>
         </tr>
-        <tr th:if="${adminPermissionList.empty}">
+        <tr th:if="${#lists.isEmpty(adminPermissionList)}">
           <td colspan="6" class="no-data">조회된 역할 목록이 없습니다.</td>
         </tr>
         </tbody>
@@ -59,9 +60,8 @@
 
     <!-- 페이지네이션 영역 -->
     <div class="pagination-area">
-      <a href="#" class="page-link current-page">1</a>
-      <!-- <a href="#" class="page-link">2</a> -->
-      <!-- <a href="#" class="page-link">3</a> -->
+      <div th:replace="~{common/pagination :: paginationWidget(pInfo=${paginationInfo})}">
+      </div>
     </div>
   </div>
 </section >

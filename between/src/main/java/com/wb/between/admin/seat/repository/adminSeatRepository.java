@@ -25,4 +25,7 @@ public interface adminSeatRepository extends JpaRepository<adminSeat, Long> {
     // 모든 활성 좌석 조회 시 가격 정보 함께 로딩
     @Query("SELECT DISTINCT s FROM adminSeat s LEFT JOIN FETCH s.prices WHERE s.useAt = true ORDER BY s.floor ASC, s.seatNo ASC")
     List<adminSeat> findByUseAtTrueWithPrices();
+
+    //사용가능한 모든 좌석 수 조회
+    long countByUseAt(boolean useAt);
 }

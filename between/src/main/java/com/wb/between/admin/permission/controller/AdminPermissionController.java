@@ -5,6 +5,7 @@ import com.wb.between.admin.permission.dto.AdminPermissionRegReqDto;
 import com.wb.between.admin.permission.dto.AdminPermissionResDto;
 import com.wb.between.admin.permission.service.AdminPermissionService;
 import com.wb.between.common.exception.CustomException;
+import com.wb.between.common.util.pagination.PaginationInfo;
 import com.wb.between.user.domain.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,11 +13,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/admin/permissions")
@@ -25,6 +30,8 @@ import org.springframework.web.bind.annotation.*;
 public class AdminPermissionController {
 
     private final AdminPermissionService adminPermissionService;
+
+
 
     /**
      * 관리자 > 권한그룹
@@ -35,14 +42,29 @@ public class AdminPermissionController {
     @GetMapping
     public String getPermissionManagementView(@AuthenticationPrincipal User user,
                                               @RequestParam(required = false, defaultValue = "") String searchPermissionName,
-                                              @RequestParam(defaultValue = "0") int page,
+                                              @PageableDefault(size = 10) Pageable pageable,
                                               Model model){
 
-        Pageable pageable = PageRequest.of(page, 10); // 예: 페이지당 10개
-
+        //권한 목록 조회
         Page<AdminPermissionResDto> adminPermissionList = adminPermissionService.findAdminPermissionList(pageable, searchPermissionName);
 
         model.addAttribute("adminPermissionList", adminPermissionList);
+        model.addAttribute("searchPermissionName", searchPermissionName);
+
+        // --- PaginationInfo를 위한 추가 파라미터 구성 ---
+        Map<String, Object> additionalParams = new HashMap<>();
+        if (searchPermissionName != null && !searchPermissionName.isEmpty()) {
+            additionalParams.put("searchPermissionName", searchPermissionName);
+        }
+
+        int pageDisplayWindow = 5; // 예: 한 번에 5개의 페이지 번호를 보여줌
+        PaginationInfo paginationInfo =
+                new PaginationInfo(adminPermissionList, "/admin/permissions", additionalParams, pageDisplayWindow);
+
+        log.debug("paginationInfo|getAdditionalParams => {}", paginationInfo.getAdditionalParams());
+        log.debug("paginationInfo|getAdditionalParams => {}", paginationInfo.getStartPage());
+        log.debug("paginationInfo|getAdditionalParams => {}", paginationInfo.getEndPage());
+        model.addAttribute("paginationInfo", paginationInfo);
 
         return "admin/permission/permission-manage";
     }

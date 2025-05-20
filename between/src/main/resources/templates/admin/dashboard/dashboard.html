@@ -21,23 +21,23 @@
       <div class="kpi-card blue">
         <div class="title">현재 점유율</div>
         <div class="value">
-          <span th:text="${dashboardData.kpis.occupancy.current}">75</span><span class="unit">%</span>
+          <span th:text="${dashboardResData.occupancyRate}">75</span><span class="unit">%</span>
         </div>
-        <div class="description" th:text="|총 ${dashboardData.kpis.occupancy.totalSeats}석 중 ${dashboardData.kpis.occupancy.usedSeats}석 이용 중|">
+        <div class="description" th:text="|총 ${dashboardResData.totalSeats}석 중 ${dashboardResData.occupiedSeats}석 이용 중|">
           총 100석 중 75석 이용 중
         </div>
       </div>
       <div class="kpi-card green">
         <div class="title">오늘 신규 예약</div>
         <div class="value">
-          <span th:text="${dashboardData.kpis.newBookingsToday}">5</span><span class="unit">건</span>
+          <span th:text="${dashboardResData.todayCount}">5</span><span class="unit">건</span>
         </div>
         <div class="description">오늘 접수된 신규 예약 수</div>
       </div>
       <div class="kpi-card orange">
         <div class="title">오늘 예상 수익</div>
         <div class="value">
-          <span th:text="${#numbers.formatInteger(dashboardData.kpis.revenueToday, 3, 'COMMA')}">125,000</span><span class="unit">원</span>
+          <span th:text="${#numbers.formatInteger(dashboardResData.revenue, 1, 'COMMA')}">125,000</span><span class="unit">원</span>
         </div>
         <div class="description">오늘 발생 예상 수익</div>
       </div>
@@ -55,22 +55,22 @@
       <!-- 최근 예약 목록 -->
       <div class="panel recent-bookings">
         <h2 class="panel-title">최근 예약</h2>
-        <ul th:if="${not #lists.isEmpty(dashboardData.recentBookings)}">
-          <!-- 최근 5개만 표시 (예시) -->
-          <li th:each="booking, iterStat : ${dashboardData.recentBookings}" th:if="${iterStat.index < 5}">
-            <a th:href="@{/admin/bookings/{id}(id=${booking.id})}">
-              <span th:text="${booking.userName}">홍길동</span>,
-              <span th:text="${booking.spaceName}">회의실 A</span>
-              (<span th:text="${booking.time}">14:00-16:00</span>)
+        <ul th:if="${not #lists.isEmpty(dashboardResData.reservationList)}">
+          <!-- 최근 5개만 표시 -->
+          <li th:each="reservation : ${dashboardResData.reservationList}">
+            <a th:href="@{/admin/reservationList/{resNo}(resNo=${reservation.resNo})}">
+              <span th:text="${reservation.userName}">홍길동</span>,
+              <span th:text="${reservation.seatNm}">회의실 A</span>
+              (<span th:text="${#temporals.format(reservation.resDt, 'yyyy.MM.dd HH:mm')}">14:00-16:00</span>)
             </a>
             <span class="status"
-                  th:classappend="${booking.status == '확정' ? 'status-confirmed' : 'status-pending'}"
-                  th:text="${booking.status}">확정</span>
+                  th:classappend="${reservation.resStatus == '완료' ? 'status-confirmed' : 'status-pending'}"
+                  th:text="${reservation.resStatus}">확정</span>
           </li>
         </ul>
-        <p th:if="${#lists.isEmpty(dashboardData.recentBookings)}">최근 예약이 없습니다.</p>
-        <a th:if="${not #lists.isEmpty(dashboardData.recentBookings) and #lists.size(dashboardData.recentBookings) > 5}"
-           th:href="@{/admin/bookings}" class="more-link">
+        <p th:if="${#lists.isEmpty(dashboardResData.reservationList)}">최근 예약이 없습니다.</p>
+        <a th:if="${not #lists.isEmpty(dashboardResData.reservationList)}"
+           th:href="@{/admin/reservationList}" class="more-link">
           모든 예약 보기 →
         </a>
       </div>
