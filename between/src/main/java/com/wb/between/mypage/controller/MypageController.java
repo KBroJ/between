@@ -5,18 +5,21 @@ import com.wb.between.mypage.dto.*;
 import com.wb.between.mypage.service.MyReservationService;
 import com.wb.between.mypage.service.MypageService;
 import com.wb.between.user.domain.User;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import java.util.List;
 
 import java.time.LocalDate;
@@ -202,7 +205,10 @@ public class MypageController {
      * 회퉌 탈퇴
      */
     @DeleteMapping("/accountDeletion")
-    public String accountDeletion(@AuthenticationPrincipal User user,Model model) {
+    public String accountDeletion(@AuthenticationPrincipal User user,
+                                  Authentication authentication,
+                                  HttpServletRequest request,
+                                  HttpServletResponse response) {
 
         //로그인 여부 판단
         if (user == null) {
@@ -212,7 +218,7 @@ public class MypageController {
         try {
             //탈퇴 요청
             mypageService.accountDeletion(user.getUserNo());
-
+            new SecurityContextLogoutHandler().logout(request, response, authentication);
             return "redirect:/";
         } catch (Exception e) {
             return "redirect:/mypage/confirm-account-deletion";
