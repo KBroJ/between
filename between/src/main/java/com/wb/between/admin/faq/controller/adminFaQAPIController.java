@@ -8,11 +8,9 @@ import com.wb.between.admin.faq.dto.adminFaqUpdateReqDto;
 import com.wb.between.admin.faq.service.adminFaQService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -34,12 +32,12 @@ public class adminFaQAPIController {
         List<adminFaQ> faqList = adminFaQService.findAll();
         try{
 
-        List<adminFaQListViewResponse> faqLists = faqList.stream()
-                .map(adminFaQListViewResponse::new)
-                .collect(Collectors.toList());
+            List<adminFaQListViewResponse> faqLists = faqList.stream()
+                    .map(adminFaQListViewResponse::new)
+                    .collect(Collectors.toList());
 
-        return ResponseEntity.ok()
-                .body(faqLists);
+            return ResponseEntity.ok()
+                    .body(faqLists);
 
         } catch (Exception e) {
             System.err.println("[Controller] FAQ 목록 조회 중 심각한 오류 발생: " + e.getMessage());
@@ -59,7 +57,7 @@ public class adminFaQAPIController {
         }
 
         try{
-           adminFaQ createFaq = adminFaQService.createFaq(requestDto);
+            adminFaQ createFaq = adminFaQService.createFaq(requestDto);
 
             URI location = ServletUriComponentsBuilder
                     .fromCurrentRequest().path("/{id}")
@@ -82,7 +80,7 @@ public class adminFaQAPIController {
             @Valid @RequestBody adminFaqUpdateReqDto requestDto,
             BindingResult bindingResult
     ){
-       if (bindingResult.hasErrors()) {
+        if (bindingResult.hasErrors()) {
             Map<String, String> errors = bindingResult.getFieldErrors().stream()
                     .collect(Collectors.toMap( fe -> fe.getField(), fe -> fe.getDefaultMessage()));
             return ResponseEntity.badRequest().body(Map.of("success", false, "errors", errors)); // 400 Bad Request
@@ -108,7 +106,7 @@ public class adminFaQAPIController {
             return ResponseEntity.internalServerError().body(Map.of("success", false, "message", "FAQ 수정 중 오류가 발생했습니다."));
         }
     }
-    
+
     // FAQ 상세 조회
     @GetMapping("/api/admin/faqs/{qNo}")
     public ResponseEntity<?> getFaqById(@PathVariable Long qNo){
@@ -138,8 +136,8 @@ public class adminFaQAPIController {
             adminFaQService.deleteFaq(qNo);
 
             return ResponseEntity.ok(Map.of(
-            "success", true,
-            "message", "FAQ가 성공적으로 삭제되었습니다."));
+                    "success", true,
+                    "message", "FAQ가 성공적으로 삭제되었습니다."));
         } catch (EntityNotFoundException e) {
             System.err.println("FAQ 삭제 실패 (Not Found): " + e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)

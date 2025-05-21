@@ -139,7 +139,7 @@ public class PaymentController {
             if (e.getMessage() != null && (e.getMessage().contains("다른 사용자") || e.getMessage().contains("이미 예약"))) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("success", false, "message", errorMessage));
             }
-            return ResponseEntity.internalServerError().body(Map.of("success", false, "message", "결제 준비 중 내부 오류 발생: " + errorMessage));
+            return ResponseEntity.internalServerError().body(Map.of("success", false, "message",  errorMessage));
         } catch (Exception e) {
             System.err.println("카카오페이 준비 실패: " + e.getMessage());
             e.printStackTrace();

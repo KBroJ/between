@@ -28,6 +28,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ReservationService {
@@ -55,8 +56,8 @@ public class ReservationService {
 
     private static final long LOCK_TIMEOUT_SECONDS = 10; // 락 유지 시간 (초)
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
-    private static final LocalTime OPEN_TIME = LocalTime.of(9, 0);  // 운영 시간 (설정 필요)
-    private static final LocalTime CLOSE_TIME = LocalTime.of(22, 0); // 운영 시간 (설정 필요)
+    private static final LocalTime OPEN_TIME = LocalTime.MIDNIGHT; // 운영 시간
+    private static final LocalTime CLOSE_TIME = LocalTime.MAX; // 운영 시간
 
     /**
      * Redis 락을 사용하여 예약을 생성합니다.
@@ -92,6 +93,23 @@ public class ReservationService {
                 if (requestDto.getSelectedTimes() == null || requestDto.getSelectedTimes().isEmpty()) {
                     throw new IllegalArgumentException("시간제는 예약 시간을 선택해야 합니다.");
                 }
+
+                List<String> selectedTimes = requestDto.getSelectedTimes();
+
+                List<LocalTime> times = selectedTimes.stream()
+                        .map(timeStr -> LocalTime.parse(timeStr, TIME_FORMATTER))
+                        .sorted()
+                        .collect(Collectors.toList());
+
+                if (times.size() > 1) {
+                    for (int i = 0; i < times.size() - 1; i++) {
+                        if (!times.get(i).plusHours(1).equals(times.get(i + 1))) {
+                            // 에러 발생시켜서 프론트엔드로 메시지 전달
+                            throw new IllegalArgumentException("시간제 예약은 연속된 시간으로만 한 번에 요청할 수 있습니다. 각각 다른 시간대 예약은 개별적으로 예약해주세요.");
+                        }
+                    }
+                }
+
                 // 선택된 시간 중 가장 빠른 시간과 가장 마지막 시간 + 1시간으로 계산 (연속 사용 가정)
                 requestDto.getSelectedTimes().sort(Comparator.naturalOrder());
                 LocalTime startTime = LocalTime.parse(requestDto.getSelectedTimes().get(0), TIME_FORMATTER);

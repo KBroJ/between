@@ -1014,6 +1014,17 @@ async function loadReservationForModification(resNo) {
     document.addEventListener('DOMContentLoaded', async function() {
         console.log("DOM 로드 완료. 초기화 시작.");
 
+        const hourlyPlanRadio = document.getElementById('hourlyPlan');
+
+          if (typeof isModificationMode !== 'undefined' && !isModificationMode) {
+                    if (hourlyPlanRadio) {
+                        hourlyPlanRadio.checked = true; // 시간제 라디오 버튼을 체크 상태로 만듦
+                        selectedPlanType = 'HOURLY'; // 전역 변수도 업데이트 (사용하고 있다면)
+                        console.log("기본 요금제로 '시간제'가 선택되었습니다.");
+                    }
+                }
+
+
         // 1. 기본 이벤트 리스너 등록
        calendarIcon?.addEventListener('click', openCalendar);
        planRadios.forEach(radio => { radio.addEventListener('change', handlePlanChange); });
@@ -1022,6 +1033,24 @@ async function loadReservationForModification(resNo) {
        // 층 탭 리스너는 동적 생성 후 등록
 
        try {
+
+            if (typeof isModificationMode !== 'undefined') { // isModificationMode가 정의되었다면
+                if (!isModificationMode && hourlyPlanRadio && hourlyPlanRadio.checked) {
+                     // 신규 예약이고 시간제가 방금 체크되었다면 handlePlanChange 호출
+                     handlePlanChange();
+                } else if (isModificationMode && originalReservationData) {
+                     // 변경 모드면, 기존 예약의 planType으로 selectedPlanType이 설정된 후 handlePlanChange가 호출되어야 함
+                     // (이 부분은 이전 DOMContentLoaded 로직에 이미 포함되어 있을 가능성 높음)
+                     selectedPlanType = originalReservationData.planType; // 예시
+                     document.querySelector(`input[name="planType"][value="${selectedPlanType}"]`).checked = true;
+                     handlePlanChange();
+                } else {
+                     // isModificationMode는 false인데, 시간제가 아닌 다른 것이 HTML checked 되어있을 때 등
+                     handlePlanChange();
+                }
+            }
+
+
            // 2. 쿠폰 로드 (병렬 가능)
            loadAvailableCoupons();
 

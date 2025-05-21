@@ -233,12 +233,12 @@ async function fetchData(url, options = {}) {
             const csrfHeaderElement = document.querySelector("meta[name='_csrf_header']");
             const headers = { 'Content-Type': 'application/json' }; // 기본 헤더
 
-           if (csrfToken && csrfHeader) {
+     /*      if (csrfToken && csrfHeader) {
                 headers[csrfHeader] = csrfToken; // headers 객체에 CSRF 토큰 추가
                 console.log(`CSRF 헤더 추가됨 (PUT 요청): ${csrfHeader} = ${csrfToken}`); // 로그 확인!
             } else {
                  console.warn("CSRF 메타 태그를 찾을 수 없거나 비어있습니다. (PUT 요청)");
-            }
+            }*/
 
 
 

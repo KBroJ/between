@@ -40,8 +40,8 @@ public class ReservationController {
     @Autowired
     private SeatRepository seatRepository;
 
-    private static final LocalTime OPEN_TIME = LocalTime.of(9, 0);  // 운영 시작 시간
-    private static final LocalTime CLOSE_TIME = LocalTime.of(22, 0); // 운영 종료 시간
+    private static final LocalTime OPEN_TIME = LocalTime.MIDNIGHT; // 운영 시간
+    private static final LocalTime CLOSE_TIME = LocalTime.MAX; // 운영 시간
 
     /**
      * 좌석 예약 페이지를 보여주는 메소드.

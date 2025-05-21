@@ -24,19 +24,19 @@
     좌석: <span class="fw-bold" th:text="${originalReservation?.seatName}">Seat Name</span>,
     <th:block th:switch="${originalReservation?.planType}">
             <span th:case="'HOURLY'">
-                , 시간:
+                 시간:
                 <span class="fw-bold" th:if="${originalReservation?.selectedTimes != null && !#lists.isEmpty(originalReservation.selectedTimes)}"
                       th:text="${#strings.listJoin(originalReservation.selectedTimes, ', ')}">HH:mm, ...</span>
                 <span class="fw-bold" th:if="${originalReservation?.selectedTimes == null || #lists.isEmpty(originalReservation.selectedTimes)}">정보 없음</span>
             </span>
       <span th:case="'DAILY'">
-                , 구분: <span class="fw-bold">일일권</span>
+                 구분: <span class="fw-bold">일일권</span>
             </span>
       <span th:case="'MONTHLY'">
-                 , 구분: <span class="fw-bold">월정액권</span>
+                  구분: <span class="fw-bold">월정액권</span>
                  </span>
       <span th:case="*">
-                 , 구분: <span class="fw-bold" th:text="${originalReservation?.planType}"></span>
+                  구분: <span class="fw-bold" th:text="${originalReservation?.planType}"></span>
             </span>
     </th:block>
     )
@@ -81,7 +81,7 @@
         <h5 class="fw-bold"><i class="fas fa-tags me-1"></i>요금제 선택</h5>
         <hr class="my-3">
         <div class="form-check">
-          <input class="form-check-input" type="radio" name="planType" id="hourlyPlan" value="HOURLY" checked="checked"
+          <input class="form-check-input" type="radio" name="planType" id="hourlyPlan" value="HOURLY" checked
                  th:checked="${originalReservation?.planType == 'HOURLY'}"
                  th:disabled="${isModificationMode}" /> <label class="form-check-label" for="hourlyPlan">시간제  <span class="text-muted small">(1시간당 <span id="hourlyPlanPrice">2,000</span>원)</span></label>
         </div>
