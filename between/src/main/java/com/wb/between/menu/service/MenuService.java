@@ -32,18 +32,6 @@ public class MenuService {
 
     private final MenuCacheService menuCacheService;
 
-    /**
-     * 메뉴 목록 전체 조회
-     * @return
-     */
-    public List<MenuListResponseDto> findByUseAt() {
-        List<Menu> menuList = menuRepository.findByUseAt("Y", Sort.by(Sort.Direction.ASC, "menuNo"));
-
-        return menuList.stream()
-                .map(MenuListResponseDto::from).toList();
-    }
-
-
     /******************************
      * 캐시 메뉴 조회 처리
      ******************************/
@@ -76,6 +64,12 @@ public class MenuService {
         //메뉴 역할 필터 후 리턴
         return allHeaderMenu.stream()
                 .filter(menu -> {
+
+                    //1. 전체공개일 경우 모든 사용자 표출
+                    if(menu.isPublic()) {
+                        return true;
+                    }
+
                     Set<String> menuAllowedRoles = getMenuAllowedRoleNames(menu);
                     // menuAllowedRoles 가 비어있으면 공개
                     if (menuAllowedRoles.isEmpty()) {
@@ -102,6 +96,30 @@ public class MenuService {
                 .collect(Collectors.toSet());
     }
 
+    /**
+     * 관리자 사이드바
+     * @param authentication
+     * @return
+     */
+    public List<MenuListResponseDto> getAdminSideMenu(Authentication authentication) {
+        if(isAdmin(authentication)) {
+            log.debug("===> {}", menuCacheService.getAdminSideMenu());
+            return menuCacheService.getAdminSideMenu().stream().map(MenuListResponseDto::from).toList();
+        }
+        return Collections.emptyList();
+    }
 
-
+    /**
+     * 사용자가 관리자 역할을 가지고 있는지 확인하는 헬퍼 메서드
+     * @param authentication 현재 인증 정보
+     * @return 관리자이면 true, 아니면 false
+     */
+    private boolean isAdmin(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return false;
+        }
+        return authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(role -> "ROLE_ADMIN".equals(role)); 
+    }
 }

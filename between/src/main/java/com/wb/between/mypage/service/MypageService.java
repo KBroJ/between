@@ -2,10 +2,7 @@ package com.wb.between.mypage.service;
 
 import com.wb.between.common.exception.CustomException;
 import com.wb.between.common.exception.ErrorCode;
-import com.wb.between.mypage.dto.MypageCouponResDto;
-import com.wb.between.mypage.dto.MypageUserInfoResDto;
-import com.wb.between.mypage.dto.UserInfoEditReqDto;
-import com.wb.between.mypage.dto.UserPasswordEditReqDto;
+import com.wb.between.mypage.dto.*;
 import com.wb.between.user.domain.User;
 import com.wb.between.user.repository.UserRepository;
 import com.wb.between.usercoupon.domain.UserCoupon;
@@ -35,6 +32,8 @@ public class MypageService {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final MyReservationService myReservationService;
+
     /**
      * 유저 조회
      */
@@ -43,6 +42,13 @@ public class MypageService {
         User user = userRepository.findById(userNo).orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
         log.debug("findUserbyId|user = {}", user);
         return MypageUserInfoResDto.from(user);
+    }
+
+    /**
+     * 최근 예약 조회
+     */
+    public List<MyReservationDto> findResentReservation(Long userNo){
+        return myReservationService.findResentReservation(userNo);
     }
 
     /**

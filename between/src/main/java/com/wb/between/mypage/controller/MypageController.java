@@ -46,8 +46,10 @@ public class MypageController {
         log.debug("user = {}", user);
         MypageUserInfoResDto mypageUserInfoResDto = mypageService.findUserbyId(user.getUserNo());
         log.debug("mypageResponseDto.getName = {}", mypageUserInfoResDto.getName());
+        List<MyReservationDto> resentReservations = mypageService.findResentReservation(user.getUserNo());
 
         model.addAttribute("userInfo", mypageUserInfoResDto);
+        model.addAttribute("resentReservations", resentReservations);
 
         return "mypage/dashboard";
     }

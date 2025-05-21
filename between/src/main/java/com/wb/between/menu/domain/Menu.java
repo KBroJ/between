@@ -43,6 +43,9 @@ public class Menu {
     @Column(name = "menuType", length = 30)
     private String menuType;
 
+    @Column(name = "isPublic", nullable = false)
+    private boolean isPublic;
+
     // --- 새로운 @OneToMany 관계 추가 ---
     @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     // mappedBy: MenuRole 엔티티에 있는 'menu' 필드가 관계의 주인임을 명시

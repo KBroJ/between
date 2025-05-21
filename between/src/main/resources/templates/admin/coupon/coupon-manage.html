@@ -5,6 +5,7 @@
 <head>
   <title>관리자 화면</title>
   <link rel="stylesheet" th:href="@{/css/admin/coupon-manage.css}">
+  <link rel="stylesheet" th:href="@{/css/common/pagination.css}">
 </head>
 <body>
 
@@ -57,7 +58,7 @@
               <a th:href="@{/admin/coupons/edit/{cpNo}(cpNo=${coupon.cpNo})}" class="btn btn-edit">수정</a>
               <button type="button" class="btn-edit" data-coupon-id="${coupon.cpNo}">삭제</button></td>
           </tr>
-          <tr th:if="${adminCouponList.empty}">
+          <tr th:if="${#lists.isEmpty(adminCouponList)}">
             <td colspan="8" class="no-data">조회된 쿠폰 내역이 없습니다.</td>
           </tr>
         </tbody>
@@ -66,10 +67,10 @@
 
     <!-- 페이지네이션 영역 -->
     <div class="pagination-area">
-      <a href="#" class="page-link current-page">1</a>
-      <!-- <a href="#" class="page-link">2</a> -->
-      <!-- <a href="#" class="page-link">3</a> -->
+      <div th:replace="~{common/pagination :: paginationWidget(pInfo=${paginationInfo})}">
+      </div>
     </div>
+  </div>
 
   </div>
 </section >

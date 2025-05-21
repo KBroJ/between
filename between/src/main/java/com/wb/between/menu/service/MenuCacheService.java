@@ -21,12 +21,20 @@ public class MenuCacheService {
      */
     @Cacheable(cacheNames = "headerMenus", key = "'global'")
     public List<Menu> getAllHeaderMenu() {
-        return menuRepository.findByUseAt("Y", Sort.by(Sort.Direction.ASC, "sortOrder"));
+        return menuRepository.findByUseAtAndMenuType("Y", "USER", Sort.by(Sort.Direction.ASC, "sortOrder"));
     }
 
     /** 메뉴가 변경됐을 때(관리자 수정 등) 캐시를 비우고 새로 로딩 */
     @CacheEvict(cacheNames = "headerMenus", key = "'global'")
     public void refreshHeaderMenus() {
         // 빈 메서드. @CacheEvict만으로 캐시 초기화.
+    }
+
+    /**
+     * 관리자 사이다브 메뉴 조회
+     */
+    @Cacheable(cacheNames = "adminSideMenus", key = "'adminSideMenus'")
+    public List<Menu> getAdminSideMenu() {
+        return menuRepository.findByUseAtAndMenuType("Y", "ADMIN", Sort.by(Sort.Direction.ASC, "sortOrder"));
     }
 }

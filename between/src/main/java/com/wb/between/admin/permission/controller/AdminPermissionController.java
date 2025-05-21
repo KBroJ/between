@@ -61,9 +61,6 @@ public class AdminPermissionController {
         PaginationInfo paginationInfo =
                 new PaginationInfo(adminPermissionList, "/admin/permissions", additionalParams, pageDisplayWindow);
 
-        log.debug("paginationInfo|getAdditionalParams => {}", paginationInfo.getAdditionalParams());
-        log.debug("paginationInfo|getAdditionalParams => {}", paginationInfo.getStartPage());
-        log.debug("paginationInfo|getAdditionalParams => {}", paginationInfo.getEndPage());
         model.addAttribute("paginationInfo", paginationInfo);
 
         return "admin/permission/permission-manage";

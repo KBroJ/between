@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -212,4 +213,21 @@ public class MyReservationService {
         // TODO: 실제 비즈니스 규칙에 맞게 수정 (취소 정책 반영 - 예: 1시간 전까지만 가능)
     }
 
+    public List<MyReservationDto> findResentReservation(Long userNo){
+        List<Reservation> recentReservations = myReservationRepository.findTop5ByOrderByResDtDesc(userNo);
+
+        List<MyReservationDto> dtoList = recentReservations.stream()
+                .map(reservation -> {
+                    MyReservationDto dto = new MyReservationDto();
+                    // Reservation 엔티티의 getter를 사용해 MyReservationDto의 setter로 값 설정
+                    dto.setResNo(reservation.getResNo());
+                    dto.setResDt(reservation.getResDt());
+                    dto.setSeatNm(reservation.getSeat().getSeatNm()); // Reservation의 예약 날짜 (타입 변환 필요시 여기서 처리)
+//                    dto.setResStatus(reservation.getResStatus());
+                    return dto;
+                })
+                .toList();
+
+        return dtoList;
+    }
 }

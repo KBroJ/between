@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface MyReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -50,6 +51,12 @@ public interface MyReservationRepository extends JpaRepository<Reservation, Long
             @Param("tabStatus") String tabStatus,
             @Param("now") LocalDateTime now,
             Pageable pageable); // 페이징 및 정렬 정보
+
+    //등록일 기준 최근 5개 조회
+    @Query("SELECT r " +
+            "FROM Reservation r JOIN Seat s ON r.seatNo = s.seatNo " +      // Seat 테이블 조인 (좌석 이름 가져오기)
+            "WHERE r.userNo = :userNo")
+    List<Reservation> findTop5ByOrderByResDtDesc( @Param("userNo") Long userNo);
 
     /**
      * 마이페이지 예약 내역 조회 (JPQL @Query 사용)

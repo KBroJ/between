@@ -12,6 +12,6 @@ public class CacheConfig {
     // 별도 라이브러리 없이 스프링 기본 메모리 캐시 사용
     @Bean
     public CacheManager cacheManager() {
-        return new ConcurrentMapCacheManager("headerMenus");
+        return new ConcurrentMapCacheManager("headerMenus", "adminSideMenus");
     }
 }
