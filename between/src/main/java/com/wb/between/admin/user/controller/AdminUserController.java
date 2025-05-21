@@ -3,7 +3,9 @@ package com.wb.between.admin.user.controller;
 import com.wb.between.admin.user.dto.UserDetailDto;
 import com.wb.between.admin.user.dto.UserFilterParamsDto;
 import com.wb.between.admin.user.dto.UserListDto;
+import com.wb.between.admin.user.dto.UserUpdateReqDto;
 import com.wb.between.admin.user.service.AdminUserService;
+import com.wb.between.user.domain.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,12 +21,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
 @Controller
 @RequiredArgsConstructor // final 필드(AdminUserService)에 대한 생성자 자동 생성 및 주입
-@RequestMapping("/admin")
+@RequestMapping("/admin/user")
 public class AdminUserController {
 
     private final AdminUserService adminUserService; // 주입받은 서비스 객체
@@ -64,7 +67,7 @@ public class AdminUserController {
      * @param model View로 데이터를 전달할 모델 객체
      * @return 렌더링할 뷰의 이름
      */
-    @GetMapping("/users/{userNo}") // 요청 경로 변경: /admin/users/{userNo} 형태
+    @GetMapping("/{userNo}") // 요청 경로 변경: /admin/users/{userNo} 형태
     public String userDetailPage(@PathVariable Long userNo, Model model) { // 메소드명 변경 및 파라미터 추가
         log.info("AdminUserController|userDetailPage|관리자 - 사용자 상세 정보 조회 요청. userNo={}", userNo);
         try {
@@ -100,7 +103,7 @@ public class AdminUserController {
      * @param userDetails 현재 로그인한 관리자 정보
      * @return 처리 결과 ResponseEntity
      */
-    @DeleteMapping("/user/{userNo}/withdraw") // RESTful하게 DELETE 사용, 또는 @PostMapping("/{userNo}/withdraw")
+    @DeleteMapping("/{userNo}/withdraw") // RESTful하게 DELETE 사용, 또는 @PostMapping("/{userNo}/withdraw")
     public ResponseEntity<?> withdrawUserByAdmin(
             @PathVariable Long userNo,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -136,10 +139,66 @@ public class AdminUserController {
         }
     }
 
+    /**
+     * 회원 정보 수정 API
+     * 관리자에 의한 회원 정보(등급, 상태) 수정 및 사유 기록
+     * JavaScript에서 POST 요청으로 JSON 데이터를 받아 처리합니다.
+     * @param userNo 수정할 사용자의 번호
+     * @param updateDto 변경할 등급, 상태 및 수정 사유가 담긴 DTO (JSON 요청 본문)
+     * @param userDetails 현재 로그인한 관리자 정보
+     * @return 처리 결과 ResponseEntity
+     */
+    @PostMapping("/{userNo}/update")
+    public ResponseEntity<?> updateUserByAdmin(
+            @PathVariable Long userNo,
+            @RequestBody UserUpdateReqDto updateDto, // JSON 본문을 DTO로 받음
+            @AuthenticationPrincipal UserDetails userDetails) {
 
+        String adminUsername = userDetails.getUsername();
+        log.info("관리자 {}에 의한 회원 {} 정보 수정 요청 시작. 요청 데이터: {}", adminUsername, userNo, updateDto);
 
+    /*
+        // 관리자 권한 확인
+        if (!isAdmin(userDetails)) {
+            log.warn("권한 없는 사용자 {}의 회원 {} 정보 수정 시도", adminUsername, userNo);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("success", false, "message", "회원 정보 수정 권한이 없습니다."));
+        }
+    */
 
+        try {
 
+            // 회원 정보 수정 서비스 호출
+            User updatedUser = adminUserService.updateUserAccount(userNo, updateDto, adminUsername);
+
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("success", true);
+            responseBody.put("message", "회원 정보가 성공적으로 수정되었습니다.");
+
+            // 업데이트된 사용자 정보 브라우저에서 확인
+             responseBody.put("userNo", updatedUser.getUserNo());
+             responseBody.put("updatedGrade", updatedUser.getAuthCd());
+             responseBody.put("updatedStatus", "일반".equals(updatedUser.getUserStts()) ? "정상" : updatedUser.getUserStts());
+             responseBody.put("reasonLogged", updateDto.getUpdateRs());
+
+            return ResponseEntity.ok(responseBody);
+
+        } catch (EntityNotFoundException e) {
+            log.warn("회원 {} 정보 수정 실패: 사용자를 찾을 수 없음. 관리자: {}", userNo, adminUsername, e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("success", false, "message", e.getMessage()));
+        } catch (IllegalArgumentException e) { // 유효하지 않은 등급/상태 값 등
+            log.warn("회원 {} 정보 수정 실패: 잘못된 요청 데이터. 관리자: {}, 오류: {}", userNo, adminUsername, e.getMessage(), e);
+            return ResponseEntity.badRequest()
+                    .body(Map.of("success", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            log.error("회원 {} 정보 수정 중 예기치 않은 오류 발생 (관리자: {})", userNo, adminUsername, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "message", "회원 정보 수정 중 오류가 발생했습니다."));
+        }
+    }
+
+// =====================================================================================================================
 
     // 관리자 권한 확인을 위한 헬퍼 메소드 (실제 구현은 Spring Security 설정에 따름)
     private boolean isAdmin(UserDetails userDetails) {

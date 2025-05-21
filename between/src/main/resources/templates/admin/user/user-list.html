@@ -15,7 +15,7 @@
             <h1 class="main-title">회원 관리 목록</h1>
 
             <!-- 회원 정보 검색 폼 -->
-            <form th:action="@{/admin/userList}" method="get" class="filter-area">
+            <form th:action="@{/admin/user/userList}" method="get" class="filter-area">
                 <div class="filter-group date-filter">
                     <label for="searchStartDate">가입일</label>
                     <div class="date-inputs">
@@ -96,7 +96,7 @@
             <nav class="pagination-area" aria-label="Page navigation" th:if="${userPage != null and userPage.totalPages > 0}">
                 <ul class="pagination-list">
                     <li class="pagination-item" th:classappend="${userPage.first} ? 'disabled'">
-                        <a class="pagination-link" th:href="@{/admin/userList(page=0,
+                        <a class="pagination-link" th:href="@{/admin/user/userList(page=0,
                                                 startDate=${filterParams.startDate},
                                                 endDate=${filterParams.endDate},
                                                 searchType=${filterParams.searchType},
@@ -105,7 +105,7 @@
                                                 grade=${filterParams.grade})}" aria-label="First">&laquo;</a>
                     </li>
                     <li class="pagination-item" th:classappend="${userPage.first} ? 'disabled'">
-                        <a class="pagination-link" th:href="@{/admin/userList(page=${userPage.number - 1},
+                        <a class="pagination-link" th:href="@{/admin/user/userList(page=${userPage.number - 1},
                                                 startDate=${filterParams.startDate},
                                                 endDate=${filterParams.endDate},
                                                 searchType=${filterParams.searchType},
@@ -115,7 +115,7 @@
                     </li>
                     <li class="pagination-item" th:each="pageNum : ${#numbers.sequence( T(java.lang.Math).max(0, userPage.number - 2), T(java.lang.Math).min(userPage.totalPages - 1, userPage.number + 2) )}"
                         th:classappend="${pageNum == userPage.number} ? 'active'">
-                        <a class="pagination-link" th:href="@{/admin/userList(page=${pageNum},
+                        <a class="pagination-link" th:href="@{/admin/user/userList(page=${pageNum},
                                                 startDate=${filterParams.startDate},
                                                 endDate=${filterParams.endDate},
                                                 searchType=${filterParams.searchType},
@@ -124,7 +124,7 @@
                                                 grade=${filterParams.grade})}" th:text="${pageNum + 1}"></a>
                     </li>
                     <li class="pagination-item" th:classappend="${userPage.last} ? 'disabled'">
-                        <a class="pagination-link" th:href="@{/admin/userList(page=${userPage.number + 1},
+                        <a class="pagination-link" th:href="@{/admin/user/userList(page=${userPage.number + 1},
                                                 startDate=${filterParams.startDate},
                                                 endDate=${filterParams.endDate},
                                                 searchType=${filterParams.searchType},
@@ -133,7 +133,7 @@
                                                 grade=${filterParams.grade})}" aria-label="Next">&rsaquo;</a>
                     </li>
                     <li class="pagination-item" th:classappend="${userPage.last} ? 'disabled'">
-                        <a class="pagination-link" th:href="@{/admin/userList(page=${userPage.totalPages - 1},
+                        <a class="pagination-link" th:href="@{/admin/user/userList(page=${userPage.totalPages - 1},
                                                 startDate=${filterParams.startDate},
                                                 endDate=${filterParams.endDate},
                                                 searchType=${filterParams.searchType},

@@ -1,9 +1,6 @@
 package com.wb.between.admin.user.service;
 
-import com.wb.between.admin.user.dto.UserDetailReservationListDto;
-import com.wb.between.admin.user.dto.UserDetailDto;
-import com.wb.between.admin.user.dto.UserFilterParamsDto;
-import com.wb.between.admin.user.dto.UserListDto;
+import com.wb.between.admin.user.dto.*;
 import com.wb.between.admin.user.repository.AdminUserRepository;
 import com.wb.between.reservation.reserve.domain.Reservation;
 import com.wb.between.reservation.reserve.repository.ReservationRepository;
@@ -302,6 +299,64 @@ public class AdminUserService {
         }
     }
 
+
+    @Transactional
+    public User updateUserAccount(Long userNo, UserUpdateReqDto updateDto, String adminUsername) {
+        log.info("관리자 {}에 의한 사용자 {} 계정 정보 수정 서비스 시작. 요청 데이터: {}, 사유: {}",
+                adminUsername, userNo, updateDto, updateDto.getUpdateRs()); // DTO에 reason 필드가 있다고 가정
+
+        User userToUpdate = userRepository.findByUserNo(userNo)
+                .orElseThrow(() -> new EntityNotFoundException("수정할 사용자를 찾을 수 없습니다. 사용자 번호: " + userNo));
+
+        boolean isUpdated = false;
+
+        // 1. 회원 등급(authCd) 변경 처리
+        if (StringUtils.hasText(updateDto.getAuthCd()) && !updateDto.getAuthCd().equals(userToUpdate.getAuthCd())) {
+            log.info("사용자 {} 등급 변경: 기존 '{}' -> 새 '{}' (수정 사유: {}, 관리자: {})",
+                    userNo, userToUpdate.getAuthCd(), updateDto.getAuthCd(), updateDto.getUpdateRs(), adminUsername);
+            userToUpdate.setAuthCd(updateDto.getAuthCd());
+            isUpdated = true;
+        }
+
+        // 2. 회원 상태(userStts) 변경 처리
+        if (StringUtils.hasText(updateDto.getUserStts())) {
+            String newDbStatusValue;
+            if ("정상".equals(updateDto.getUserStts())) {
+                newDbStatusValue = "일반";
+            } else if ("휴면".equals(updateDto.getUserStts())) {
+                newDbStatusValue = "휴면";
+            }
+        /*
+            else if ("탈퇴".equals(updateDto.getUserStts())) { // 만약 관리자가 상태를 '탈퇴'로 직접 변경할 수 있다면
+                newDbStatusValue = "탈퇴";
+            }
+        */
+            else {
+                throw new IllegalArgumentException("유효하지 않은 회원 상태 값입니다: " + updateDto.getUserStts());
+            }
+
+            if (!newDbStatusValue.equals(userToUpdate.getUserStts())) {
+                log.info("사용자 {} 상태 변경: 기존 '{}' -> 새 '{}' (수정 사유: {}, 관리자: {})",
+                        userNo, userToUpdate.getUserStts(), newDbStatusValue, updateDto.getUpdateRs(), adminUsername);
+                userToUpdate.setUserStts(newDbStatusValue);
+                isUpdated = true;
+            }
+        }
+
+        if (isUpdated) {
+
+            if (StringUtils.hasText(updateDto.getUpdateRs())) {
+                userToUpdate.setUpdateRs(updateDto.getUpdateRs());
+            }
+
+            User savedUser = userRepository.save(userToUpdate);
+            log.info("관리자 {}에 의해 사용자 {}의 정보가 성공적으로 수정되었습니다. 저장된 사유: {}", adminUsername, userNo, savedUser.getUpdateRs());
+            return savedUser;
+        } else {
+            log.info("사용자 {} 정보에 변경 사항이 없어 업데이트하지 않았습니다. (관리자: {}, 전달된 사유: {})", userNo, adminUsername, updateDto.getUpdateRs());
+            return userToUpdate;
+        }
+    }
 
 
 // =====================================================================================================================

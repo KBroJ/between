@@ -64,6 +64,9 @@ public class User implements UserDetails, OAuth2User {
         this.updateDt = LocalDateTime.now();
     }
 
+    @Column(name = "updateRs", length = 500)
+    private String updateRs;
+
     @Column(name = "loginM", length = 10, nullable = false)
     private String loginM;
 

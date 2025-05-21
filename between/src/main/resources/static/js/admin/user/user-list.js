@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (userId) {
                     // 상세 페이지 URL 생성 및 이동
-                    window.location.href = '/admin/users/' + userId;
+                    window.location.href = '/admin/user/' + userId;
                 } else {
                     console.error('클릭된 행에서 사용자 ID(data-user-id)를 찾을 수 없습니다.');
                 }

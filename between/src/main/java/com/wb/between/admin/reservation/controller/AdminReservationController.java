@@ -98,7 +98,7 @@ public class AdminReservationController {
     /**
      * 관리자에 의한 예약 정보 수정 (HTML Form 제출 방식)
      */
-    @PostMapping("/{resNo}/update")
+    @PostMapping("/reserve/{resNo}/update")
     public ResponseEntity<?> updateReservationByAdmin(
             @PathVariable Long resNo,
             @RequestParam("seatNo") Long seatNo,
@@ -150,7 +150,7 @@ public class AdminReservationController {
     /**
      * 관리자에 의한 예약 취소 (JSON 요청 방식)
      */
-    @PostMapping("/{resNo}/cancel")
+    @PostMapping("/reserve/{resNo}/cancel")
     public ResponseEntity<?> cancelReservationByAdmin(
             @PathVariable Long resNo,
             @RequestBody ReservationReqDto cancelDto, // JSON 요청 본문

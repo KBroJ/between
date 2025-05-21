@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log("CSRF Token from meta:", csrfToken);
 
     // API 기본 경로 설정
-    const API_ADMIN_BASE_URL = "/admin";
+    const API_ADMIN_BASE_URL = "/admin/reserve";
 
     // --- Flatpickr 초기화 ---
     const resStartInput = document.getElementById('resStart');

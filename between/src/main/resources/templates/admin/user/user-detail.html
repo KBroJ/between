@@ -113,7 +113,11 @@
                                 <tr th:if="${#lists.isEmpty(user.recentReservations)}">
                                     <td colspan="5" class="text-center">최근 예약 내역이 없습니다.</td>
                                 </tr>
-                                <tr th:each="reservation : ${user.recentReservations}">
+                                <tr th:each="reservation : ${user.recentReservations}"
+                                    th:attr="data-resno=${reservation.resNo}"
+                                    class="clickable-row"
+                                    title="클릭하여 예약 상세 보기"
+                                >
                                     <td th:text="${reservation.resNo}">RES-12345</td>
                                     <td th:text="${#temporals.format(reservation.resDt, 'yyyy-MM-dd HH:mm')}">2024-04-20 10:00</td>
                                     <td th:text="${reservation.seatNm}">회의실 A</td>
@@ -135,6 +139,39 @@
                     <button type="button" class="btn btn-primary" id="updateUserBtn">수정</button>
                 </div>
             </div>
+
+            <!-- 모달 오버레이 -->
+            <div class="modal-overlay" id="modalOverlay"></div>
+
+            <!-- 공통 모달창 -->
+            <div class="modal-container" id="reasonModalContainer">
+                <div class="modal-content-custom">
+                    <div class="modal-header-custom">
+                        <h5 class="modal-title-custom" id="reasonModalTitle">타이틀</h5>
+                        <button type="button" class="modal-close-button" data-modal-id="reasonModalContainer">×</button>
+                    </div>
+
+                    <div class="modal-body-custom">
+                        <form id="reasonForm">
+                            <div class="form-group-custom">
+                                <label for="reasonInput" class="form-label-custom" id="reasonModalLabel">사유</label>
+                                <textarea class="form-control-custom" id="reasonInput" name="reason" rows="3" placeholder="사유를 입력해주세요."></textarea>
+                                <div class="validation-message" id="reasonValidationMessage">
+                                    사유를 입력해주세요.
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="modal-footer-custom">
+                        <button type="button" class="btn btn-secondary modal-cancel-button" data-modal-id="reasonModalContainer">취소</button>
+                        <button type="button" class="btn" id="submitReasonButton">진행</button>
+                    </div>
+
+                </div>
+            </div>
+            <!-- 모달 영역 끝 -->
+
         </section>
 
         <th:block layout:fragment="page-script">
