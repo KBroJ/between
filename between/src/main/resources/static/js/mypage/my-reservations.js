@@ -112,6 +112,50 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+// =====================================================================================================================
+
+    // 카카오 지도 초기화 (my-reservation-detail.html 용)
+    // kakao.maps.load() 콜백 함수 내에서 지도 관련 코드 실행
+    if (typeof kakao !== 'undefined' && typeof kakao.maps !== 'undefined') {
+        kakao.maps.load(function() {
+            console.log('Kakao Maps API loaded for reservation detail.');
+            const mapContainer = document.getElementById('kakao_map_reservation_detail');
+
+            // 지도를 표시할 div가 실제로 페이지에 존재하는지 확인
+            if (mapContainer) {
+
+                // 지도 중심 좌표 설정
+                const mapOption = {
+                    center: new kakao.maps.LatLng(37.504528, 127.024497),
+                    level: 4 // 지도의 확대 레벨
+                };
+
+                // 지도를 생성합니다
+                const map = new kakao.maps.Map(mapContainer, mapOption);
+
+                // 마커가 표시될 위치입니다
+                const markerPosition  = new kakao.maps.LatLng(37.506186, 127.025835);
+
+                // 마커를 생성합니다
+                const marker = new kakao.maps.Marker({
+                    position: markerPosition
+                });
+
+                // 마커가 지도 위에 표시되도록 설정합니다
+                marker.setMap(map);
+
+                // (선택) 지도 확대 축소를 제어할 수 있는 줌 컨트롤을 생성합니다
+                const zoomControl = new kakao.maps.ZoomControl();
+                map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
+
+                console.log('Kakao map for reservation detail page initialized.');
+            } else {
+                // console.log('Map container #kakao_map_reservation_detail not found on this page.');
+            }
+        });
+    } else {
+        console.error("Kakao Maps API script not loaded or kakao object not ready.");
+    }
 
 
 });
