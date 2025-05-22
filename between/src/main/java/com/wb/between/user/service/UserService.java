@@ -9,6 +9,7 @@ import com.wb.between.user.dto.VerificationResult;
 import com.wb.between.user.repository.UserRepository;
 import com.wb.between.userrole.domain.UserRole;
 import jakarta.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
@@ -22,6 +23,7 @@ import java.util.Enumeration;
 import java.util.Optional;
 import java.util.Random;
 
+@Slf4j
 @Service
 public class UserService {
 
@@ -53,7 +55,7 @@ public class UserService {
         this.mailSender = mailSender;
     }
 
-// 1. 회원가입
+    // 회원가입
     @Transactional  // 트랜잭션 처리
     public User registerUser(SignupReqDto signupReqDto) {
         System.out.println("UserService|registerUser|회원가입|시작 ==========> ");
@@ -114,13 +116,33 @@ public class UserService {
         return userRepository.save(user);
     }
 
-// 2. 회원가입 내 이메일중복 확인
+    // 회원가입 내 이메일중복 확인
+    @Transactional(readOnly = true)
     public boolean checkEmail(String email) {
 //        return !userRepository.existsByEmail(email);
         return !userRepository.checkEmail(email);
     }
 
-// 3. 휴대폰 인증번호 생성 및 SMS전송(API연동)
+    /**
+     * 입력된 휴대폰 번호가 이미 시스템에 등록되어 있는지 확인합니다.
+     * @param phoneNo (하이픈 포함 가능, 내부에서 제거)
+     * @return 중복이면 true, 아니면 false
+     */
+    @Transactional(readOnly = true)
+    public boolean isPhoneNumberDuplicated(String phoneNo) {
+        log.info("UserService|isPhoneNumberDuplicated|휴대폰 번호 중복 확인 시작 ==========> phoneNo : " + phoneNo);
+
+        String cleanPhoneNo = phoneNo.replaceAll("-", "");
+
+//        userRepository.findByPhoneNo(cleanPhoneNo).isPresent(); // findByPhoneNo로 조회하면 JPA가 암묵적으로 최대 하나의 결과만 조회하도록 처리하므로 사용X
+        boolean isDuplicated = userRepository.existsByPhoneNo(cleanPhoneNo);
+        log.info("UserService|isPhoneNumberDuplicated|isDuplicated : " + isDuplicated);
+
+        return isDuplicated;
+    }
+
+    // 휴대폰 인증번호 생성 및 SMS전송(API연동)
+    @Transactional
     public String generateAndSendVerificationCode(HttpSession session, String phoneNo) {
         System.out.println("UserService|generateAndSendVerificationCode|시작 ==========> phoneNo : " + phoneNo);
 
@@ -156,7 +178,7 @@ public class UserService {
 
     }
 
-// 4. 회원가입 > 휴대폰 번호 인증 검증
+    // 회원가입 > 휴대폰 번호 인증 검증
     public boolean verifyCode(HttpSession session, String phoneNo, String code) {
         System.out.println("UserService|verifyCode| ===============> 시작" );
 

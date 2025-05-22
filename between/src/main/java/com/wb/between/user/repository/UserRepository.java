@@ -32,6 +32,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM User u WHERE u.email = :email")
     boolean checkEmail(@Param("email") String email);
 
+    // 휴대폰 번호 존재 여부만 확인(여러건 존재해도 존재여부만 확인하기 때문에 true/false로 리턴)
+    boolean existsByPhoneNo(String phoneNo);
+
     /*
      * 회원정보 찾기 > 이메일 찾기
      * 휴대폰 번호로 사용자를 조회합니다.

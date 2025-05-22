@@ -30,8 +30,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let isEmailVerified = false;        // 이메일 중복 확인 여부
     let isPhoneVerified = false;        // 휴대폰 번호 인증 여부 (최종 제출 시 사용)
     let isVerificationExpired = false;  // 인증번호 입력 카운트다운 만료 여부
+    let isOtpUiActive = false; // OTP 입력 UI 활성화 상태를 추적하는 플래그
 
-// 이메일 중복 확인 버튼 클릭 이벤트
+    // 이메일 중복 확인 버튼 클릭 이벤트
     checkEmailBtn.addEventListener('click', function() {
         const email = emailInput.value;
         if (!email) {
@@ -77,10 +78,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-// 휴대폰 번호 입력 시 숫자만 허용하고 자동으로 하이픈 추가
-    /*
-    */
+    // 휴대폰 번호 입력 시 숫자만 허용하고 자동으로 하이픈 추가
     phoneNumberInput.addEventListener('input', function(e) {
+
         // 숫자 이외의 문자 제거
         let value = this.value.replace(/[^0-9]/g, '');
 
@@ -98,17 +98,50 @@ document.addEventListener('DOMContentLoaded', function() {
             value = value.substring(0, 13);
         }
 
+        // 하이픈을 적용하여 입력값 변경
         this.value = value;
 
+        // 입력 중에는 휴대폰 관련 메시지 초기화
         if (this.value) {
             phoneMessage.textContent = '';
         }
+
+        // 인증번호 전송 후 휴대폰 번호 변경 시 인증 상태 초기화
+        if (isOtpUiActive) { // isOtpUiActive 플래그를 사용하여 OTP UI 활성화 여부 판단
+            console.log('휴대폰 번호 변경 감지. 인증 상태를 초기화합니다.');
+            resetVerificationState();
+        }
     });
+
+    // 인증 관련 UI 및 상태를 초기화하는 함수
+    function resetVerificationState() {
+
+        verificationSection.style.display = 'none';       // 인증번호 입력칸 숨기기
+        registerBtn.style.display = 'none';               // 회원가입 버튼 숨기기 (인증 후 보이므로)
+        sendVerificationBtn.style.display = 'block';      // '인증하기' 버튼 다시 보이기
+        resendVerificationBtn.style.display = 'none';     // '재전송' 버튼 숨기기
+
+        if (countdownTimer) {
+            clearInterval(countdownTimer); // 실행 중인 카운트다운 중지
+        }
+        countdownSpan.style.display = 'none';             // 카운트다운 숨기기
+        countdownSpan.textContent = '';                   // 카운트다운 텍스트 초기화
+
+        verificationCodeInput.value = '';                 // 인증번호 입력값 초기화
+        verificationCodeInput.disabled = true;            // 인증번호 입력칸 비활성화 (선택적)
+        verificationMessage.textContent = '';             // 인증 관련 메시지 초기화
+        phoneMessage.textContent = '휴대폰 번호가 변경되었습니다. 다시 인증해주세요.'; // 안내 메시지
+        phoneMessage.style.color = '#dc3545';
+
+        isVerificationExpired = false; // 인증 만료 상태 초기화
+        isOtpUiActive = false;         // OTP UI 비활성화 상태로 변경
+    }
 
     // '인증하기' 버튼 클릭 이벤트
     sendVerificationBtn.addEventListener('click', function() {
         // 이메일, 비밀번호 등 기본 정보 유효성 검사
-        if (!validateAllInputs()) {
+//        if (!validateAllInputs()) {
+        if (!validatePreVerificationInputs()) {
             return;
         }
         // 이메일 중복 확인 여부 검증
@@ -127,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
         requestVerificationCode(); // 인증번호 발송 함수 호출
     });
 
-    // *** '재전송' 버튼 클릭 이벤트 ***
+    // '재전송' 버튼 클릭 이벤트
     resendVerificationBtn.addEventListener('click', function() {
         // 휴대폰 번호 유효성 검사 (형식만)
          if (!isValidPhoneNumber(phoneNumberInput.value)) {
@@ -141,11 +174,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // 휴대폰 번호 인증번호 전송 버튼 클릭 이벤트
     function requestVerificationCode() {
         const phoneNo = phoneNumberInput.value.replace(/[^0-9]/g, '');
+
         if (!phoneNo) {
             phoneMessage.textContent = '휴대폰 번호를 입력해주세요.';
             phoneMessage.style.color = '#dc3545';
             return; // 전화번호 없으면 중단
         }
+
+        if (!isValidPhoneNumber(phoneNo)) {
+             phoneMessage.textContent = '유효한 휴대폰 번호 형식이 아닙니다.';
+             phoneMessage.style.color = '#dc3545';
+             return;
+        }
+
+        // 이전 오류 메시지 초기화
+        phoneMessage.textContent = '';
 
         // 서버에 인증번호 발송 요청
         fetch('/send-verification', {
@@ -157,24 +200,62 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!response.ok) throw new Error('Network response was not ok');
             return response.json(); // 서버 응답이 있다면 JSON 처리
         })
-        .then(() => { // 성공 시 UI 변경
-            verificationSection.style.display = 'block'; // 인증번호 입력칸 보이기
-            registerBtn.style.display = 'block';       // 회원가입 버튼 보이기
-            sendVerificationBtn.style.display = 'none';  // '인증하기' 버튼 숨기기
-            resendVerificationBtn.style.display = 'inline-block'; // '재전송' 버튼 보이기
-            countdownSpan.style.display = 'inline';    // 카운트다운 보이기
-            startCountdown(180); // 3분 카운트다운 시작
-            isVerificationExpired = false; // 만료 상태 초기화
-            verificationMessage.textContent = ''; // 이전 메시지 초기화
-            verificationCodeInput.disabled = false; // 입력칸 활성화
-            verificationCodeInput.value = ''; // 입력칸 초기화
-            alert('인증번호가 발송되었습니다.');
+        .then(data  => { // 성공 시 data에 응답값 저장
+
+            if (data.success) { // 서버에서 success: true 응답 시
+
+                verificationSection.style.display = 'block';            // 인증번호 입력칸 보이기
+                registerBtn.style.display = 'block';                    // 회원가입 버튼 보이기
+                sendVerificationBtn.style.display = 'none';             // '인증하기' 버튼 숨기기
+                resendVerificationBtn.style.display = 'inline-block';   // '재전송' 버튼 보이기
+                countdownSpan.style.display = 'inline';                 // 카운트다운 보이기
+                startCountdown(180);                                    // 3분 카운트다운 시작
+                isVerificationExpired = false;                          // 만료 상태 초기화
+
+                verificationMessage.textContent = '';                   // 인증번호 메시지 초기화
+                phoneMessage.textContent = '';                          // 휴대폰 관련 메시지 초기화
+
+                verificationCodeInput.disabled = false;                 // 인증번호 입력란 활성화
+                verificationCodeInput.value = '';                       // 인증번호 입력값 초기화
+
+                isOtpUiActive = true;
+
+                alert(data.message || '인증번호가 발송되었습니다.');
+
+            } else { // 서버에서 success: false 응답 시 (예: 중복 번호, 기타 오류)
+
+                phoneMessage.textContent = data.message || '인증번호를 발송할 수 없습니다.';
+                phoneMessage.style.color = '#dc3545';
+
+                resetVerificationStateExceptMessage();
+
+            }
+
         })
         .catch(error => {
             console.error('Verification send error:', error);
             phoneMessage.textContent = '인증번호 발송 중 오류가 발생했습니다.';
             phoneMessage.style.color = '#dc3545';
+            isOtpUiActive = false;
         });
+    }
+
+    // 메시지를 제외하고 UI를 인증 전 상태로 되돌리는 함수 (중복 번호 등 실패 시)
+    function resetVerificationStateExceptMessage() {
+
+        verificationSection.style.display = 'none';
+        registerBtn.style.display = 'none'; // 회원가입 버튼도 숨김
+        sendVerificationBtn.style.display = 'block';
+        resendVerificationBtn.style.display = 'none';
+
+        if (countdownTimer) {
+            clearInterval(countdownTimer);
+            countdownSpan.style.display = 'none';
+            countdownSpan.textContent = '';
+        }
+
+        isVerificationExpired = false;
+        isOtpUiActive = false;
     }
 
     // 비밀번호 보기/숨기기 토글 함수
@@ -231,6 +312,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     countdownSpan.textContent = "시간 만료";
 
                     isVerificationExpired = true;
+                    isOtpUiActive = false;
 
                     // 회원가입 버튼을 인증하기 버튼으로 변경
                     registerBtn.style.display = 'none';             // 회원가입 버튼 숨김
@@ -302,6 +384,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 this.submit();
+
             } else {
                 // 인증 실패
                 verificationMessage.textContent = '인증번호가 올바르지 않습니다.';
@@ -317,19 +400,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     });
 
-    // 모든 필수 입력값 검증 함수
-    function validateAllInputs() {
+    // 인증 전 필드 유효성 검사 함수 (sendVerificationBtn 클릭 시 사용)
+    function validatePreVerificationInputs() {
         let isValid = true;
-
         // 이메일 검증
-        const email = emailInput.value; // trim 제거 (공백 검사는 실시간 리스너에서)
-        emailMessage.textContent = ''; // 메시지 초기화
-        emailMessage.style.color = '#dc3545'; // 기본 색상
-
+        const email = emailInput.value;
+        emailMessage.textContent = '';
         if (!email) {
             emailMessage.textContent = '이메일을 입력해주세요.';
             isValid = false;
-        } else if (/\s/.test(email)) { // 공백 체크 추가
+        } else if (/\s/.test(email)) {
             emailMessage.textContent = '이메일에 공백은 포함될 수 없습니다.';
             isValid = false;
         } else if (!isValidEmail(email)) {
@@ -343,14 +423,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!password) {
             passwordMessage.textContent = '비밀번호를 입력해주세요.';
             isValid = false;
-        } else if (!isValidPwd(passwordInput.value) && passwordInput.value.length < 8) {
+        } else if (password.length < 8 || !isValidPwd(password)) { // 조건 단순화
             passwordMessage.textContent = '비밀번호는 영문, 숫자, 특수문자를 포함한 8자 이상이어야 합니다.';
-            isValid = false;
-        } else if (!isValidPwd(passwordInput.value)) {
-            passwordMessage.textContent = '비밀번호는 영문, 숫자, 특수문자를 포함해야 합니다.';
-            isValid = false;
-        } else if (passwordInput.value.length < 8) {
-            passwordMessage.textContent = '비밀번호는 8자 이상이어야 합니다.';
             isValid = false;
         }
 
@@ -376,15 +450,39 @@ document.addEventListener('DOMContentLoaded', function() {
             isValid = false;
         }
 
-        // 휴대폰 번호 검증
+        // 휴대폰 번호 형식 검증 (내용 존재 여부는 requestVerificationCode 에서도 확인)
         const phoneNo = phoneNumberInput.value;
-        phoneMessage.textContent = '';
-        if (!phoneNo) {
+        phoneMessage.textContent = ''; // 일단 초기화
+        if (!phoneNo) { // 이 함수 호출 시점에는 번호가 있어야 함
             phoneMessage.textContent = '휴대폰 번호를 입력해주세요.';
             isValid = false;
         } else if (!isValidPhoneNumber(phoneNo)) {
             phoneMessage.textContent = '유효한 휴대폰 번호 형식이 아닙니다.';
             isValid = false;
+        }
+        return isValid;
+    }
+
+    // 모든 필수 입력값 검증 함수
+    function validateAllInputs() {
+        let isValid = validatePreVerificationInputs(); // 먼저 이전 단계 유효성 검사 실행
+
+        // 인증번호 입력 필드 검증 (이 함수는 최종 제출 시에만 호출되므로,
+        // 인증번호 입력칸이 보이는지 여부도 함께 고려하는 것이 좋음)
+        if (verificationSection.style.display === 'block' || verificationSection.style.display === 'inline-block') {
+            const verificationCode = verificationCodeInput.value;
+            verificationMessage.textContent = '';
+            if (!verificationCode) {
+                verificationMessage.textContent = '인증번호를 입력해주세요.';
+                isValid = false;
+            }
+            // isVerificationExpired 체크는 submit 핸들러에서 이미 하고 있음
+        } else {
+            // 인증번호 입력 단계가 아니라면 (정상적인 흐름에서는 이럴 일 없지만 방어 코드)
+            // 또는 인증번호 UI가 어떤 이유로든 활성화되지 않았다면,
+            // 이 부분에 대한 처리 정책 필요. 일단은 그냥 넘어감.
+            // phoneMessage.textContent = '휴대폰 인증이 필요합니다.';
+            // isValid = false;
         }
 
         return isValid;
@@ -493,12 +591,6 @@ document.addEventListener('DOMContentLoaded', function() {
             nameMessage.textContent = '이름은 한글 또는 영문자만 입력 가능합니다.';
         }
 
-    });
-
-    phoneNumberInput.addEventListener('input', function() {
-        if (this.value) {
-            phoneMessage.textContent = '';
-        }
     });
 
 });

@@ -22,6 +22,7 @@ CREATE TABLE `User` (
 	`authCd` VARCHAR(10) NOT NULL COMMENT '일반, 임직원, 관리자 등',
 	`createDt` timestamp NOT NULL COMMENT '회원가입 생성일자',
 	`updateDt` timestamp NULL COMMENT '회원 정보 수정 일자',
+	`updateRs` varchar(500) NULL COMMENT '관리자에 의한 변경 사유',
 	`loginM` varchar(10) NOT NULL COMMENT '일반/구글/네이버 등',
     PRIMARY KEY (userNo)
 );

@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -189,18 +190,41 @@ public class UserController {
     // 휴대폰번호 인증번호 전송
     @PostMapping("/send-verification")
     @ResponseBody
-    public Map<String, String> sendVerificationCode(@RequestBody Map<String, String> request, HttpSession session) {
-        System.out.println("UserController|sendVerificationCode|시작 ==========> request : " + request);
+    public ResponseEntity<Map<String, Object>> sendVerificationCode(@RequestBody Map<String, String> request, HttpSession session) {
+        log.info("UserController|sendVerificationCode|시작 ==========> request : " + request);
 
         String phoneNo = request.get("phoneNo");
-        String code = userService.generateAndSendVerificationCode(session, phoneNo);
+        Map<String, Object> response = new HashMap<>();
 
-        Map<String, String> response = new HashMap<>();
-        response.put("success", "true");
+        try {
+            if (userService.isPhoneNumberDuplicated(phoneNo)) {
+                // 1. 휴대폰 번호 중복인 경우
+                log.warn("UserController|sendVerificationCode|중복된 휴대폰 번호: {}", phoneNo);
 
-//        response.put("code", code); // 디버깅용으로 클라이언트에 반환
-        return response;
+                response.put("success", false);
+                response.put("message", "이미 사용 중인 휴대폰 번호입니다.");
 
+                return ResponseEntity.ok(response); // 클라이언트가 처리하기 쉽도록 200 OK와 함께 응답
+            } else {
+
+                // 2. 중복되지 않은 경우, 인증번호 생성 및 발송
+                userService.generateAndSendVerificationCode(session, phoneNo);
+
+                response.put("success", true);
+                response.put("message", "인증번호가 발송되었습니다.");
+
+                return ResponseEntity.ok(response);
+            }
+
+
+        } catch (Exception e) { // SMS 발송 실패 또는 기타 예외 처리
+            log.error("UserController|sendVerificationCode|인증번호 처리 중 알 수 없는 오류 발생: {}", e.getMessage(), e);
+
+            response.put("success", false);
+            response.put("message", "인증번호 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+
+            return  ResponseEntity.ok(response);
+        }
     }
 
     // 회원가입 > 휴대폰 인증번호 확인
