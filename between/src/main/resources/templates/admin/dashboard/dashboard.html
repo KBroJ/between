@@ -77,55 +77,56 @@
 
       <!-- 빠른 실행 링크 -->
       <div class="panel quick-links">
-        <h2 class="panel-title">빠른 실행</h2>
-        <ul th:if="${not #lists.isEmpty(dashboardData.quickLinks)}">
-          <li th:each="link : ${dashboardData.quickLinks}">
-            <a th:href="@{${link.href}}" th:text="${link.title}">신규 예약 등록</a>
+        <h2 class="panel-title">최근 회원</h2>
+        <ul th:if="${not #lists.isEmpty(dashboardResData.userList)}">
+          <li th:each="user : ${dashboardResData.userList}">
+            <span th:text="${user.email}"></span>
+            <span th:text="${#temporals.format(user.createDt, 'yyyy.MM.dd')}"></span>
           </li>
         </ul>
-        <p th:if="${#lists.isEmpty(dashboardData.quickLinks)}">등록된 링크가 없습니다.</p>
+        <p th:if="${#lists.isEmpty(dashboardResData.userList)}">유저가 없습니다.</p>
       </div>
     </div>
 
     <!-- 알림 및 차트 섹션 -->
-    <div class="grid-container content-grid" style="margin-top: 20px;">
-      <!-- 알림 (만료 예정 계약 등) -->
-      <div class="panel alerts">
-        <h2 class="panel-title">알림</h2>
-        <ul th:if="${not #lists.isEmpty(dashboardData.alerts)}">
-          <!-- 최근 3개만 표시 (예시) -->
-          <li th:each="alert, iterStat : ${dashboardData.alerts}" th:if="${iterStat.index < 3}">
-            <!-- 알림 종류에 따라 링크 다르게 처리 가능 -->
-<!--            <a th:href="${alert.userContractId != null ? '/admin/contracts/' + alert.userContractId : (alert.userId != null ? '/admin/users/' + alert.userId : '#')}"-->
-<!--               th:text="${alert.message}">-->
-<!--              '박보검'님 계약 만료 D-5-->
-<!--            </a>-->
-            <a th:text="${alert.message}"></a>
-            <span th:if="${alert.type == 'warning'}" style="color: #e74c3c; font-weight: bold;">중요</span>
-            <span th:if="${alert.type == 'info'}" style="color: #3498db;">정보</span>
-          </li>
-        </ul>
-        <p th:if="${#lists.isEmpty(dashboardData.alerts)}">새로운 알림이 없습니다.</p>
-        <a th:if="${not #lists.isEmpty(dashboardData.alerts) and #lists.size(dashboardData.alerts) > 3}"
-           th:href="@{/admin/notifications}" class="more-link">
-          모든 알림 보기 →
-        </a>
-      </div>
+<!--    <div class="grid-container content-grid" style="margin-top: 20px;">-->
+<!--      &lt;!&ndash; 알림 (만료 예정 계약 등) &ndash;&gt;-->
+<!--      <div class="panel alerts">-->
+<!--        <h2 class="panel-title">알림</h2>-->
+<!--        <ul th:if="${not #lists.isEmpty(dashboardData.alerts)}">-->
+<!--          &lt;!&ndash; 최근 3개만 표시 (예시) &ndash;&gt;-->
+<!--          <li th:each="alert, iterStat : ${dashboardData.alerts}" th:if="${iterStat.index < 3}">-->
+<!--            &lt;!&ndash; 알림 종류에 따라 링크 다르게 처리 가능 &ndash;&gt;-->
+<!--&lt;!&ndash;            <a th:href="${alert.userContractId != null ? '/admin/contracts/' + alert.userContractId : (alert.userId != null ? '/admin/users/' + alert.userId : '#')}"&ndash;&gt;-->
+<!--&lt;!&ndash;               th:text="${alert.message}">&ndash;&gt;-->
+<!--&lt;!&ndash;              '박보검'님 계약 만료 D-5&ndash;&gt;-->
+<!--&lt;!&ndash;            </a>&ndash;&gt;-->
+<!--            <a th:text="${alert.message}"></a>-->
+<!--            <span th:if="${alert.type == 'warning'}" style="color: #e74c3c; font-weight: bold;">중요</span>-->
+<!--            <span th:if="${alert.type == 'info'}" style="color: #3498db;">정보</span>-->
+<!--          </li>-->
+<!--        </ul>-->
+<!--        <p th:if="${#lists.isEmpty(dashboardData.alerts)}">새로운 알림이 없습니다.</p>-->
+<!--        <a th:if="${not #lists.isEmpty(dashboardData.alerts) and #lists.size(dashboardData.alerts) > 3}"-->
+<!--           th:href="@{/admin/notifications}" class="more-link">-->
+<!--          모든 알림 보기 →-->
+<!--        </a>-->
+<!--      </div>-->
 
-      <!-- 간단한 차트 (자리 표시자) -->
-      <div class="panel chart-area">
-        <h2 class="panel-title" th:text="${dashboardData.sampleChart?.title ?: '데이터 분석'}">주간 예약 추이</h2>
-        <!-- 실제 차트는 Chart.js, ApexCharts 등의 JS 라이브러리와 Thymeleaf를 연동하여 구현합니다. -->
-        <!-- 이 예제에서는 단순히 자리만 표시합니다. -->
-        <div class="chart-placeholder">
-          차트 라이브러리 연동 영역<br>
-          (예: Chart.js)
-          <div th:if="${dashboardData.sampleChart}" style="font-size:0.8em; margin-top:10px;">
-            데이터: <span th:text="${dashboardData.sampleChart.data}"></span>
-          </div>
-        </div>
-      </div>
-    </div>
+<!--      &lt;!&ndash; 간단한 차트 (자리 표시자) &ndash;&gt;-->
+<!--      <div class="panel chart-area">-->
+<!--        <h2 class="panel-title" th:text="${dashboardData.sampleChart?.title ?: '데이터 분석'}">주간 예약 추이</h2>-->
+<!--        &lt;!&ndash; 실제 차트는 Chart.js, ApexCharts 등의 JS 라이브러리와 Thymeleaf를 연동하여 구현합니다. &ndash;&gt;-->
+<!--        &lt;!&ndash; 이 예제에서는 단순히 자리만 표시합니다. &ndash;&gt;-->
+<!--        <div class="chart-placeholder">-->
+<!--          차트 라이브러리 연동 영역<br>-->
+<!--          (예: Chart.js)-->
+<!--          <div th:if="${dashboardData.sampleChart}" style="font-size:0.8em; margin-top:10px;">-->
+<!--            데이터: <span th:text="${dashboardData.sampleChart.data}"></span>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
   </div>
 
 

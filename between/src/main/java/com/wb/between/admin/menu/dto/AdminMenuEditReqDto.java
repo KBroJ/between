@@ -27,7 +27,7 @@ public class AdminMenuEditReqDto {
 
     private String menuType;
 
-    private List<String> roleName;
+    private List<Long> allowedRoles;
 
     public static AdminMenuEditReqDto from(Menu menu) {
         return AdminMenuEditReqDto.builder()

@@ -25,6 +25,6 @@ public class AdminRoleEditReqDto {
     @Size(max = 255, message = "설명은 255자를 초과할 수 없습니다.")
     private String description;
 
-    @NotEmpty(message = "하나 이상의 권한을 선택해야 합니다.") // 초기 권한 목록
+//    @NotEmpty(message = "하나 이상의 권한을 선택해야 합니다.") // 초기 권한 목록
     private List<Long> permissionIds; // UI에서 선택된 권한들의 ID 목록
 }

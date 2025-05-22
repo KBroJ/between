@@ -4,12 +4,12 @@ $(document).ready(function () {
     if(tableBody) {
         tableBody.on('click', '.delete-btn', function () {
             const delButton = $(this);
-            const bNo = delButton.data('bno');
-            console.log("bNo => ", bNo);
+            const permissionId = delButton.data('permissionid');
+            console.log("permissionId => ", permissionId);
 
-            if(confirm('정말 이 배너를 삭제하시겠습니까? (ID: ' + bNo + ')')) {
+            if(confirm('정말 이 권한를 삭제하시겠습니까? (ID: ' + permissionId + ')')) {
                 $.ajax({
-                    url: `/admin/banner/delete/${bNo}`,
+                    url: `/admin/permissions/delete/${permissionId}`,
                     type: 'DELETE',
                     success: function (data) {
                         alert("삭제에 성공했습니다.")

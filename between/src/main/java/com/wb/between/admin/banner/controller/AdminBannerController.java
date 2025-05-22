@@ -8,6 +8,9 @@ import com.wb.between.common.exception.CustomException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -30,9 +33,11 @@ public class AdminBannerController {
      * @return
      */
     @GetMapping
-    public String getBannerManagementView(Model model) {
+    public String getBannerManagementView(@RequestParam(required = false, defaultValue = "") String searchBannerName,
+                                          @PageableDefault(size = 10) Pageable pageable,
+                                          Model model) {
 
-        List<AdminBannerResDto> bannerList = adminBannerService.findAll();
+        Page<AdminBannerResDto> bannerList = adminBannerService.findBannerList(pageable, searchBannerName);
         log.debug("getBannerManagementView: bannerList = {}", bannerList);
 
         model.addAttribute("bannerList", bannerList);
@@ -111,7 +116,7 @@ public class AdminBannerController {
         }
 
         try {
-
+            log.debug("bno = {}, adminBannerEditReqDto = {} ", bNo, adminBannerEditReqDto);
             adminBannerService.editBanner(bNo, adminBannerEditReqDto);
 
             return "redirect:/admin/banner/edit/" + bNo;

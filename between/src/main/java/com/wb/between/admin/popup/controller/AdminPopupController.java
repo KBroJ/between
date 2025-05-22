@@ -129,4 +129,15 @@ public class AdminPopupController {
         return "admin/popup/popup-edit";
     }
 
+    /**
+     * 삭제
+     * @param popupId
+     */
+    @ResponseBody
+    @DeleteMapping("/delete/{popupId}")
+    public void deletePopup(@PathVariable("popupId") Long popupId) {
+        adminPopupService.deletePopup(popupId);
+    }
+
+
 }

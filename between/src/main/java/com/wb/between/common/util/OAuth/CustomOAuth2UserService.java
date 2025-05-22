@@ -1,7 +1,10 @@
 package com.wb.between.common.util.OAuth;
 
+import com.wb.between.admin.role.domain.Role;
+import com.wb.between.role.repository.RoleRepository;
 import com.wb.between.user.domain.User;
 import com.wb.between.user.repository.UserRepository;
+import com.wb.between.userrole.domain.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // 추가
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
 
 /*
@@ -84,6 +88,13 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     // HttpSession 주입 (선택적: 세션에 사용자 정보 저장 시 필요)
     // private final HttpSession httpSession;
 
+    private final RoleRepository roleRepository;
+
+    // 기본 역할 코드 상수 정의 (설정 파일 등으로 관리하는 것이 더 좋음)
+    private static final String DEFAULT_ROLE_CODE = "ROLE_USER"; // 일반 사용자 역할 코드
+    private static final String STAFF_ROLE_CODE = "ROLE_STAFF";   // 임직원 역할 코드 (예시)
+
+
     @Override
     @Transactional // 추가: DB 작업을 포함하므로 트랜잭션 처리
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -143,7 +154,36 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             user = attributes.toEntity();
             System.out.println("CustomOAuth2UserService|saveOrUpdate|신규 사용자 생성: " + user.getEmail());
 
-            return userRepository.save(user);
+            //1. 부여할 역할 코드 결정
+            String targetRoleCode = DEFAULT_ROLE_CODE; // 기본값: 일반 사용자
+            if (user.getEmail() != null && user.getEmail().endsWith("@winbit.kr")) { // 도메인 체크 (null 체크 추가)
+                targetRoleCode = STAFF_ROLE_CODE; // 특정 도메인이면 임직원 역할
+            }
+
+            //2. 역할(Role) 엔티티 조회
+            Role assignedRole = roleRepository.findByRoleCode(targetRoleCode)
+                    .orElseThrow(() -> new IllegalStateException("역할을 찾을 수 없습니다. 시스템 설정 오류입니다."));
+
+            //3. UserRole 조인 엔티티 생성 & 연결
+            UserRole ur = new UserRole();
+            ur.setUser(user);
+            ur.setRole(assignedRole);
+
+            //4. User 컬렉션에 추가
+            // user.getUserRole()이 null일 수 있으므로 초기화 확인
+            if (user.getUserRole() == null) {
+                user.setUserRole(new HashSet<>());
+            }
+
+            user.getUserRole().add(ur);
+            //5. 신규 저장
+            userRepository.save(user);
+
+            //6.
+            User savedUser = userRepository.findByIdWithAuthorities(user.getUserNo())
+                    .orElseThrow(() -> new IllegalStateException("저장 후 사용자 조회 실패: " + user.getUserNo()));
+
+            return savedUser;
         }
 
 

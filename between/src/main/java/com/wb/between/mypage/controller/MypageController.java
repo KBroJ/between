@@ -20,6 +20,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import java.util.List;
 
 import java.time.LocalDate;
@@ -51,9 +53,12 @@ public class MypageController {
         log.debug("mypageResponseDto.getName = {}", mypageUserInfoResDto.getName());
         List<MyReservationDto> resentReservations = mypageService.findResentReservation(user.getUserNo());
 
+        List<MyReservationDto> winbitReservation = mypageService.findWinbitReservation();
+
+
         model.addAttribute("userInfo", mypageUserInfoResDto);
         model.addAttribute("resentReservations", resentReservations);
-
+        model.addAttribute("winbitReservation", winbitReservation);
         return "mypage/dashboard";
     }
 
@@ -79,7 +84,8 @@ public class MypageController {
     public String editProfile(@AuthenticationPrincipal User user,
                               @Valid @ModelAttribute("userInfo") UserInfoEditReqDto userInfoEditReqDto,
                               BindingResult bindingResult,
-                              Model model) {
+                              Model model,
+                              RedirectAttributes redirectAttributes) {
 
         if(bindingResult.hasErrors()) {
             return "mypage/edit-profile";
@@ -90,15 +96,17 @@ public class MypageController {
             log.debug("editProfile|userInfoEditReqDto = {}", userInfoEditReqDto);
             //정보 수정
             MypageUserInfoResDto mypageUserInfoResDto = mypageService.updateUserInfo(user.getUserNo(), userInfoEditReqDto);
-            model.addAttribute("userInfo", mypageUserInfoResDto);
-
-            return "redirect:/mypage/edit";
+//            model.addAttribute("userInfo", mypageUserInfoResDto);
+            redirectAttributes.addFlashAttribute("alertMessage", "회원정보가 성공적으로 변경되었습니다."); // 성공
+            return "redirect:/mypage";
         } catch (CustomException ex) {
             log.error("error = {}", ex.getMessage());
+            model.addAttribute("alertMessage", "회원정보 변경에 실패하였습니다.");
             return "mypage/edit-profile";
         } catch (Exception e) {
             // 예상치 못한 다른 종류의 예외 처리
             log.error("예상치 못한 오류 발생", e);
+            model.addAttribute("alertMessage", "예상치 못한 오류가 발생했습니다");
             return "mypage/edit-profile";
         }
 
@@ -121,7 +129,8 @@ public class MypageController {
     public String editPassword(@AuthenticationPrincipal User user,
                                @Valid @ModelAttribute("passwordEditInfo") UserPasswordEditReqDto userPasswordEditReqDto,
                                BindingResult bindingResult,
-                               Model model) {
+                               Model model,
+                               RedirectAttributes redirectAttributes) {
         log.debug("currentPassword = {}", userPasswordEditReqDto.getCurrentPassword());
         log.debug("newPassword = {}", userPasswordEditReqDto.getNewPassword());
 
@@ -136,16 +145,17 @@ public class MypageController {
         try {
             mypageService.changePassword(user.getUserNo(),
                     userPasswordEditReqDto);
-            model.addAttribute("result", "success");
+            redirectAttributes.addFlashAttribute("alertMessage", "비밀번호가 성공적으로 변경되었습니다."); // 성공
             return "redirect:/mypage";
 
         } catch (CustomException ex) {
             log.error("changePassword|error = {}", ex.getMessage());
-            model.addAttribute("result", "fail");
+            model.addAttribute("alertMessage", "비밀번호 변경에 실패했습니다");
             return "mypage/edit-password";
         } catch (RuntimeException e) {
             // 예상치 못한 다른 종류의 예외 처리
             log.error("예상치 못한 오류 발생", e);
+            model.addAttribute("alertMessage", "예상치 못한 오류가 발생했습니다");
             return "mypage/edit-password";
         }
     }

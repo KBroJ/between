@@ -1,6 +1,7 @@
 package com.wb.between.admin.dashboard.dto;
 
 import com.wb.between.admin.reservation.dto.ReservationListDto;
+import com.wb.between.admin.user.dto.UserListDto;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -16,6 +17,9 @@ public class DashboardResDto {
 
     //최근 예약 목록
     private List<ReservationListDto> reservationList;
+
+    //최근 회원 목록
+    private List<UserListDto> userList;
 
     //총 좌석 건수
     private long totalSeats;

@@ -2,87 +2,87 @@
 <aside class="sidebar" th:fragment="admin-sidebar">
     <h2 class="sidebar-title">관리자</h2>
     <nav class="sidebar-nav">
-<!--        <ul>-->
-<!--            <li th:each="menu : ${adminSideMenus}">-->
-<!--                <a th:href="@{${menu.menuUrl}}" class="menu-item">-->
-<!--                    <span th:text="${menu.menuNm}"></span>-->
-<!--                </a>-->
-<!--            </li>-->
-<!--        </ul>-->
         <ul>
-            <li>
-                <a href="/admin" class="menu-item">
-                    <i class="fas fa-user-circle icon"></i> <!-- Font Awesome Icon -->
-                    <span>관리</span>
-                </a>
-            </li>
-            <li>
-                <a href="/admin/menus" class="menu-item">
-                    <i class="fas fa-shopping-bag icon"></i>
-                    <span>메뉴 관리</span>
-                </a>
-            </li>
-            <li>
-                <a href="/admin/roles" class="menu-item">
-                    <i class="fas fa-edit icon"></i>
-                    <span>역할 관리</span>
-                </a>
-            </li>
-            <li>
-                <a href="/admin/permissions" class="menu-item">
-                    <i class="fas fa-cog icon"></i>
-                    <span>권한 관리</span>
-                </a>
-            </li>
-            <li>
-                <a href="/admin/banner" class="menu-item">
-                    <i class="fas fa-cog icon"></i>
-                    <span>배너 관리</span>
-                </a>
-            </li>
-            <li>
-                <a href="/admin/popup" class="menu-item">
-                    <i class="fas fa-cog icon"></i>
-                    <span>팝업 관리</span>
-                </a>
-            </li>
-            <li>
-                <a href="/admin/user/userList" class="menu-item">
-                    <i class="fas fa-cog icon"></i>
-                    <span>회원 관리</span>
-                </a>
-            </li>
-            <li>
-                <a href="/admin/reservationList" class="menu-item">
-                    <i class="fas fa-cog icon"></i>
-                    <span>예약 관리</span>
-                </a>
-            </li>
-            <li>
-                <a href="/admin/adminSeat" class="menu-item">
-                    <i class="fas fa-cog icon"></i>
-                    <span>좌석 관리</span>
-                </a>
-            </li>
-            <li>
-                <a href="/admin/coupons" class="menu-item">
-                    <i class="fas fa-cog icon"></i>
-                    <span>쿠폰 관리</span>
-                </a>
-            </li>
-            <li>
-                <a href="/admin/faq_admin" class="menu-item">
-                    <i class="fas fa-cog icon"></i>
-                    <span>FAQ 관리</span>
+            <li th:each="menu : ${adminSideMenus}">
+                <a th:href="@{${menu.menuUrl}}" class="menu-item">
+                    <span th:text="${menu.menuNm}"></span>
                 </a>
             </li>
         </ul>
+<!--        <ul>-->
+<!--            <li>-->
+<!--                <a href="/admin" class="menu-item">-->
+<!--                    <i class="fas fa-user-circle icon"></i> &lt;!&ndash; Font Awesome Icon &ndash;&gt;-->
+<!--                    <span>관리</span>-->
+<!--                </a>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--                <a href="/admin/menus" class="menu-item">-->
+<!--                    <i class="fas fa-shopping-bag icon"></i>-->
+<!--                    <span>메뉴 관리</span>-->
+<!--                </a>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--                <a href="/admin/roles" class="menu-item">-->
+<!--                    <i class="fas fa-edit icon"></i>-->
+<!--                    <span>역할 관리</span>-->
+<!--                </a>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--                <a href="/admin/permissions" class="menu-item">-->
+<!--                    <i class="fas fa-cog icon"></i>-->
+<!--                    <span>권한 관리</span>-->
+<!--                </a>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--                <a href="/admin/banner" class="menu-item">-->
+<!--                    <i class="fas fa-cog icon"></i>-->
+<!--                    <span>배너 관리</span>-->
+<!--                </a>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--                <a href="/admin/popup" class="menu-item">-->
+<!--                    <i class="fas fa-cog icon"></i>-->
+<!--                    <span>팝업 관리</span>-->
+<!--                </a>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--                <a href="/admin/user/userList" class="menu-item">-->
+<!--                    <i class="fas fa-cog icon"></i>-->
+<!--                    <span>회원 관리</span>-->
+<!--                </a>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--                <a href="/admin/reservationList" class="menu-item">-->
+<!--                    <i class="fas fa-cog icon"></i>-->
+<!--                    <span>예약 관리</span>-->
+<!--                </a>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--                <a href="/admin/adminSeat" class="menu-item">-->
+<!--                    <i class="fas fa-cog icon"></i>-->
+<!--                    <span>좌석 관리</span>-->
+<!--                </a>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--                <a href="/admin/coupons" class="menu-item">-->
+<!--                    <i class="fas fa-cog icon"></i>-->
+<!--                    <span>쿠폰 관리</span>-->
+<!--                </a>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--                <a href="/admin/faq_admin" class="menu-item">-->
+<!--                    <i class="fas fa-cog icon"></i>-->
+<!--                    <span>FAQ 관리</span>-->
+<!--                </a>-->
+<!--            </li>-->
+<!--        </ul>-->
     </nav>
-    <!-- Logout Link -->
-    <div class="sidebar-footer">
-        <a href="#" class="logout-link">
-            <i class="fas fa-sign-out-alt icon"></i>
-            <span>로그아웃</span>
-        </a>
-    </div>
+<!--    &lt;!&ndash; Logout Link &ndash;&gt;-->
+<!--    <div class="sidebar-footer">-->
+<!--        <a href="#" class="logout-link">-->
+<!--            <i class="fas fa-sign-out-alt icon"></i>-->
+<!--            <span>로그아웃</span>-->
+<!--        </a>-->
+<!--    </div>-->
 </aside>

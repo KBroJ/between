@@ -3,9 +3,9 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/admin/admin}">
 <head>
-  <title>관리자 화면 - 쿠폰 등록</title>
+  <title>권한 수정</title>
   <!-- 통일성을 위해 동일한 CSS 사용 -->
-  <link rel="stylesheet" th:href="@{/css/admin/coupon-manage.css}">
+  <link rel="stylesheet" th:href="@{/css/admin/coupon/coupon-manage.css}">
   <!-- 등록 폼을 위한 추가/수정 스타일 (필요시) -->
   <style>
     /* 등록 폼 레이아웃 미세 조정 */
@@ -60,7 +60,7 @@
 
 <section layout:fragment="admin-content">   <!-- Main Content -->
 
-  <h1 class="main-title">역할 등록</h1>
+  <h1 class="main-title">권한 수정</h1>
 
   <div class="content-container">
     <!-- 쿠폰 등록 폼 -->
@@ -70,64 +70,64 @@
       <!-- put 처리 -->
       <input type="hidden" name="_method" value="put" />
       <div class="form-group">
-        <label for="permissionCode">역할코드:</label>
-        <input type="text" id="permissionCode" th:field="*{permissionCode}" placeholder="예: ROLE_ADMIN" required>
+        <label for="permissionCode">권한 코드:</label>
+        <input type="text" id="permissionCode" th:field="*{permissionCode}" placeholder="예: USER:READ_LIST" required>
       </div>
 
       <div class="form-group">
-        <label for="permissionName">역할명:</label>
+        <label for="permissionName">권한 명:</label>
         <input type="text" id="permissionName" th:field="*{permissionName}" placeholder="예: 관리자" required>
       </div>
 
       <div class="form-group">
-        <label for="description">역할 내용:</label>
-        <textarea id="description" th:field="*{description}" rows="4" placeholder="역할에 대한 상세 설명을 입력하세요 (선택)"></textarea>
+        <label for="description">권한 설명:</label>
+        <textarea id="description" th:field="*{description}" rows="4" placeholder="권한에 대한 상세 설명을 입력하세요 (선택)"></textarea>
       </div>
 
-      <!-- 결과 테이블 영역 -->
-      <div class="table-area">
-        <table class="results-table">
-          <thead>
-          <tr>
-            <th scope="col">선택</th>
-            <th scope="col">번호</th>
-            <th scope="col">권한 코드</th>
-            <th scope="col">권한 명</th>
-<!--            <th scope="col">권한 설명</th>-->
-<!--            <th scope="col">수정</th>-->
-          </tr>
-          </thead>
-          <tbody id="resultsBody">
-          <!-- 검색 결과가 여기에 동적으로 추가됩니다 -->
-          <!-- 예시 행 (실제로는 JS로 생성) -->
-          <tr th:each="permission : ${adminPermissionList}">
-            <td>
-              <input type="checkbox"
-                     th:id="'perm-' + ${permission.permissionId}"
-                     name="permissionIds"
-                     th:value="${permission.permissionId}"
-                     th:checked="${roleInfo.permissionIds != null && #lists.contains(roleInfo.permissionIds, permission.permissionId)}"
-              />
-            </td>
-            <td th:text="${permission.permissionId}"></td>
-            <td th:text="${permission.permissionCode}"></td>
-            <td th:text="${permission.permissionName}"></td>
-<!--            <td th:text="${permission.description}"></td>-->
-            <!--          <td th:text="${#temporals.format(role.createDt, 'yyyy.MM.dd HH:mm')}"></td>-->
-<!--            <td><button type="button" class="btn-edit" data-group-id="3">수정</button></td>-->
-          </tr>
-          <tr th:if="${#lists.isEmpty(adminPermissionList)}">
-            <td colspan="5" class="no-data">조회된 역할 목록이 없습니다.</td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
+<!--      &lt;!&ndash; 결과 테이블 영역 &ndash;&gt;-->
+<!--      <div class="table-area">-->
+<!--        <table class="results-table">-->
+<!--          <thead>-->
+<!--          <tr>-->
+<!--            <th scope="col">선택</th>-->
+<!--            <th scope="col">번호</th>-->
+<!--            <th scope="col">권한 코드</th>-->
+<!--            <th scope="col">권한 명</th>-->
+<!--&lt;!&ndash;            <th scope="col">권한 설명</th>&ndash;&gt;-->
+<!--&lt;!&ndash;            <th scope="col">수정</th>&ndash;&gt;-->
+<!--          </tr>-->
+<!--          </thead>-->
+<!--          <tbody id="resultsBody">-->
+<!--          &lt;!&ndash; 검색 결과가 여기에 동적으로 추가됩니다 &ndash;&gt;-->
+<!--          &lt;!&ndash; 예시 행 (실제로는 JS로 생성) &ndash;&gt;-->
+<!--          <tr th:each="permission : ${adminPermissionList}">-->
+<!--            <td>-->
+<!--              <input type="checkbox"-->
+<!--                     th:id="'perm-' + ${permission.permissionId}"-->
+<!--                     name="permissionIds"-->
+<!--                     th:value="${permission.permissionId}"-->
+<!--                     th:checked="${roleInfo.permissionIds != null && #lists.contains(roleInfo.permissionIds, permission.permissionId)}"-->
+<!--              />-->
+<!--            </td>-->
+<!--            <td th:text="${permission.permissionId}"></td>-->
+<!--            <td th:text="${permission.permissionCode}"></td>-->
+<!--            <td th:text="${permission.permissionName}"></td>-->
+<!--&lt;!&ndash;            <td th:text="${permission.description}"></td>&ndash;&gt;-->
+<!--            &lt;!&ndash;          <td th:text="${#temporals.format(role.createDt, 'yyyy.MM.dd HH:mm')}"></td>&ndash;&gt;-->
+<!--&lt;!&ndash;            <td><button type="button" class="btn-edit" data-group-id="3">수정</button></td>&ndash;&gt;-->
+<!--          </tr>-->
+<!--          <tr th:if="${#lists.isEmpty(adminPermissionList)}">-->
+<!--            <td colspan="5" class="no-data">조회된 역할 목록이 없습니다.</td>-->
+<!--          </tr>-->
+<!--          </tbody>-->
+<!--        </table>-->
+<!--      </div>-->
 
       <!-- 폼 버튼 영역 -->
       <div class="button-area">
         <button type="submit" class="btn-save">저장</button>
         <!-- 취소 시 목록 페이지로 이동 -->
-        <a th:href="@{/admin/roles}" class="btn-cancel">취소</a>
+        <a th:href="@{/admin/permissions}" class="btn-cancel">취소</a>
         <!-- 또는 JS 사용 버튼:
         <button type="button" onclick="location.href='/admin/coupons'" class="btn-cancel">취소</button>
          -->

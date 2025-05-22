@@ -4,6 +4,8 @@ import com.wb.between.admin.dashboard.dto.DashboardResDto;
 import com.wb.between.admin.reservation.dto.ReservationListDto;
 import com.wb.between.admin.reservation.service.AdminReservationService;
 import com.wb.between.admin.seat.service.SeatAdminService;
+import com.wb.between.admin.user.dto.UserListDto;
+import com.wb.between.admin.user.service.AdminUserService;
 import com.wb.between.coupon.service.CouponService;
 import com.wb.between.reservation.reserve.service.ReservationService;
 import com.wb.between.user.service.UserService;
@@ -24,7 +26,7 @@ public class AdminDashboardService {
     private final SeatAdminService seatAdminService;
 
     //회원서비스
-    private final UserService userService;
+    private final AdminUserService adminUserService;
 
     //쿠폰서비스
     private final CouponService couponService;
@@ -45,6 +47,7 @@ public class AdminDashboardService {
         long availableSeats = totalSeats - occupiedSeats;
         if (availableSeats < 0) availableSeats = 0; // 혹시 모를 계산 오류 방지
 
+        //비율 계산
         double occupancyRateDouble = (totalSeats == 0) ? 0.0 : ((double) occupiedSeats / totalSeats) * 100.0;
         int occupancyRate = (int) Math.round(occupancyRateDouble);
 
@@ -54,13 +57,18 @@ public class AdminDashboardService {
         //오늘 수익
         BigDecimal revenue = adminReservationService.revenueByToday();
 
+
         //최근 5개 예약목록
         List<ReservationListDto> reservationList = adminReservationService.dashboardReservation();
+
+        //최근 회원 목록
+        List<UserListDto> userList = adminUserService.dashboadUser();
 
 
         return DashboardResDto.builder()
                 .todayCount(todayCount)
                 .reservationList(reservationList)
+                .userList(userList)
                 .totalSeats(totalSeats)
                 .occupiedSeats(occupiedSeats)
                 .occupancyRate(occupancyRate)

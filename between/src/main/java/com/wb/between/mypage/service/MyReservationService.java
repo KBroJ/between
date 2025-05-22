@@ -242,7 +242,31 @@ public class MyReservationService {
                     dto.setResNo(reservation.getResNo());
                     dto.setResDt(reservation.getResDt());
                     dto.setSeatNm(reservation.getSeat().getSeatNm()); // Reservation의 예약 날짜 (타입 변환 필요시 여기서 처리)
-//                    dto.setResStatus(reservation.getResStatus());
+                    dto.setResStatus(calculateStatusCode(reservation, LocalDateTime.now()));
+                    dto.setResStart(reservation.getResStart());
+                    dto.setResEnd(reservation.getResEnd());
+                    return dto;
+                })
+                .toList();
+
+        return dtoList;
+    }
+
+    public List<MyReservationDto> findWinbitReservation() {
+        LocalDateTime now = LocalDateTime.now();
+        String winbitEmail = "@winbit.kr";
+        List<Reservation> findWinbitReservation = myReservationRepository.findWinbitReservation(now, winbitEmail);
+
+        List<MyReservationDto> dtoList = findWinbitReservation.stream()
+                .map(reservation -> {
+                    MyReservationDto dto = new MyReservationDto();
+                    // Reservation 엔티티의 getter를 사용해 MyReservationDto의 setter로 값 설정
+                    dto.setResNo(reservation.getResNo());
+                    dto.setResDt(reservation.getResDt());
+                    dto.setSeatNm(reservation.getSeat().getSeatNm()); // Reservation의 예약 날짜 (타입 변환 필요시 여기서 처리)
+                    dto.setResStatus(calculateStatusCode(reservation, LocalDateTime.now()));
+                    dto.setResStart(reservation.getResStart());
+                    dto.setResEnd(reservation.getResEnd());
                     return dto;
                 })
                 .toList();

@@ -54,9 +54,17 @@ public interface MyReservationRepository extends JpaRepository<Reservation, Long
 
     //등록일 기준 최근 5개 조회
     @Query("SELECT r " +
-            "FROM Reservation r JOIN Seat s ON r.seatNo = s.seatNo " +      // Seat 테이블 조인 (좌석 이름 가져오기)
+            "FROM Reservation r JOIN FETCH Seat s ON r.seatNo = s.seatNo " +      // Seat 테이블 조인 (좌석 이름 가져오기)
             "WHERE r.userNo = :userNo")
     List<Reservation> findTop5ByOrderByResDtDesc( @Param("userNo") Long userNo);
+
+    @Query("SELECT r " +
+            "FROM Reservation r " +
+            "JOIN FETCH Seat s ON r.seatNo = s.seatNo " +      // Seat 테이블 조인 (좌석 이름 가져오기)
+            "JOIN FETCH User u ON r.userNo = u.userNo " +
+            "WHERE r.resStart <= :now AND r.resEnd >= :now " +
+            "AND u.email LIKE CONCAT('%', :winbitEmail, '%')")
+    List<Reservation> findWinbitReservation(@Param("now") LocalDateTime now, @Param("winbitEmail") String winbitEmail);
 
     /**
      * 마이페이지 예약 내역 조회 (JPQL @Query 사용)

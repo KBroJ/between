@@ -73,4 +73,8 @@ public class AdminPermissionService {
         adminPermissionRepository.save(permission);
     }
 
+    // 삭제
+    public void deletePermission(Long permissionId) {
+        adminPermissionRepository.deleteById(permissionId);
+    }
 }

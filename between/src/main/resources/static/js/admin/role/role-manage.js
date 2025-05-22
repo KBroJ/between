@@ -13,10 +13,11 @@ $(document).ready(function(){
                     url:`/admin/roles/delete/${roleId}`,
                     type: 'DELETE',
                     success: function (data) {
-
+                        alert("삭제에 성공했습니다.")
+                        location.reload();
                     },
                     error: function (data) {
-
+                        alert("삭제에 실패했습니다.")
                     }
                 })
             }

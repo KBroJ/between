@@ -85,5 +85,13 @@ public class AdminPopupService {
         adminPopupRepository.save(popups);
     }
 
+    /**
+     * 삭제
+     * @param popupId
+     */
+    public void deletePopup(Long popupId) {
+        adminPopupRepository.deleteById(popupId);
+    }
+
 
 }

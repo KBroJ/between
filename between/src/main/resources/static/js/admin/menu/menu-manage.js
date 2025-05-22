@@ -56,6 +56,11 @@ $(function () {
     $('#addBtn').on('click', function() {
         prepareNewMenu();
     });
+    
+    //갱신
+    $('#refreshBtn').on('click', function() {
+        refreshMenu();
+    })
 
     // 저장
     $('#saveBtn').on('click', function() {
@@ -190,12 +195,17 @@ function saveMenu() {
         menuData[item.name] = item.value;
     });
 
+    // 동적으로 생성된 체크박스 (allowedRoles) 값 수집
+    // 체크된 항목들의 roleId를 배열로 만듭니다.
+    const allowedRoles = [];
+    $('#roleCheckboxes input[name="allowedRoles"]:checked').each(function() {
+        allowedRoles.push($(this).val()); // 체크된 체크박스의 value (roleId)를 배열에 추가
+    });
+    menuData['allowedRoles'] = allowedRoles; // 배열 형태로 menuData에 추가
+
     const menuNo = $('#menuNo').val(); // 숨겨진 menuNo 값 확인
     const isNew = !menuNo; // menuNo가 없으면 새 메뉴
 
-    console.log("isNew = ", isNew);
-    console.log("menuNo = ", menuNo);
-    console.log("menyType = ", $("#menuType").val());
     const url = isNew ? '/admin/menus/regist' : '/admin/menus/edit/' + menuNo;
     const method = isNew ? 'POST' : 'PUT';
 
@@ -250,5 +260,19 @@ function deleteMenu() {
             }
         })
     }
+}
 
+//메뉴 갱신
+function refreshMenu() {
+
+    $.ajax({
+        url: '/admin/menus/refresh',
+        type: 'GET',
+        success: function (data) {
+            alert("메뉴 갱신에 성공하였습니다.")
+        },
+        error: function (data) {
+            alert("메뉴 갱신에 실패하였습니다.")
+        }
+    });
 }

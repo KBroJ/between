@@ -56,7 +56,7 @@
 button {
     padding: 8px 15px;
     border: none;
-    border-radius: 3px;
+    /*border-radius: 3px;*/
     cursor: pointer;
     font-size: 14px;
 }
@@ -118,10 +118,19 @@ button {
     color: white;
     padding: 5px 10px; /* 테이블 내 버튼 크기 조정 */
     font-size: 12px;
+    text-decoration: none;
 }
 .results-table .btn-edit:hover {
     background-color: #5a6268;
 }
+
+.results-table .delete-button {
+    background-color: #6c757d;
+    color: white;
+    padding: 5px 10px; /* 테이블 내 버튼 크기 조정 */
+    font-size: 12px;
+}
+
 
 /* 페이지네이션 영역 스타일 */
 .pagination-area {

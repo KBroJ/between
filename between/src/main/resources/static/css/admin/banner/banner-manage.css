@@ -7,325 +7,254 @@
     padding-bottom: 10px;
 }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
+.content-container {
     background-color: #fff;
-    padding: 25px 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
 }
 
-.title-icon {
-    width: 24px;
-    height: 24px;
+/* 검색 영역 스타일 */
+.search-area {
+    background-color: #f8f9fa; /* 약간 밝은 배경 */
+    padding: 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    display: flex; /* 요소들을 가로로 배치 */
+    justify-content: space-between; /* 양쪽 끝으로 정렬 */
+    align-items: center;
+}
+
+.search-area .form-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0; /* search-area 내부 form-group 마진 제거 */
+}
+
+.search-area label {
+    /* display: inline-block; */ /* flex 사용 시 불필요 */
+    width: 100px; /* 라벨 너비 */
+    font-weight: bold;
     margin-right: 10px;
-    opacity: 0.7; /* Adjust as needed */
+    color: #555;
+    text-align: right;
 }
 
-/* Buttons */
-.btn {
+.search-area input[type="text"] {
+    /* flex: 1; */ /* 필요 시 너비 자동 조절 */
+    width: 250px; /* 너비 지정 */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    margin-right: 10px; /* 검색 버튼과의 간격 */
+}
+
+/* 기본 버튼 스타일 (이전과 유사하게) */
+button {
     padding: 8px 15px;
     border: none;
-    border-radius: 5px;
+    /*border-radius: 3px;*/
     cursor: pointer;
-    font-size: 0.95em;
-    transition: background-color 0.2s ease;
-    text-decoration: none; /* For potential <a> styled as buttons */
-    display: inline-block; /* Consistency */
-    margin-right: 5px; /* Spacing between buttons */
+    font-size: 14px;
 }
 
-.btn-primary {
-    background-color: #3498db;
+.btn-cancel {
+    background-color: #6c757d;
+    color: white;
+    padding: 5px 10px; /* 테이블 내 버튼 크기 조정 */
+    font-size: 12px;
+    text-decoration: none;
+}
+
+#searchBtn {
+    background-color: #007bff;
     color: white;
 }
-.btn-primary:hover {
-    background-color: #2980b9;
+#searchBtn:hover {
+    background-color: #0056b3;
 }
 
-.btn-secondary {
-    background-color: #ecf0f1;
-    color: #333;
-    border: 1px solid #bdc3c7;
-}
-.btn-secondary:hover {
-    background-color: #dadedf;
-}
-
-.btn-danger {
-    background-color: #e74c3c;
+.register-button { /* 등록 버튼 별도 스타일 */
+    background-color: #17a2b8; /* 정보성 색상 */
     color: white;
 }
-.btn-danger:hover {
-    background-color: #c0392b;
+.register-button:hover {
+    background-color: #138496;
 }
 
-.btn-sm {
-    padding: 5px 10px;
-    font-size: 0.85em;
-}
 
-/* Toolbar */
-.toolbar {
-    margin-bottom: 25px;
-    display: flex;
-    justify-content: flex-end; /* Align button to the right */
-}
-
-/* Banner List Table */
-.banner-list-container {
-    margin-top: 20px;
-}
-
-.banner-list {
+/* 테이블 영역 스타일 */
+.table-area {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
+    overflow-x: auto; /* 테이블 내용 많을 시 가로 스크롤 */
 }
 
-.banner-list th,
-.banner-list td {
-    border: 1px solid #ddd;
-    padding: 10px 12px;
-    text-align: left;
-    vertical-align: middle;
+.results-table {
+    width: 100%;
+    border-collapse: collapse; /* 테두리 겹치기 */
+    margin-bottom: 20px;
+    font-size: 14px;
+    table-layout: fixed; /* 컬럼 너비 고정 시 유용 */
 }
 
-.banner-list th {
-    background-color: #f2f2f2;
-    font-weight: bold;
-    font-size: 0.9em;
-    color: #555;
-}
-
-
-.col-order { width: 8%; text-align: center;}
-.col-preview { width: 15%; text-align: center;}
-.col-title { width: 30%; }
-.col-link { width: 22%; }
-.col-status { width: 10%; text-align: center;}
-.col-actions { width: 15%; text-align: center;}
-
-.order-handle span {
-    font-size: 1.2em;
-    color: #aaa;
-    display: inline-block;
-    margin-right: 5px;
+.results-table th,
+.results-table td {
+    border: 1px solid #ddd; /* 테이블 셀 테두리 */
+    padding: 10px; /* 셀 안쪽 여백 */
+    text-align: center; /* 기본 가운데 정렬 */
+    white-space: nowrap; /* 줄바꿈 방지 (필요 시) */
+    overflow: hidden; /* 내용 넘칠 때 숨김 */
+    text-overflow: ellipsis; /* 넘치는 텍스트 ... 처리 */
 }
 
 .banner-thumbnail {
-    max-width: 100px;
-    max-height: 40px; /* Adjust as needed */
+    max-width: 150px;
+    max-height: 60px; /* Adjust as needed */
     object-fit: contain; /* Or 'cover' */
     display: block;
     margin: 0 auto;
 }
 
-.banner-list td a {
-    color: #3498db;
+.results-table th {
+    background-color: #f2f2f2; /* 헤더 배경색 */
+    font-weight: bold;
+}
+
+/* 관리 컬럼의 수정 버튼 */
+.results-table .btn-edit {
+    background-color: #6c757d;
+    color: white;
+    padding: 5px 10px; /* 테이블 내 버튼 크기 조정 */
+    font-size: 12px;
     text-decoration: none;
-    word-break: break-all; /* Prevent long URLs from breaking layout */
 }
-.banner-list td a:hover {
-    text-decoration: underline;
-}
-
-.actions .btn {
-    margin: 0 3px; /* Spacing within actions cell */
+.results-table .btn-edit:hover {
+    background-color: #5a6268;
 }
 
-/* List Actions (Save Order) */
-.list-actions {
+/* 관리 컬럼의 삭제 버튼 */
+.results-table .btn-delete {
+    background-color: #6c757d;
+    color: white;
+    padding: 5px 10px; /* 테이블 내 버튼 크기 조정 */
+    font-size: 12px;
+}
+.results-table .btn-delete:hover {
+    background-color: #5a6268;
+}
+
+/* 페이지네이션 영역 스타일 */
+.pagination-area {
+    text-align: center;
     margin-top: 20px;
-    text-align: right;
-}
-.list-actions small {
-    display: block;
-    margin-top: 5px;
-    color: #777;
-    font-size: 0.85em;
 }
 
-
-/* Status Toggle Switch CSS */
-.switch {
-    position: relative;
+.pagination-area .page-link {
     display: inline-block;
-    width: 44px; /* Adjusted size */
-    height: 24px; /* Adjusted size */
-    vertical-align: middle;
-    margin-right: 5px;
-}
-
-.switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    transition: .4s;
-}
-
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 18px; /* Adjusted size */
-    width: 18px;  /* Adjusted size */
-    left: 3px;    /* Adjusted position */
-    bottom: 3px;   /* Adjusted position */
-    background-color: white;
-    transition: .4s;
-}
-
-input:checked + .slider {
-    background-color: #2ecc71; /* Active color */
-}
-
-input:focus + .slider {
-    box-shadow: 0 0 1px #2ecc71;
-}
-
-input:checked + .slider:before {
-    transform: translateX(20px); /* Adjusted movement */
-}
-
-.slider.round { border-radius: 24px; } /* Adjusted radius */
-.slider.round:before { border-radius: 50%; }
-
-/* Status Text */
-.status-text {
-    font-size: 0.9em;
-    font-weight: bold;
-    vertical-align: middle;
-}
-.status-active { color: #27ae60; }
-.status-inactive { color: #95a5a6; }
-
-
-/* Modal Form Styles */
-.modal {
-    position: fixed; /* Stay in place */
-    z-index: 1000; /* Sit on top */
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
-}
-
-.modal-content {
-    background-color: #fefefe;
-    margin: 10% auto; /* Centered */
-    padding: 30px;
-    border: 1px solid #888;
-    width: 80%; /* Could be more specific */
-    max-width: 600px;
-    border-radius: 8px;
-    position: relative;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-}
-
-.close-btn {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    position: absolute;
-    top: 10px;
-    right: 20px;
-}
-
-.close-btn:hover,
-.close-btn:focus {
-    color: black;
+    padding: 5px 10px;
+    margin: 0 3px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    color: #007bff;
     text-decoration: none;
-    cursor: pointer;
+    border-radius: 3px;
 }
 
-/* Form Styles */
-#banner-form .form-group {
-    margin-bottom: 20px;
+.pagination-area .page-link:hover {
+    background-color: #e9ecef;
 }
 
-#banner-form label {
-    display: block;
-    margin-bottom: 5px;
+.pagination-area .current-page {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
     font-weight: bold;
-    color: #555;
-    font-size: 0.9em;
 }
 
-#banner-form input[type="text"],
-#banner-form input[type="url"],
-#banner-form input[type="file"],
-#banner-form input[type="date"] {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1em;
-}
-#banner-form input[type="file"] {
-    padding: 5px;
-}
+/* --- 이전에 정의된 다른 스타일들 ... --- */
 
-#banner-form .required {
-    color: #e74c3c;
-    margin-left: 3px;
-}
-
-#banner-form small {
-    display: block;
-    font-size: 0.8em;
-    color: #777;
-    margin-top: 3px;
-}
-
-#banner-form .radio-label {
-    display: inline-block;
-    margin-right: 15px;
-    font-weight: normal;
-}
-#banner-form input[type="radio"] {
-    margin-right: 5px;
-    vertical-align: middle;
-}
-
-.image-preview {
-    display: block;
-    max-width: 200px;
-    max-height: 100px;
-    margin-top: 10px;
-    border: 1px solid #eee;
-    padding: 5px;
-}
-
-.date-group {
+/* 메뉴 관리 화면과 공유하는 스타일 조정 (필요 시) */
+/* 예: .form-group, label, input[type="text"] 등의 공통 스타일 */
+.form-group {
+    margin-bottom: 15px; /* 기본 폼 그룹 마진 */
     display: flex;
-    gap: 20px; /* Space between date inputs */
-}
-.date-group > div {
-    flex: 1; /* Make them share space equally */
+    align-items: center;
+    /* flex-wrap: wrap; */ /* 필요 시 */
 }
 
-
-.form-actions {
-    margin-top: 30px;
-    text-align: right;
-    padding-top: 20px;
-    border-top: 1px solid #eee;
+label {
+    /* 이전 스타일 유지 또는 조정 */
 }
 
-.form-actions .btn {
-    margin-left: 10px;
+input[type="text"], input[type="number"], textarea {
+    /* 이전 스타일 유지 또는 조정 */
+    /* flex: 1; */ /* 필요에 따라 */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+
+/* 페이징 네비게이션 */
+.pagination-nav {
+    margin-top: 25px;
+    text-align: center;
+}
+
+/* 페이징 리스트 */
+.pagination {
+    display: inline-block;
+    padding-left: 0;
+    margin: 0;
+    list-style: none;
+    border-radius: 4px;
+}
+
+.page-item {
+    display: inline; /* 가로 정렬 */
+}
+
+.page-item .page-link {
+    position: relative;
+    float: left; /* inline 요소 간 간격 제거 */
+    padding: 8px 12px;
+    margin-left: -1px; /* 테두리 겹침 처리 */
+    line-height: 1.42857143;
+    color: #0d6efd;
+    text-decoration: none;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out;
+}
+.page-item:first-child .page-link {
+    margin-left: 0;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+}
+.page-item:last-child .page-link {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.page-item .page-link:hover {
+    z-index: 2;
+    color: #0a58ca;
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+}
+
+.page-item.active .page-link {
+    z-index: 3;
+    color: #fff;
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+    cursor: default;
+    background-color: #fff;
+    border-color: #dee2e6;
 }

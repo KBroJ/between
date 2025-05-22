@@ -1,10 +1,9 @@
-package com.wb.between.menurole;
+package com.wb.between.menurole.domain;
 
 import com.wb.between.admin.role.domain.Role;
 import com.wb.between.menu.domain.Menu;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -13,6 +12,9 @@ import java.time.LocalDateTime;
 @Table(name = "menurole")
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class MenuRole {
 
     @Id

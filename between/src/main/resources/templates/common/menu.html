@@ -3,7 +3,7 @@
 <div th:fragment="commonMenu">
     <nav class="nav-menu">
         <div th:if="${#authorization.expression('isAuthenticated()')}">
-            <span th:text="${#authentication.name}">사용자 이메일</span> 님 환영합니다!
+            <span sec:authorize="hasRole('ADMIN')">(관리자)</span><span th:text="${#authentication.name}">사용자 이메일</span> 님 환영합니다!
         </div>
         <ul>
             <li th:each="menu : ${headerMenus}">
@@ -11,7 +11,7 @@
             </li>
             <!-- ROLE_ADMIN 권한이 있는 유저에게만 보이기 -->
             <li sec:authorize="hasRole('ADMIN')">
-                <a th:href="@{/admin/dashboard}" th:text="관리권한"></a>
+                <a th:href="@{/admin/dashboard}" th:text="관리"></a>
             </li>
         </ul>
     </nav>

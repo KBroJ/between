@@ -9,6 +9,8 @@ import com.wb.between.common.exception.CustomException;
 import com.wb.between.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +38,12 @@ public class AdminBannerService {
      * 관리자 > 배너 조회
      * @return
      */
+    public Page<AdminBannerResDto> findBannerList(Pageable pageable, String searchBannerName) {
+        Page<Banner> bannerList = adminBannerRepository.findBannerList(pageable, searchBannerName);
+        return bannerList.map(AdminBannerResDto::from);
+    }
+
+
     public List<AdminBannerResDto> findAll() {
 
         List<Banner> sortedBannerList = adminBannerRepository.findAll(Sort.by(Sort.Direction.ASC, "sortOrder"));
@@ -138,12 +146,13 @@ public class AdminBannerService {
         String tempUploadPath = "/tmp/banner_uploads"; // 예시 경로 (Windows: "C:/temp/banner_uploads")
         Path uploadDirectory = Paths.get(tempUploadPath);
 
-
         banner.setBTitle(adminBannerEditReqDto.getBTitle());
         banner.setBImageUrl(adminBannerEditReqDto.getBImageUrl());
+        banner.setSortOrder(adminBannerEditReqDto.getSortOrder());
         banner.setStartDt(adminBannerEditReqDto.getStartDt());
         banner.setEndDt(adminBannerEditReqDto.getEndDt());
         banner.setUseAt(adminBannerEditReqDto.getUseAt());
+
 
     }
 

@@ -31,10 +31,16 @@ public class MenuCacheService {
     }
 
     /**
-     * 관리자 사이다브 메뉴 조회
+     * 관리자 사이드바 메뉴 조회
      */
     @Cacheable(cacheNames = "adminSideMenus", key = "'adminSideMenus'")
     public List<Menu> getAdminSideMenu() {
         return menuRepository.findByUseAtAndMenuType("Y", "ADMIN", Sort.by(Sort.Direction.ASC, "sortOrder"));
+    }
+
+    /** 메뉴가 변경됐을 때(관리자 수정 등) 캐시를 비우고 새로 로딩 */
+    @CacheEvict(cacheNames = "adminSideMenus", key = "'adminSideMenus'")
+    public void refreshSideMenus() {
+        // 빈 메서드. @CacheEvict만으로 캐시 초기화.
     }
 }

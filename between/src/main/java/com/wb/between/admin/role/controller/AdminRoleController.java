@@ -17,6 +17,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -129,7 +130,11 @@ public class AdminRoleController {
 
         if (bindingResult.hasErrors()) {
             // 유효성 검사 실패 시, 다시 등록 폼으로 이동 (오류 메시지 표시됨)
-            return "admin/roles/role-edit";
+            List<FieldError> fieldErrors = bindingResult.getFieldErrors();
+            for (FieldError error : fieldErrors) {
+                log.debug("field => {}, message => {}", error.getField(), error.getDefaultMessage());
+            }
+            return "admin/role/role-edit";
         }
 
         try {
@@ -140,11 +145,11 @@ public class AdminRoleController {
             return "redirect:/admin/roles/edit/" + roleId;
         } catch (CustomException ex) {
             log.error("AdminRoleController|editRole|error = {}", ex.getMessage());
-            return "admin/roles/role-edit";
+            return "admin/role/role-edit";
         } catch (RuntimeException e) {
             // 예상치 못한 다른 종류의 예외 처리
             log.error("예상치 못한 오류 발생 => {}", e.getMessage());
-            return "admin/roles/role-edit";
+            return "admin/role/role-edit";
         }
 
     }

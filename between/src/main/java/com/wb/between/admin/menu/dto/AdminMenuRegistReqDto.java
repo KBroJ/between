@@ -29,20 +29,20 @@ public class AdminMenuRegistReqDto {
 
     private String menuType;
 
-    private List<String> roleName;
+    private List<Long> allowedRoles;
 
-    public static AdminMenuRegistReqDto from(Menu menu) {
-        return AdminMenuRegistReqDto.builder()
-                .menuNo(menu.getMenuNo())
-                .upperMenuNo(menu.getUpperMenuNo())
-                .menuNm(menu.getMenuNm())
-                .menuDsc(menu.getMenuDsc())
-                .menuUrl(menu.getMenuUrl())
-                .useAt(menu.getUseAt())
-                .sortOrder(menu.getSortOrder())
-                .menuType(menu.getMenuType())
-                .build();
-    }
+//    public static AdminMenuRegistReqDto from(Menu menu) {
+//        return AdminMenuRegistReqDto.builder()
+//                .menuNo(menu.getMenuNo())
+//                .upperMenuNo(menu.getUpperMenuNo())
+//                .menuNm(menu.getMenuNm())
+//                .menuDsc(menu.getMenuDsc())
+//                .menuUrl(menu.getMenuUrl())
+//                .useAt(menu.getUseAt())
+//                .sortOrder(menu.getSortOrder())
+//                .menuType(menu.getMenuType())
+//                .build();
+//    }
 
 
 }

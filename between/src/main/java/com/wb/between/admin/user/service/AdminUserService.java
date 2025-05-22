@@ -374,5 +374,13 @@ public class AdminUserService {
     // TODO: 회원 정보 수정(등급/상태) 및 탈퇴 처리 로직 구현 필요
 
 
+    /**
+     * 대시보드 최근 회원 조회
+     * @return
+     */
+    public List<UserListDto> dashboadUser() {
+      List<User> userList = adminUserRepository.findTop5ByOrderByCreateDtDesc();
+      return userList.stream().map(this::mapToUserListDto).toList();
+    }
 
 }

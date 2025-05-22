@@ -57,20 +57,77 @@
             <th>예약 번호</th>
             <th>예약 일시</th>
             <th>좌석명</th>
-            <th>이용 시간</th>
+            <th>시작 시간</th>
+            <th>종료 시간</th>
             <th>예약 상태</th>
           </tr>
           </thead>
           <tbody>
+          <tr th:if="${#lists.isEmpty(resentReservations)}">
+            <td colspan="6" class="text-center">최근 예약 내역이 없습니다.</td>
+          </tr>
             <tr th:each="reservation : ${resentReservations}">
               <td th:text="${reservation.resNo}"></td>
               <td th:text="${#temporals.format(reservation.resDt, 'yyyy.MM.dd HH:mm')}"></td>
               <td th:text="${reservation.seatNm}"></td>
+              <td th:text="${#temporals.format(reservation.resStart, 'yyyy.MM.dd HH:mm')}"></td>
+              <td th:text="${#temporals.format(reservation.resEnd, 'yyyy.MM.dd HH:mm')}"></td>
+              <td>
+                 <span th:switch="${reservation.resStatus}">
+                      <span th:case="'1'" class="status confirmed" th:text="예약완료"></span>
+                      <span th:case="'2'" class="status completed" th:text="이용완료"></span>
+                      <span th:case="'3'" class="status cancelled" th:text="취소"></span>
+                      <span th:case="*" class="status" th:text="${reservation.resStatus}"></span>
+                  </span>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
 
+    </section>
+
+    <hr class="card-divider">
+
+    <section class="info-section" th:if="${#strings.contains(userInfo.email, '@winbit.kr')}">
+      <h3 class="section-title">현재 이용 중인 회사 임직원</h3>
+      <div class="table-responsive">
+        <table class="reservation-table">
+          <thead>
+          <tr>
+            <th>예약 번호</th>
+            <th>예약 일시</th>
+            <th>좌석명</th>
+            <th>시작 시간</th>
+            <th>종료 시간</th>
+            <th>예약 상태</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:if="${#lists.isEmpty(winbitReservation)}">
+            <td colspan="6" class="text-center">최근 예약 내역이 없습니다.</td>
+          </tr>
+          <tr th:each="reservation : ${winbitReservation}">
+            <td th:text="${reservation.resNo}"></td>
+            <td th:text="${#temporals.format(reservation.resDt, 'yyyy.MM.dd HH:mm')}"></td>
+            <td th:text="${reservation.seatNm}"></td>
+            <td th:text="${#temporals.format(reservation.resStart, 'yyyy.MM.dd HH:mm')}"></td>
+            <td th:text="${#temporals.format(reservation.resEnd, 'yyyy.MM.dd HH:mm')}"></td>
+            <td>
+                 <span th:switch="${reservation.resStatus}">
+                      <span th:case="'1'" class="status confirmed" th:text="예약완료"></span>
+                      <span th:case="'2'" class="status completed" th:text="이용완료"></span>
+                      <span th:case="'3'" class="status cancelled" th:text="취소"></span>
+                      <span th:case="*" class="status" th:text="${reservation.resStatus}"></span>
+                  </span>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="info-section">
       <!-- Action Buttons -->
       <div class="card-footer">
         <button type="button" class="btn btn-secondary" onclick="location.href='/mypage/edit'">정보수정</button>
@@ -78,7 +135,18 @@
       </div>
 
     </section>
+
+
   </div><!-- 유저 객체 마지막 -->
 </section >
+<th:block layout:fragment="page-script">
+  <!-- JavaScript Alert 처리 (리다이렉션 후) -->
+  <script th:if="${alertMessage != null}" th:inline="javascript">
+    /*<![CDATA[*/
+    alert(/*[[${alertMessage}]]*/);
+    /*]]>*/
+  </script>
+</th:block>
+
 </body>
 </html>

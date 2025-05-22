@@ -10,15 +10,15 @@
 
 <section layout:fragment="admin-content">   <!-- Main Content -->
 
-  <h1 class="main-title">팝업 관리 화면</h1>
+  <h1 class="main-title">팝업 수정</h1>
   <div class="form-panel"> <!-- 클래스명 변경 -->
-    <form th:action="@{/admin/popup/edit}" th:object="${popupInfo}" method="post" id="popupForm" >
-      <input type="hidden" />
+    <form th:action="@{/admin/popup/edit/{popupId}(popupId=*{popupId})}" th:object="${popupInfo}" method="post" id="popupForm" >
+      <input type="hidden" name="_method" value="put" />
 
       <div class="form-group">
         <label for="title" class="form-label">팝업 제목 <span style="color: #dc3545;">*</span></label>
         <input type="text" class="form-control" id="title" th:field="*{title}" required>
-        <div class="field-error">제목 오류</div>
+<!--        <div class="field-error">제목 오류</div>-->
       </div>
 
       <div class="form-group">
@@ -27,19 +27,19 @@
         <div class="wysiwyg-editor-wrapper">
           <textarea class="form-control" id="content" name="contentBody" th:field="*{contentBody}" rows="10" placeholder="HTML 태그를 직접 입력하거나, 에디터를 사용하세요."></textarea>
         </div>
-        <div class="field-error">내용 오류</div>
+<!--        <div class="field-error">내용 오류</div>-->
       </div>
 
       <div class="form-row form-group"> <!-- form-row 추가 -->
         <div class="form-col form-col-6"> <!-- form-col 추가 -->
           <label for="startDate" class="form-label">노출 시작일 <span style="color: #dc3545;">*</span></label>
           <input type="datetime-local" class="form-control" id="startDate" th:field="*{startDt}" required>
-          <div  class="field-error">시작일 오류</div>
+<!--          <div  class="field-error">시작일 오류</div>-->
         </div>
         <div class="form-col form-col-6"> <!-- form-col 추가 -->
           <label for="endDate" class="form-label">노출 종료일 <span style="color: #dc3545;">*</span></label>
           <input type="datetime-local" class="form-control" id="endDate" th:field="*{endDt}" required>
-          <div  class="field-error">종료일 오류</div>
+<!--          <div  class="field-error">종료일 오류</div>-->
         </div>
       </div>
 
@@ -80,13 +80,13 @@
 <!--          <input type="number" class="form-control" id="height"  placeholder="예: 300">-->
 <!--          <small class="form-text">비워두면 자동</small>-->
 <!--        </div>-->
-        <div class="form-col form-col-6" style="align-self: center;"> <!-- 인라인 스타일보다 클래스 권장 -->
-          <label class="form-label">'오늘 하루 보지 않기' 버튼</label>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="useCloseToday" >
-            <label class="form-check-label" for="useCloseToday">사용</label>
-          </div>
-        </div>
+<!--        <div class="form-col form-col-6" style="align-self: center;"> &lt;!&ndash; 인라인 스타일보다 클래스 권장 &ndash;&gt;-->
+<!--          <label class="form-label">'오늘 하루 보지 않기' 버튼</label>-->
+<!--          <div class="form-check">-->
+<!--            <input class="form-check-input" type="checkbox" id="useCloseToday" >-->
+<!--            <label class="form-check-label" for="useCloseToday">사용</label>-->
+<!--          </div>-->
+<!--        </div>-->
       </div>
 
       <div class="button-group">

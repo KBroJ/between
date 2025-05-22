@@ -8,17 +8,18 @@ import com.wb.between.admin.role.repository.AdminRoleRepository;
 import com.wb.between.common.exception.CustomException;
 import com.wb.between.common.exception.ErrorCode;
 import com.wb.between.menu.domain.Menu;
+import com.wb.between.menu.repository.MenuRepository;
 import com.wb.between.menu.service.MenuCacheService;
+import com.wb.between.menurole.domain.MenuRole;
+import com.wb.between.menurole.repository.MenuRoleRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -32,8 +33,14 @@ public class AdminMenuService {
     //역할
     private final AdminRoleRepository adminRoleRepository;
 
+    //메뉴 역할
+    private final MenuRoleRepository menuRoleRepository;
+
     //메뉴 캐시 서비스
     private final MenuCacheService menuCacheService;
+
+    private final EntityManager entityManager; // EntityManager 주입
+
 
     /**
      * 관리자 > 메뉴관리 - 최상단 메뉴조회
@@ -183,6 +190,13 @@ public class AdminMenuService {
         menuCacheService.refreshHeaderMenus();
     }
 
+    @Transactional
+    public void deleteAllMenuRolesForMenu(Long menuNo) {
+        log.info("Deleting all MenuRoles for menuNo: {}", menuNo);
+        menuRoleRepository.deleteByRoleByMenuNo(menuNo);
+        // 이 트랜잭션이 커밋되면 DB에 DELETE 반영
+    }
+
     /**
      * 관리자 > 메뉴 수정
      * @param menuNo
@@ -190,7 +204,7 @@ public class AdminMenuService {
      */
     @Transactional
     public void editMenu(Long menuNo, AdminMenuEditReqDto adminMenuEditReqDto) {
-        Menu menu = adminMenuRepository.findById(menuNo).orElseThrow(() -> new CustomException(ErrorCode.MENU_NOT_FOUND));
+        Menu menu = adminMenuRepository.findByMenuNo(menuNo).orElseThrow(() -> new CustomException(ErrorCode.MENU_NOT_FOUND));
      
         menu.setMenuNm(adminMenuEditReqDto.getMenuNm());
         menu.setMenuDsc(adminMenuEditReqDto.getMenuDsc());
@@ -199,6 +213,40 @@ public class AdminMenuService {
         menu.setUpperMenuNo(adminMenuEditReqDto.getUpperMenuNo());
         menu.setMenuType(adminMenuEditReqDto.getMenuType());
         menu.setMenuUrl(adminMenuEditReqDto.getMenuUrl());
+
+        log.debug("menu.getMenuRoles() => {}", menu.getMenuRoles());
+
+        List<Long> newRoleIds = adminMenuEditReqDto.getAllowedRoles();
+
+        if (menu.getMenuRoles() != null) { // null 체크는 방어적으로 해주는 것이 좋음
+            menu.getMenuRoles().clear(); // 영속성 컨텍스트에서 기존 MenuRole들을 '삭제 예정'으로 표시
+            // orphanRemoval=true 이므로 트랜잭션 커밋 시 DB에서도 DELETE됨
+        } else {
+            menu.setMenuRoles(new HashSet<>()); // 만약 컬렉션이 null이었다면 초기
+        }
+
+
+        if(newRoleIds != null) {
+            for(Long roleId : newRoleIds) {
+                log.debug("editMenu|roleId ==> {}", roleId);
+
+                //역할 조회
+                Role role = adminRoleRepository.findById(roleId)
+                        .orElseThrow(()-> new CustomException(ErrorCode.INVALID_INPUT));
+
+                log.debug("editMenu|role ==> {}", role);
+
+                MenuRole menuRole = MenuRole.builder()
+                        .menu(menu)
+                        .role(role)
+                        .createDt(LocalDateTime.now())
+                        .build();
+                //메뉴-역할 세팅
+                menu.getMenuRoles().add(menuRole);
+            }
+        }
+
+        adminMenuRepository.save(menu);
 
         //메뉴 캐시 갱신
         menuCacheService.refreshHeaderMenus();
@@ -214,6 +262,11 @@ public class AdminMenuService {
         adminMenuRepository.deleteById(menuNo);
 
         //메뉴 캐시 갱신
+        menuCacheService.refreshHeaderMenus();
+    }
+
+    //메뉴 갱신
+    public void refreshMenu(){
         menuCacheService.refreshHeaderMenus();
     }
 }

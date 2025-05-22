@@ -9,17 +9,11 @@
 </head>
 <body>
 <div layout:fragment="mypage-content">
-  <div class="detail-card" th:object="${userInfo}">
+  <h1 class="main-title">회원정보 수정</h1>
+  <div class="card info-card" th:object="${userInfo}">
     <form th:action="@{/mypage/edit}" method="post" class="profile-form">
       <!-- put 처리 -->
       <input type="hidden" name="_method" value="put" />
-      <h2 class="card-title">
-        <i class="fa-solid fa-user-circle card-title-icon"></i>
-        회원정보 수정
-      </h2>
-
-      <hr class="card-divider">
-
       <section class="info-section">
         <div class="info-grid">
           <div class="form-group">
@@ -49,11 +43,11 @@
   </div>
 
 
-  <h1 class="main-title">회원정보 수정</h1>
-  <div class="card info-card" th:object="${userInfo}">
-    <div class="card-header">
+<!--  <h1 class="main-title">회원정보 수정</h1>-->
+<!--  <div class="card info-card" th:object="${userInfo}">-->
+<!--    <div class="card-header">-->
 
-    </div>
+<!--    </div>-->
 <!--    <div th:object="${userInfo}">-->
 <!--      <form th:action="@{/mypage/edit}" method="post" class="profile-form">-->
 <!--        &lt;!&ndash; put 처리 &ndash;&gt;-->
@@ -153,6 +147,11 @@
       });
 
     });
+  </script>
+  <script th:if="${alertMessage != null}" th:inline="javascript">
+    /*<![CDATA[*/
+    alert(/*[[${alertMessage}]]*/);
+    /*]]>*/
   </script>
 </th:block>
 </body>

@@ -4,6 +4,8 @@ import com.wb.between.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import java.util.List;
+
 /*
     동적 쿼리 생성을 위해 JpaSpecificationExecutor를 상속
         findAll(Specification<T> spec, Pageable pageable)과 같은 메소드를 사용할 수 있게 됨
@@ -17,4 +19,5 @@ public interface AdminUserRepository extends JpaRepository<User, Long>, JpaSpeci
     // 사용자 전화번호로 사용자 조회
     User findByPhoneNo(String phoneNo);
 
+    List<User> findTop5ByOrderByCreateDtDesc();
 }

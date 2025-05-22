@@ -2,14 +2,14 @@
 $(document).ready(function () {
     const tableBody = $('#resultsBody');
     if(tableBody) {
-        tableBody.on('click', '.delete-btn', function () {
+        tableBody.on('click', '.delete-button', function () {
             const delButton = $(this);
-            const bNo = delButton.data('bno');
-            console.log("bNo => ", bNo);
+            const popupId = delButton.data('popupid');
+            console.log("popupId => ", popupId);
 
-            if(confirm('정말 이 배너를 삭제하시겠습니까? (ID: ' + bNo + ')')) {
+            if(confirm('정말 이 권한를 삭제하시겠습니까? (ID: ' + popupId + ')')) {
                 $.ajax({
-                    url: `/admin/banner/delete/${bNo}`,
+                    url: `/admin/popup/delete/${popupId}`,
                     type: 'DELETE',
                     success: function (data) {
                         alert("삭제에 성공했습니다.")

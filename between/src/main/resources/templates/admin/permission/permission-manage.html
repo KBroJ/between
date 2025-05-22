@@ -4,14 +4,14 @@
       layout:decorate="~{layout/admin/admin}">
 <head>
   <title>관리자 화면</title>
-  <link rel="stylesheet" th:href="@{/css/admin/permission-manage.css}">
+  <link rel="stylesheet" th:href="@{/css/admin/permission/permission-manage.css}">
   <link rel="stylesheet" th:href="@{/css/common/pagination.css}">
 </head>
 <body>
 
 <section layout:fragment="admin-content">   <!-- Main Content -->
 
-  <h1 class="main-title">권한 관리 화면</h1>
+  <h1 class="main-title">권한 관리</h1>
   <div class="content-container">
     <!-- 상단 검색 영역 -->
     <form id="searchForm" class="search-area">
@@ -47,7 +47,7 @@
 <!--          <td th:text="${#temporals.format(role.createDt, 'yyyy.MM.dd HH:mm')}"></td>-->
           <td>
             <a th:href="@{/admin/permissions/edit/{permissionId}(permissionId=${permission.permissionId})}" class="btn-edit">수정</a>
-            <button type="button" class="btn-edit">삭제</button>
+            <button type="button" class="delete-btn" th:data-permissionId="${permission.permissionId}">삭제</button>
           </td>
         </tr>
         <tr th:if="${#lists.isEmpty(adminPermissionList)}">
@@ -64,5 +64,9 @@
     </div>
   </div>
 </section >
+<th:block layout:fragment="page-script">
+  <!-- 커스텀 JavaScript -->
+  <script th:src="@{/js/admin/permission/permission-manage.js}"></script>
+</th:block>
 </body>
 </html>

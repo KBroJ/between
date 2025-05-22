@@ -143,4 +143,14 @@ public class AdminPermissionController {
        }
       
     }
+
+    /**
+     * 권한 삭제
+     * @param permissionId
+     */
+    @ResponseBody
+    @DeleteMapping("/delete/{permissionId}")
+    public void deletePermission(@PathVariable("permissionId") Long permissionId) {
+        adminPermissionService.deletePermission(permissionId);
+    }
 }

@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -24,9 +25,9 @@ public class BannerService {
      * @return
      */
     public List<BannerListResponseDto> findBannerList() {
-
+        LocalDateTime now = LocalDateTime.now();
         //배너목록 조회
-        List<Banner> bannerList = bannerRepository.findByUseAt("Y", Sort.by(Sort.Direction.ASC, "sortOrder"));
+        List<Banner> bannerList = bannerRepository.findBannerByUseAt("Y", now);
 
         return bannerList.stream().map(BannerListResponseDto::from).toList();
     }

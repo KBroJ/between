@@ -52,6 +52,13 @@ public class MypageService {
     }
 
     /**
+     * 최근 예약 조회
+     */
+    public List<MyReservationDto> findWinbitReservation(){
+        return myReservationService.findWinbitReservation();
+    }
+
+    /**
      * 유저 정보 수정
      */
     @Transactional
