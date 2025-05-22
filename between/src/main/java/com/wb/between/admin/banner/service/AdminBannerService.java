@@ -67,6 +67,9 @@ public class AdminBannerService {
 
         // 개발 단계용 임시 업로드 경로 (주의: 실제 운영에서는 외부 설정으로 관리해야 합니다)
         String tempUploadPath = "/tmp/banner_uploads"; // 예시 경로 (Windows: "C:/temp/banner_uploads")
+        String webBasePath = "/tmp/banner_uploads"; // 브라우저용 URL 경로
+
+
         Path uploadDirectory = Paths.get(tempUploadPath);
 
         if(bannerImgFile != null && !bannerImgFile.isEmpty()) {
@@ -102,7 +105,7 @@ public class AdminBannerService {
             // DB에 저장할 이미지 URL 업데이트 (실제 서비스에서는 웹 접근 가능한 URL이어야 함)
             // 개발 단계에서는 저장된 파일 경로 또는 가상의 웹 경로를 사용할 수 있습니다.
             // 예: imageUrlForDb = "/uploaded-banners/" + storedFileName; (웹 서버 설정 필요)
-            imageUrlForDb = targetFilePath.toString(); // 여기서는 로컬 파일 시스템 경로를 그대로 사용 (개발용)
+            imageUrlForDb = webBasePath + "/" + storedFileName;
             log.info("DB에 저장될 이미지 경로: {}", imageUrlForDb);
         }
 

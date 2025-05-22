@@ -77,7 +77,7 @@ public class AdminBannerController {
         } catch (CustomException ex) {
             log.error("registMainBanner|error = {}", ex.getMessage());
             model.addAttribute("result", "fail");
-            return "admin/banner/banner-regist";
+            return "redirect:/admin/banner";
         } catch (RuntimeException e) {
             // 예상치 못한 다른 종류의 예외 처리
             log.error("예상치 못한 오류 발생 = {}", e.getMessage());

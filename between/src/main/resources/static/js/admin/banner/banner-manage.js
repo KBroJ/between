@@ -2,7 +2,7 @@
 $(document).ready(function () {
     const tableBody = $('#resultsBody');
     if(tableBody) {
-        tableBody.on('click', '.delete-btn', function () {
+        tableBody.on('click', '.btn-delete', function () {
             const delButton = $(this);
             const bNo = delButton.data('bno');
             console.log("bNo => ", bNo);
