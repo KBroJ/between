@@ -1,4 +1,4 @@
-/* static/css/mypage/reservation-detail.css */
+/* static/css/mypage/my-reservation-detail.css */
 
 .detail-card {
     background-color: #fff;
@@ -34,12 +34,6 @@
     gap: 15px 20px; /* 행/열 간격 */
 }
 
-/* 결제 정보 섹션 그리드는 다르게 설정 가능 */
-.payment-grid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-}
-
-
 .info-item {
     /* 개별 정보 항목 */
 }
@@ -59,39 +53,144 @@
     word-break: break-word; /* 긴 값 줄바꿈 */
 }
 
-/* 상태 뱃지 스타일은 my-reservations.css 재사용 */
-/* .status { ... } */
+/* 상태 뱃지 스타일은 my-reservations.css 또는 공통 CSS 재사용을 가정합니다. */
+/* 예시:
+.status {
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 10px;
+    color: white;
+    font-size: 0.85em;
+    display: inline-block;
+}
+.status.confirmed { background-color: #198754; }
+.status.completed { background-color: #6c757d; }
+.status.cancelled { background-color: #dc3545; }
+*/
 
 /* 할인 금액 스타일 */
 .discount-value {
     color: #dc3545; /* 빨간색 계열 */
 }
 
-/* 최종 결제 금액 강조 */
-.total-price-item {
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px dashed #ccc;
+/* --- 결제 정보 토글 관련 CSS --- */
+.payment-summary-container {
+    /* 특별한 스타일이 필요 없을 수 있지만, 구조를 위해 유지 */
+    /* margin-bottom은 .collapsible-content.expanded의 margin-top으로 제어 */
 }
-.total-price {
+
+.total-price-summary-item .info-label {
+    /* 기본 .info-label 스타일 사용 */
+}
+
+.total-price-value-wrapper {
+    display: flex; /* 금액 <p>와 토글 <button>을 가로로 정렬 */
+    align-items: center; /* 수직 중앙 정렬 */
+    gap: 10px; /* 금액과 버튼 사이 간격 */
+    flex-wrap: nowrap; /* 내부 요소들이 줄바꿈되지 않도록 */
+}
+
+.total-price-summary-item .total-price { /* .info-value 클래스에 이미 스타일이 적용될 수 있음 */
     font-weight: bold;
-    font-size: 1.15em;
-    color: #007bff; /* 파란색 계열 */
+    font-size: 1.2em; /* 최종 결제 금액 강조 */
+    color: #007bff;
+    margin: 0; /* flex item이므로 불필요한 margin 제거 */
+    white-space: nowrap; /* 금액이 길 경우 줄바꿈 방지 (선택 사항) */
 }
+
+.btn-toggle-details {
+    background-color: transparent;
+    border: 1px solid #007bff;
+    color: #007bff;
+    padding: 5px 10px; /* 버튼 크기 조정 */
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85em; /* 버튼 내 폰트 크기 조정 */
+    transition: background-color 0.2s ease, color 0.2s ease;
+    white-space: nowrap; /* 버튼 내 텍스트 줄바꿈 방지 */
+    flex-shrink: 0; /* 버튼 크기가 주변 요소에 의해 줄어들지 않도록 함 */
+}
+
+.btn-toggle-details:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-toggle-details .toggle-icon {
+    display: inline-block;
+    margin-left: 5px;
+    transition: transform 0.3s ease;
+}
+
+/* aria-expanded 상태에 따라 아이콘 회전 */
+.btn-toggle-details[aria-expanded="true"] .toggle-icon {
+    transform: rotate(180deg);
+}
+
+.collapsible-content {
+    overflow: hidden; /* 내용이 넘칠 경우 숨김 (애니메이션에 중요) */
+    transition: max-height 0.35s ease-out, opacity 0.3s ease-in-out, margin-top 0.35s ease-out;
+    max-height: 0; /* 초기에는 높이 0 (JS로 펼칠 때 실제 높이로 변경) */
+    opacity: 0; /* 초기에는 투명 (JS로 펼칠 때 1로 변경) */
+    margin-top: 0; /* 접혔을 때는 margin-top 없음. expanded 클래스에서 설정. */
+}
+
+.collapsible-content.expanded {
+    opacity: 1; /* 펼쳐졌을 때 불투명 */
+    margin-top: 20px; /* 펼쳐졌을 때 위의 .payment-summary-container 와의 간격 */
+}
+
+/* 결제 정보 상세 내역 그리드 (펼쳐졌을 때 적용) */
+#payment-details-collapsible.payment-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+/* --- 결제 정보 토글 관련 CSS 끝 --- */
 
 
 /* 버튼 영역 스타일 */
 .detail-actions {
     margin-top: 30px;
     padding-top: 20px;
-    border-top: 1px solid #eee;
     text-align: right; /* 버튼 오른쪽 정렬 */
 }
 
 .detail-actions .btn {
-    margin-left: 10px; /* 버튼 사이 간격 */
-    min-width: 100px; /* 버튼 최소 너비 */
+    padding: 10px 20px;
+    margin-left: 10px;
+    text-decoration: none;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+    line-height: 1.5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 100px;
 }
 
-/* 버튼 스타일(btn, btn-secondary, btn-primary, btn-cancel)은
-   my-reservations.css 또는 공통 CSS 에 정의된 스타일 재사용 */
+.detail-actions .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+.detail-area .btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.detail-actions .btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+.detail-area .btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.detail-actions .btn-cancel {
+    background-color: #dc3545;
+    color: white;
+}
+.detail-actions .btn-cancel:hover {
+    background-color: #c82333;
+}

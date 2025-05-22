@@ -73,5 +73,45 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // 예: 날짜 입력 필드 기본값 설정 등
+// =====================================================================================================================
+
+    // 결제 정보 토글 기능(my-reservation-detail.html 용)
+    const togglePaymentButton = document.getElementById('togglePaymentDetails');
+    const paymentDetailsCollapsible = document.getElementById('payment-details-collapsible');
+
+    if (togglePaymentButton && paymentDetailsCollapsible) {
+        togglePaymentButton.addEventListener('click', function() {
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+
+            if (isExpanded) {
+                // 접기
+                this.setAttribute('aria-expanded', 'false');
+                this.childNodes[0].nodeValue = "상세 보기 "; // 버튼 텍스트 변경 (첫 번째 자식 노드가 텍스트 노드여야 함)
+
+                paymentDetailsCollapsible.style.maxHeight = '0'; // 높이를 0으로 애니메이션
+                paymentDetailsCollapsible.classList.remove('expanded'); // opacity, margin-top 등 제거
+                // display: none;은 사용하지 않음. overflow:hidden과 maxHeight:0으로 숨김.
+                // HTML의 초기 style="display:none"은 JS 로드 전 숨김 용도.
+                // 접힌 후에는 display 속성을 변경하지 않아도, maxHeight와 overflow로 숨겨짐.
+            } else {
+                // 펼치기
+                this.setAttribute('aria-expanded', 'true');
+                this.childNodes[0].nodeValue = "간략히 보기 "; // 버튼 텍스트 변경
+
+                // HTML 인라인 스타일 display:none을 해제하고, 내용 계산 및 표시를 위해 grid로 변경
+                paymentDetailsCollapsible.style.display = 'grid';
+
+                // requestAnimationFrame을 사용하여 브라우저가 display 변경을 처리하고
+                // scrollHeight를 정확히 계산할 시간을 줌
+                requestAnimationFrame(() => {
+                    // 실제 내용의 높이만큼 maxHeight 설정하여 부드럽게 펼쳐지도록 함
+                    paymentDetailsCollapsible.style.maxHeight = paymentDetailsCollapsible.scrollHeight + "px";
+                    paymentDetailsCollapsible.classList.add('expanded'); // opacity, margin-top 등 적용
+                });
+            }
+        });
+    }
+
+
+
 });

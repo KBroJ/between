@@ -63,34 +63,38 @@
 
             <div class="detail-section">
                 <h2 class="section-title">결제 정보</h2>
-                <div class="info-grid payment-grid"> <div class="info-item">
-                    <label class="info-label">상품 금액</label>
-                    <p class="info-value" th:text="${#numbers.formatDecimal(reservationDetail.resPrice ?: 0, 0, 'COMMA', 0, 'POINT')} + '원'">
-                        [상품 금액]
-                    </p>
+                <div class="payment-summary-container">
+                    <div class="info-item total-price-summary-item">
+                        <label class="info-label">최종 결제 금액</label>
+                        <div class="total-price-value-wrapper">
+                            <p class="info-value total-price" th:text="${#numbers.formatDecimal(reservationDetail.totalPrice ?: 0, 0, 'COMMA', 0, 'POINT')} + '원'">
+                                [최종 금액]
+                            </p>
+                            <button type="button" id="togglePaymentDetails" class="btn-toggle-details" aria-expanded="false" aria-controls="payment-details-collapsible">
+                                상세 보기 <span class="toggle-icon">▼</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
+
+                <div id="payment-details-collapsible" class="info-grid payment-grid collapsible-content" style="display: none;">
                     <div class="info-item">
-                        <label class="info-label">할인 금액</label>
-                        <p class="info-value discount-value" th:text="'-' + ${#numbers.formatDecimal(reservationDetail.dcPrice ?: 0, 0, 'COMMA', 0, 'POINT')} + '원'">
-                            [할인 금액]
+                        <label class="info-label">상품 금액</label>
+                        <p class="info-value" th:text="${#numbers.formatDecimal(reservationDetail.resPrice ?: 0, 0, 'COMMA', 0, 'POINT')} + '원'">
+                            [상품 금액]
                         </p>
                     </div>
-                    <div class="info-item total-price-item">
-                        <label class="info-label">최종 결제 금액</label>
-                        <p class="info-value total-price" th:text="${#numbers.formatDecimal(reservationDetail.totalPrice ?: 0, 0, 'COMMA', 0, 'POINT')} + '원'">
-                            [최종 금액]
+                    <div class="info-item">
+                        <label class="info-label">할인 금액</label>
+                        <p class="info-value discount-value"
+                           th:text="${reservationDetail.dcPrice != null ? #numbers.formatDecimal(reservationDetail.dcPrice, 0, 'COMMA', 0, 'POINT') + '원' : '-'}">
+                            [할인 금액]
                         </p>
                     </div>
                     <div class="info-item">
                         <label class="info-label">결제 수단</label>
                         <p class="info-value" th:text="*{paymentMethod ?: '-'}">
                             [결제 수단]
-                        </p>
-                    </div>
-                    <div class="info-item">
-                        <label class="info-label">결제 승인 시각</label>
-                        <p class="info-value" th:text="*{paymentApproveDt != null ? #temporals.format(paymentApproveDt, 'yyyy.MM.dd HH:mm') : '-'}">
-                            [결제 시각]
                         </p>
                     </div>
                 </div>

@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // '탈퇴 처리' 버튼 클릭 이벤트
     if (deleteUserBtn && userNo) {  // 탈퇴 버튼, userNo가 존재할 때만 이벤트 리스너 추가
         deleteUserBtn.addEventListener('click', async function() {
-            if (confirm('정말로 이 회원을 탈퇴 처리하시겠습니까?\n이 작업은 되돌릴 수 없을 수 있습니다.')) {
+            if (confirm('정말로 이 회원을 탈퇴 처리하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) {
                 console.log('탈퇴 처리할 사용자 ID:', userNo); // 디버깅용 로그
 
                 this.disabled = true;

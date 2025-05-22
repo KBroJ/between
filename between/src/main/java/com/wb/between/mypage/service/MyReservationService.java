@@ -4,6 +4,8 @@ import com.wb.between.common.exception.CustomException;
 import com.wb.between.mypage.dto.MyReservationDetailDto;
 import com.wb.between.mypage.dto.MyReservationDto; // Import DTO
 import com.wb.between.mypage.repository.MyReservationRepository;
+import com.wb.between.pay.domain.Payment;
+import com.wb.between.pay.repository.PaymentRepository;
 import com.wb.between.reservation.reserve.domain.Reservation;
 import com.wb.between.reservation.seat.domain.Seat;
 import com.wb.between.reservation.seat.repository.SeatRepository;
@@ -11,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page; // Import Page
 import org.springframework.data.domain.Pageable; // Import Pageable
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +23,6 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -29,6 +31,7 @@ import java.util.Optional;
 public class MyReservationService {
 
     private final MyReservationRepository myReservationRepository; // 예약 리포지토리 주입
+    private final PaymentRepository paymentRepository; // 결제 리포지토리 주입
     private final SeatRepository seatRepository; // 좌석 리포지토리 주입
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -121,13 +124,22 @@ public class MyReservationService {
                     return null;
                 });
 
+
         // 2. 사용자 권한 확인
+        log.debug("findMyReservationDetail|사용자 확인|===> 접근회원번호(userNo): {}, 예약회원번호(getUserNo): {}", userNo, reservation.getUserNo());
         if (!reservation.getUserNo().equals(userNo)) {
             log.warn("Authorization denied for userNo {} trying to access reservation resNo {}", userNo, resNo);
-//            throw new AuthorizationDeniedException("해당 예약 정보에 접근할 권한이 없습니다.");
+            return null;
         }
 
-        // 3. 좌석 정보 조회
+        // 3. 결제 정보 조회 (PaymentRepository 사용)
+        Payment payment = paymentRepository.findByResNo(resNo)
+                .orElseThrow(() -> {
+                    log.warn("Payment not found for resNo: {}", reservation.getResNo());
+                    return null;
+                });
+
+        // 4. 좌석 정보 조회
         Seat seat = seatRepository.findById(reservation.getSeatNo())
                 .orElseGet(() -> {
                     log.warn("Seat not found for seatNo: {} (referenced by resNo: {})", reservation.getSeatNo(), resNo);
@@ -140,11 +152,18 @@ public class MyReservationService {
                     // 또는 return null; DTO 빌더에서 null 체크 필요
                 });
 
-
         // 4. DTO 생성 및 반환
         LocalDateTime now = LocalDateTime.now();
         String statusCode = calculateStatusCode(reservation, now);
         String displayStatus = getDisplayStatus(statusCode);
+
+        String paymentMethod = null;
+        if(payment.getPayProvider().equals("SYSTEM")) {
+            paymentMethod = "임직원 할인";
+        } else {
+            paymentMethod = payment.getPayProvider() + "/" + payment.getMethod();
+        }
+
         boolean canModify = calculateCanModify(reservation, now); // 예약 변경 가능 여부 로직
         boolean canCancel = calculateCanCancel(reservation, now); // 예약 취소 가능 여부 로직
 
@@ -164,8 +183,8 @@ public class MyReservationService {
                 // --- 결제 정보 ---
                 // 현재 Reservation 엔티티에 없으므로 임시로 null 또는 기본값 처리
                 // TODO: Payment 테이블 연동 시 실제 값 조회 로직 추가 필요
-                .paymentMethod(null) // 예: paymentService.getPaymentMethod(resNo)
-                .paymentApproveDt(null) // 예: paymentService.getPaymentApproveDt(resNo)
+                .paymentMethod(paymentMethod)
+                .paymentApproveDt(LocalDateTime.parse(payment.getPayApproveDt())) // 예: paymentService.getPaymentApproveDt(resNo)
                 // --- 액션 플래그 ---
                 .canModify(canModify)
                 .canCancel(canCancel)
