@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+    <head>
+        <title>회원가입 완료</title>
+        <link rel="stylesheet" th:href="@{/css/login/signup-success.css}">
+        <style>
+            .signup-success-container {
+                text-align: center;
+                padding: 50px 20px;
+                margin: 50px auto;
+                background-color: #fff;
+                border-radius: 8px;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                max-width: 600px;
+            }
+            .signup-success-container h2 {
+                color: #28a745;
+                margin-bottom: 20px;
+                font-size: 2em;
+            }
+            .signup-success-container p {
+                font-size: 1.1em;
+                margin-bottom: 15px;
+                color: #333;
+            }
+            .signup-success-container .welcome-message {
+                margin-bottom: 30px;
+            }
+            /* 카운트다운 메시지 스타일 추가 */
+            .redirect-countdown-message {
+                font-size: 0.95em;
+                color: #555;
+                margin-top: 25px; /* 버튼과의 간격 */
+                margin-bottom: 20px;
+            }
+            .redirect-countdown-message #countdown-seconds {
+                font-weight: bold;
+                color: #007bff;
+            }
+            .signup-success-container .btn-main {
+                display: inline-block;
+                padding: 12px 25px;
+                background-color: #007bff;
+                color: white;
+                text-decoration: none;
+                border-radius: 5px;
+                font-size: 1.1em;
+                transition: background-color 0.3s ease;
+            }
+            .signup-success-container .btn-main:hover {
+                background-color: #0056b3;
+            }
+        </style>
+    </head>
+
+    <body>
+        <main layout:fragment="content">
+
+            <div class="signup-success-container">
+                <h2>🎉 회원가입이 완료되었습니다! 🎉</h2>
+                <p class="welcome-message">
+                    <span th:if="${userName}" th:text="${userName} + '님, '"></span>
+                    BetWeen의 회원이 되신 것을 환영합니다!
+                </p>
+                <p>이제 다양한 서비스를 이용하실 수 있습니다.</p>
+                <a th:href="@{/}" class="btn-main">메인 페이지로 이동</a>
+
+                <p class="redirect-countdown-message" th:if="${#strings.isEmpty(param.noAutoRedirect)}">
+                    <span id="countdown-seconds">5</span>초 뒤에 자동으로 메인 페이지로 이동합니다.
+                </p>
+
+            </div>
+
+            <script th:if="${#strings.isEmpty(param.noAutoRedirect)}">
+                // DOM 요소 가져오기
+                const countdownDisplay = document.getElementById('countdown-seconds');
+                let timeLeft = 5; // 시작 시간 (초)
+
+                // 페이지 로드 시 초기 시간 표시 (HTML에 이미 '5'가 있지만, JS로 한번 더 설정 가능)
+                if (countdownDisplay) {
+                    countdownDisplay.textContent = timeLeft;
+                }
+
+                // 1초마다 카운트다운 업데이트
+                const timerId = setInterval(function() {
+                    timeLeft--; // 시간 감소
+                    if (countdownDisplay) {
+                        countdownDisplay.textContent = timeLeft; // 화면에 남은 시간 업데이트
+                    }
+
+                    // 0초가 되면 타이머 중지 및 페이지 이동
+                    if (timeLeft <= 0) {
+                        clearInterval(timerId); // 타이머 중지
+                        window.location.href = "[[@{/}]]"; // 메인 페이지로 리디렉션(타임리프 엔진을 사용하여 루프(웰컴)페이지로 이동)
+                    }
+                }, 1000); // 1000ms = 1초
+            </script>
+        </main>
+    </body>
+</html>

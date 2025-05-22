@@ -14,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -59,13 +60,16 @@ public class UserController {
             // signupRequest : 회원가입 정보를 담는 객체
             // BindingResult : 유효성 검사 결과를 담는 객체
             @Valid @ModelAttribute("user") SignupReqDto signupReqDto,
-            BindingResult result, Model model
+            BindingResult result, Model model,
+            HttpSession session, // HttpSession 파라미터 추가
+            RedirectAttributes redirectAttributes
     ) {
 
-        System.out.println("UserController|registerUser|signupRequest = " + signupReqDto);
+        log.info("UserController|registerUser|signupRequest = {}", signupReqDto);
 
         // SignupRequest 유효성 검사 실패 시 로그 출력
-        System.out.println("유효성 검사|result.hasErrors() = " + result.hasErrors());
+        log.info("유효성 검사|result.getAllErrors() = {}", result.getAllErrors());
+        log.info("유효성 검사|result.hasErrors() = {}", result.hasErrors());
         if (result.hasErrors()) {
 
             result.getAllErrors().forEach(error -> {
@@ -81,7 +85,7 @@ public class UserController {
                             ", 값=" + rejectedValue +
                             ", 메시지=" + errorMessage);
                 } else {
-                    System.out.println("유효성 검사 실패: " + error.getDefaultMessage());
+                    log.info("유효성 검사 실패: " + error.getDefaultMessage());
                 }
             });
 
@@ -91,9 +95,8 @@ public class UserController {
         try {
 
             // 회원가입 진행
-            System.out.println("UserController|registerUser|회원가입 진행 전");
             User user = userService.registerUser(signupReqDto);
-            System.out.println("UserController|registerUser|회원가입 진행 후 | user = " + user);
+            log.info("UserController|registerUser|회원가입 진행 후 | user = " + user);
 
             //쿠폰발급 진행, 쿠폰발급은 회원가입 흐름에 영향을 주지 않아야함
             if(user != null) {
@@ -102,15 +105,48 @@ public class UserController {
                 } catch (Exception e) {
                     log.error("회원가입 성공 후 쿠폰 발급 실패. 사용자: {}, 에러: {}", user.getUserNo(), e.getMessage(), e);
                 }
+
+                // 회원가입 성공 시 세션에 사용자 정보 저장(비정상적 접근 제한용)
+                session.setAttribute("signupFlowCompleted", true);
+                session.setAttribute("signupSuccessUserName", user.getName());
             }
 
-
-            return "redirect:/";
+//            return "redirect:/";
+            return "redirect:/signup-success";
 
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
             return "/signup";
         }
+    }
+
+    /**
+     * 회원가입 완료 페이지
+     */
+    @GetMapping("/signup-success")
+    public String signupSuccessPage(Model model, HttpSession session, RedirectAttributes redirectAttributes) {
+
+        // 세션에서 "signupFlowCompleted" 플래그 확인
+        Boolean signupFlowCompleted = (Boolean) session.getAttribute("signupFlowCompleted");
+
+        if (Boolean.TRUE.equals(signupFlowCompleted)) {
+            // 정상적인 접근: 플래그 사용 후 세션에서 제거
+            log.info("회원가입 완료 페이지 정상 접근");
+            String userName = (String) session.getAttribute("signupSuccessUserName");
+            if (userName != null) {
+                model.addAttribute("userName", userName);
+                session.removeAttribute("signupSuccessUserName"); // 사용자 이름 정보도 제거
+            }
+            session.removeAttribute("signupFlowCompleted"); // 플래그 제거
+            return "login/signup-success";
+        } else {
+            // 비정상적인 접근: 메인 페이지로 리디렉션
+            log.warn("회원가입 완료 페이지 비정상 접근 시도. 메인 페이지로 리디렉션합니다.");
+//            redirectAttributes.addFlashAttribute("alertMessage", "잘못된 접근입니다."); // 메인 페이지에서 보여줄 메시지
+
+            return "redirect:/";
+        }
+
     }
 
 /*

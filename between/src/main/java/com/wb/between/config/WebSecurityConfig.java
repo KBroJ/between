@@ -28,7 +28,7 @@ public class WebSecurityConfig {
     private final String[] USER_LIST = {
             "/css/**", "/js/**", "/img/**",
             "/", "/main",
-            "/signup", "/findUserInfo","/checkEmail", "/send-verification",
+            "/signup", "/signup-success","/findUserInfo","/checkEmail", "/send-verification",
             "/signup/verify-code", "/findUserInfo/verify-code",
             "/findUserInfo/reqSendEmail", "/findUserInfo/verifyPwdCode", "/api/resetPwd",
             "/login", "/faqList", "/error", "/favicon.ico",  "/api/**",
