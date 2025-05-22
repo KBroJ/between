@@ -1,6 +1,7 @@
 package com.wb.between.common.util;
 
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import net.nurigo.sdk.NurigoApp;
 import net.nurigo.sdk.message.model.Message;
 import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
@@ -9,6 +10,7 @@ import net.nurigo.sdk.message.service.DefaultMessageService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class SmsUtil {
 
@@ -28,13 +30,18 @@ public class SmsUtil {
 
     // 단일 메시지 발송 예제
     public SingleMessageSentResponse sendSms(String to, String verificationCode) {
+        System.out.println("SmsUtil|sendSms|시작 ===================> ");
+        log.info("apiKey : {}, apiSecret : {}, apiFrom : {}", apiKey, apiSecretKey, fromPhoneNo);
+
         Message message = new Message();
 
         // 발신번호 및 수신번호는 반드시 01012345678 형태로 입력되어야 합니다.
         message.setFrom(fromPhoneNo);
         message.setTo(to);
         message.setText("[betWeen] 아래의 인증번호를 입력해주세요\n" + verificationCode);
+        System.out.println("SmsUtil|sendSms|message: " + message);
 
+        System.out.println("SmsUtil|sendSms|sendOne ===================> ");
         SingleMessageSentResponse response = this.messageService.sendOne(new SingleMessageSendingRequest(message));
         System.out.println("SmsUtil|sendSms|response = " + response);
         /* response 예시

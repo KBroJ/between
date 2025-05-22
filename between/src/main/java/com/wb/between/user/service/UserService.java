@@ -150,7 +150,7 @@ public class UserService {
         System.out.println("UserService|generateAndSendVerificationCode|session|인증번호 요청 휴대폰번호 :  " + session.getAttribute(OTP_PREFIX + phoneNo));
 
         // 인증번호 SMS 발송 - coolSMS API 연동
-//        smsUtil.sendSms(phoneNo, code); // 인증번호 SMS 발송 시 건당 20원 발생으로 인해 주석처리
+        smsUtil.sendSms(phoneNo, code); // 인증번호 SMS 발송 시 건당 20원 발생으로 인해 주석처리
 
         return code;
 
