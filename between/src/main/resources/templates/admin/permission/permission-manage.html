@@ -67,6 +67,12 @@
 <th:block layout:fragment="page-script">
   <!-- 커스텀 JavaScript -->
   <script th:src="@{/js/admin/permission/permission-manage.js}"></script>
+  <!-- JavaScript Alert 처리 (리다이렉션 후) -->
+  <script th:if="${alertMessage != null}" th:inline="javascript">
+    /*<![CDATA[*/
+    alert(/*[[${alertMessage}]]*/);
+    /*]]>*/
+  </script>
 </th:block>
 </body>
 </html>

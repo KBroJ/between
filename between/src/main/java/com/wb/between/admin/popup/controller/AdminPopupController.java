@@ -17,6 +17,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.HashMap;
 import java.util.List;
@@ -71,7 +72,8 @@ public class AdminPopupController {
      */
     @PostMapping("/regist")
     public String registPopup(@Valid @ModelAttribute("popupInfo") AdminPopupRegReqDto adminPopupRegReqDto,
-                              BindingResult bindingResult) {
+                              BindingResult bindingResult,
+                              RedirectAttributes redirectAttributes) {
         
         if (bindingResult.hasErrors()) {
             List<FieldError> fieldErrors = bindingResult.getFieldErrors();
@@ -85,6 +87,7 @@ public class AdminPopupController {
             log.debug("regist => {}", adminPopupRegReqDto.getContentBody());
 
             adminPopupService.registPopup(adminPopupRegReqDto);
+            redirectAttributes.addFlashAttribute("alertMessage", "팝업정보가 성공적으로 등록되었습니다."); // 성공
             return "redirect:/admin/popup";
         } catch (CustomException ex) {
             log.error("registPopup error => {}", ex.getMessage());
@@ -114,7 +117,8 @@ public class AdminPopupController {
     @PutMapping("/edit/{popupId}")
     public String editPopup(@PathVariable("popupId") Long popupId,
                             @Valid @ModelAttribute("popupInfo") AdminPopupEditReqDto adminPopupEditReqDto,
-                            BindingResult bindingResult) {
+                            BindingResult bindingResult,
+                            RedirectAttributes redirectAttributes) {
 
         if (bindingResult.hasErrors()) {
             return "admin/popup/popup-edit";
@@ -122,6 +126,7 @@ public class AdminPopupController {
 
         try {
             adminPopupService.editPopup(popupId, adminPopupEditReqDto);
+            redirectAttributes.addFlashAttribute("alertMessage", "팝업정보가 성공적으로 수정되었습니다."); // 성공
         } catch (CustomException ex) {
             log.error("editPopup error => {}", ex.getMessage());
         }

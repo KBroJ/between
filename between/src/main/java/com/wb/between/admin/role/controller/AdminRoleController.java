@@ -19,6 +19,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -73,7 +74,8 @@ public class AdminRoleController {
     @PostMapping("/regist")
     public String roleRegist(@Valid @ModelAttribute("roleInfo") AdminRoleRegistReqDto adminRoleRegistReqDto,
                              BindingResult bindingResult,
-                             Model model) {
+                             Model model,
+                             RedirectAttributes redirectAttributes) {
         log.debug("AdminRoleController|roleRegist|adminRoleRegistReqDto {}", adminRoleRegistReqDto);
 
         if (bindingResult.hasErrors()) {
@@ -86,6 +88,7 @@ public class AdminRoleController {
         try {
             //등록
             adminRoleService.roleRegist(adminRoleRegistReqDto);
+            redirectAttributes.addFlashAttribute("alertMessage", "역할정보가 성공적으로 등록되었습니다."); // 성공
             //등록 후 관리 리다이렉트
             return "redirect:/admin/roles";
         } catch (CustomException ex) {
@@ -126,7 +129,8 @@ public class AdminRoleController {
     public String editRole(@PathVariable("roleId") Long roleId,
                            @Valid @ModelAttribute("roleInfo") AdminRoleEditReqDto adminRoleEditReqDto,
                            BindingResult bindingResult,
-                           Model model) {
+                           Model model,
+                           RedirectAttributes redirectAttributes) {
 
         if (bindingResult.hasErrors()) {
             // 유효성 검사 실패 시, 다시 등록 폼으로 이동 (오류 메시지 표시됨)
@@ -140,9 +144,9 @@ public class AdminRoleController {
         try {
             //역할 수정
             adminRoleService.editRole(roleId, adminRoleEditReqDto);
-
+            redirectAttributes.addFlashAttribute("alertMessage", "역할정보가 성공적으로 변경되었습니다."); // 성공
             //수정 후 리다이렉트
-            return "redirect:/admin/roles/edit/" + roleId;
+            return "redirect:/admin/roles";
         } catch (CustomException ex) {
             log.error("AdminRoleController|editRole|error = {}", ex.getMessage());
             return "admin/role/role-edit";
