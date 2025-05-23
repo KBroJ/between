@@ -9,6 +9,6 @@ public class PaymentViewController {
 
     @GetMapping("/payment-success")
     public String payment(Model model){
-        return "/reservation/ccess";
+        return "/reservation/payment-success";
     }
 }
