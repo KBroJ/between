@@ -19,6 +19,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -83,7 +84,8 @@ public class AdminPermissionController {
     @PostMapping("/regist")
     public String permissionRegist(@Valid @ModelAttribute("permissionInfo")
                                        AdminPermissionRegReqDto adminPermissionRegReqDto,
-                                   BindingResult bindingResult, Model model) {
+                                   BindingResult bindingResult, Model model,
+                                   RedirectAttributes redirectAttributes) {
         if(bindingResult.hasErrors()){
             return "admin/permission/permission-regist";
         }
@@ -91,7 +93,7 @@ public class AdminPermissionController {
         try {
             //등록
             adminPermissionService.permissionRegist(adminPermissionRegReqDto);
-
+            redirectAttributes.addFlashAttribute("alertMessage", "권한정보가 성공적으로 등록되었습니다."); // 성공
             return "redirect:/admin/permissions";
         } catch (CustomException ex) {
             log.error("AdminPermissionController|Post|permissionRegist|error => {}", ex.getMessage());
@@ -129,13 +131,15 @@ public class AdminPermissionController {
     @PutMapping("/edit/{permissionId}")
     public String editPermission(@PathVariable("permissionId") Long permissionId,
                                  @Valid @ModelAttribute("permissionInfo")AdminPermissionEditReqDto adminPermissionEditReqDto,
-                                 BindingResult bindingResult, Model model) {
+                                 BindingResult bindingResult, Model model,
+                                 RedirectAttributes redirectAttributes) {
        if(bindingResult.hasErrors()){
            return "admin/permission/permission-edit";
        }
        
        try {
            adminPermissionService.permissionEdit(permissionId, adminPermissionEditReqDto);
+           redirectAttributes.addFlashAttribute("alertMessage", "권한정보가 성공적으로 수정되었습니다."); // 성공
            return "redirect:/admin/permissions";
        } catch (CustomException ex) {
            log.error("AdminPermissionController|Post|permissionRegist|error => {}", ex.getMessage());

@@ -16,6 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.util.List;
@@ -58,7 +59,8 @@ public class AdminBannerController {
     @PostMapping("/regist")
     public String registBanner(@Valid @ModelAttribute("bannerInfo") AdminBannerRegistReqDto adminBannerRegistReqDto,
                                    BindingResult bindingResult,
-                                   Model model) {
+                                   Model model,
+                                    RedirectAttributes redirectAttributes) {
 
         if (bindingResult.hasErrors()) {
             List<FieldError> fieldErrors = bindingResult.getFieldErrors();
@@ -72,12 +74,12 @@ public class AdminBannerController {
 
             //등록
             adminBannerService.registMainBanner(adminBannerRegistReqDto);
-
+            redirectAttributes.addFlashAttribute("alertMessage", "배너정보가 성공적으로 등록되었습니다."); // 성공
             return "admin/banner/banner-manage";
         } catch (CustomException ex) {
             log.error("registMainBanner|error = {}", ex.getMessage());
             model.addAttribute("result", "fail");
-            return "admin/banner/banner-regist";
+            return "redirect:/admin/banner";
         } catch (RuntimeException e) {
             // 예상치 못한 다른 종류의 예외 처리
             log.error("예상치 못한 오류 발생 = {}", e.getMessage());
@@ -110,7 +112,8 @@ public class AdminBannerController {
     public String editBanner(@PathVariable("bNo") Long bNo,
                              @Valid @ModelAttribute("bannerInfo") AdminBannerEditReqDto adminBannerEditReqDto,
                              BindingResult bindingResult,
-                             Model model) {
+                             Model model,
+                             RedirectAttributes redirectAttributes) {
         if(bindingResult.hasErrors()) {
             return "admin/banner/banner-edit";
         }
@@ -118,7 +121,7 @@ public class AdminBannerController {
         try {
             log.debug("bno = {}, adminBannerEditReqDto = {} ", bNo, adminBannerEditReqDto);
             adminBannerService.editBanner(bNo, adminBannerEditReqDto);
-
+            redirectAttributes.addFlashAttribute("alertMessage", "배너정보가 성공적으로 수정되었습니다."); // 성공
             return "redirect:/admin/banner/edit/" + bNo;
         } catch (CustomException ex) {
             return "admin/banner/banner-edit";

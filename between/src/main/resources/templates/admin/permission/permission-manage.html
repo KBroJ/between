@@ -46,8 +46,8 @@
           <td th:text="${permission.description}"></td>
 <!--          <td th:text="${#temporals.format(role.createDt, 'yyyy.MM.dd HH:mm')}"></td>-->
           <td>
-            <a th:href="@{/admin/permissions/edit/{permissionId}(permissionId=${permission.permissionId})}" class="btn-edit">수정</a>
-            <button type="button" class="delete-btn" th:data-permissionId="${permission.permissionId}">삭제</button>
+            <a th:href="@{/admin/permissions/edit/{permissionId}(permissionId=${permission.permissionId})}" class="btn btn-edit">수정</a>
+            <button type="button" class="btn delete-btn" th:data-permissionId="${permission.permissionId}">삭제</button>
           </td>
         </tr>
         <tr th:if="${#lists.isEmpty(adminPermissionList)}">
@@ -67,6 +67,12 @@
 <th:block layout:fragment="page-script">
   <!-- 커스텀 JavaScript -->
   <script th:src="@{/js/admin/permission/permission-manage.js}"></script>
+  <!-- JavaScript Alert 처리 (리다이렉션 후) -->
+  <script th:if="${alertMessage != null}" th:inline="javascript">
+    /*<![CDATA[*/
+    alert(/*[[${alertMessage}]]*/);
+    /*]]>*/
+  </script>
 </th:block>
 </body>
 </html>

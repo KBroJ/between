@@ -3,7 +3,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/admin/admin}">
 <head>
-  <title>관리자 화면 - 쿠폰 등록</title>
+  <title>역할 수정</title>
   <!-- 통일성을 위해 동일한 CSS 사용 -->
   <link rel="stylesheet" th:href="@{/css/admin/coupon/coupon-manage.css}">
   <!-- 등록 폼을 위한 추가/수정 스타일 (필요시) -->
@@ -60,7 +60,7 @@
 
 <section layout:fragment="admin-content">   <!-- Main Content -->
 
-  <h1 class="main-title">역할 등록</h1>
+  <h1 class="main-title">역할 수정</h1>
 
   <div class="content-container">
     <!-- 쿠폰 등록 폼 -->
@@ -137,6 +137,13 @@
   </div>
 
 </section >
-
+<th:block layout:fragment="page-script">
+  <!-- JavaScript Alert 처리 (리다이렉션 후) -->
+  <script th:if="${alertMessage != null}" th:inline="javascript">
+    /*<![CDATA[*/
+    alert(/*[[${alertMessage}]]*/);
+    /*]]>*/
+  </script>
+</th:block>
 </body>
 </html>
