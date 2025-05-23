@@ -54,8 +54,8 @@
               <span class="status-text status-active" th:text="${banner.useAt}"></span>
             </td>
             <td class="actions">
-              <a th:href="@{/admin/banner/edit/{bNo}(bNo=${banner.bNo})}" class="btn btn-secondary btn-sm btn-edit">수정</a>
-              <button type="button" class="btn btn-danger btn-sm btn-delete" th:data-bno="${banner.bNo}">삭제</button>
+              <a th:href="@{/admin/banner/edit/{bNo}(bNo=${banner.bNo})}" class="btn btn-edit">수정</a>
+              <button type="button" class="btn btn-delete" th:data-bno="${banner.bNo}">삭제</button>
             </td>
           </tr>
         </tbody>

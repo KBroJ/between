@@ -47,8 +47,8 @@
           <td th:text="${role.description}"></td>
           <td th:text="${#temporals.format(role.createDt, 'yyyy.MM.dd HH:mm')}"></td>
           <td>
-            <a th:href="@{/admin/roles/edit/{id}(id=${role.roleId})}" class="btn-edit">수정</a>
-            <button type="button" class="btn-delete" th:data-role-id="${role.roleId}">삭제</button>
+            <a th:href="@{/admin/roles/edit/{id}(id=${role.roleId})}" class="btn">수정</a>
+            <button type="button" class="btn btn-delete" th:data-role-id="${role.roleId}">삭제</button>
           </td>
         </tr>
         <tr th:if="${#lists.isEmpty(adminRoleList)}">

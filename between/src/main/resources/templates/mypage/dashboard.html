@@ -87,7 +87,7 @@
 
     </section>
 
-    <hr class="card-divider">
+    <hr class="card-divider" th:if="${#strings.contains(userInfo.email, '@winbit.kr')}">
 
     <section class="info-section" th:if="${#strings.contains(userInfo.email, '@winbit.kr')}">
       <h3 class="section-title">현재 이용 중인 회사 임직원</h3>

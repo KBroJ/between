@@ -70,6 +70,11 @@ button {
 #searchBtn {
     background-color: #007bff;
     color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 14px;
 }
 #searchBtn:hover {
     background-color: #0056b3;
@@ -78,6 +83,11 @@ button {
 .register-button { /* 등록 버튼 별도 스타일 */
     background-color: #17a2b8; /* 정보성 색상 */
     color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 14px;
 }
 .register-button:hover {
     background-color: #138496;
@@ -121,27 +131,33 @@ button {
     font-weight: bold;
 }
 
-/* 관리 컬럼의 수정 버튼 */
-.results-table .btn-edit {
+/* 공통 버튼 스타일 */
+.results-table .btn {
+    display: inline-block;
     background-color: #6c757d;
-    color: white;
-    padding: 5px 10px; /* 테이블 내 버튼 크기 조정 */
+    color: #fff;
     font-size: 12px;
     text-decoration: none;
-}
-.results-table .btn-edit:hover {
-    background-color: #5a6268;
-}
+    border: none;
+    cursor: pointer;
 
-/* 관리 컬럼의 삭제 버튼 */
-.results-table .btn-delete {
-    background-color: #6c757d;
-    color: white;
-    padding: 5px 10px; /* 테이블 내 버튼 크기 조정 */
-    font-size: 12px;
-}
-.results-table .btn-delete:hover {
-    background-color: #5a6268;
+    /* --- 핵심 수정 부분 --- */
+    /* 1. 상하 패딩으로 높이를 동일하게 맞춥니다. */
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+
+    /* 2. line-height는 텍스트가 잘리지 않고 보기 좋게 나올 정도로 설정합니다.
+       보통 font-size와 동일하거나 약간 크게 줍니다.
+       'normal'을 사용하거나, 명시적으로 1.2 ~ 1.5 사이 값을 줄 수 있습니다.
+       여기서는 font-size와 동일하게 설정하여 타이트하게 맞춰보겠습니다.
+       (만약 button에서 텍스트가 잘린다면 이 값을 조금씩 늘려보세요) */
+    line-height: 12px; /* font-size와 동일하게 */
+    /* 또는 line-height: normal; 로 두고 패딩으로만 조절할 수도 있습니다. */
+
+    /* 3. (선택 사항) 인라인 블록 요소 간 수직 정렬 */
+    vertical-align: middle;
 }
 
 /* 페이지네이션 영역 스타일 */
