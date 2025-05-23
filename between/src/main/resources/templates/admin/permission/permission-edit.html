@@ -71,17 +71,17 @@
       <input type="hidden" name="_method" value="put" />
       <div class="form-group">
         <label for="permissionCode">권한 코드:</label>
-        <input type="text" id="permissionCode" th:field="*{permissionCode}" placeholder="예: USER:READ_LIST" required>
+        <input type="text" id="permissionCode" th:field="*{permissionCode}" name="permissionCode" placeholder="예: USER:READ_LIST" required>
       </div>
 
       <div class="form-group">
         <label for="permissionName">권한 명:</label>
-        <input type="text" id="permissionName" th:field="*{permissionName}" placeholder="예: 관리자" required>
+        <input type="text" id="permissionName" th:field="*{permissionName}" name="permissionName" placeholder="예: 관리자" required>
       </div>
 
       <div class="form-group">
         <label for="description">권한 설명:</label>
-        <textarea id="description" th:field="*{description}" rows="4" placeholder="권한에 대한 상세 설명을 입력하세요 (선택)"></textarea>
+        <textarea id="description" th:field="*{description}" rows="4" name="description" placeholder="권한에 대한 상세 설명을 입력하세요 (선택)"></textarea>
       </div>
 
 <!--      &lt;!&ndash; 결과 테이블 영역 &ndash;&gt;-->

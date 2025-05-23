@@ -127,11 +127,11 @@ public class AdminPopupController {
         try {
             adminPopupService.editPopup(popupId, adminPopupEditReqDto);
             redirectAttributes.addFlashAttribute("alertMessage", "팝업정보가 성공적으로 수정되었습니다."); // 성공
+            return "redirect:/admin/popup";
         } catch (CustomException ex) {
             log.error("editPopup error => {}", ex.getMessage());
+            return "admin/popup/popup-edit";
         }
-
-        return "admin/popup/popup-edit";
     }
 
     /**
