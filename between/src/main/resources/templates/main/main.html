@@ -6,6 +6,8 @@
   <title>홈 화면</title>
     <!-- swiper 스타일 -->
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <!-- Font Awesome (혹은 다른 아이콘 라이브러리) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
       <!-- ✅ 페이지 전용 스타일 삽입 -->
       <link rel="stylesheet" th:href="@{/css/main/main.css}">
 </head>
@@ -74,29 +76,43 @@
 
 
   <!-- 서비스 안내 -->
-  <section class="section service-section">
-    <div class="section-header">
-      <h2>우리가 제공하는 서비스</h2>
-      <p>편리하고 유연한 업무 환경을 위해 다양한 공간과 혜택을 제공합니다.</p>
-    </div>
-    <div class="service-grid">
-      <div class="service-card">
-<!--        <img src="/img/service-1.png" alt="프라이빗 오피스" />-->
-        <h3>프라이빗 오피스</h3>
-        <p>1~6인 팀을 위한 독립형 오피스 공간</p>
-      </div>
-      <div class="service-card">
-<!--        <img src="/img/service-2.png" alt="공용 라운지" />-->
-        <h3>공용 라운지</h3>
-        <p>자유롭게 소통하고 일할 수 있는 열린 공간</p>
-      </div>
-      <div class="service-card">
-<!--        <img src="/img/service-3.png" alt="회의실" />-->
-        <h3>회의실 예약</h3>
-        <p>필요할 때 간편하게 예약 가능한 회의실</p>
-      </div>
-    </div>
-  </section>
+    <section class="section service-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>제공하는 서비스</h2>
+                <p>편리하고 유연한 업무 환경을 위해 다양한 공간과 혜택을 제공합니다.</p>
+            </div>
+            <div class="service-grid">
+                <div class="service-card">
+                    <div class="service-icon-wrapper"> <!-- 아이콘 또는 이미지 래퍼 -->
+                        <!-- <img src="/img/service-private-office.jpg" alt="프라이빗 오피스 내부" class="service-image"/> -->
+                        <i class="fas fa-user-tie service-icon"></i> <!-- 예시 아이콘 -->
+                    </div>
+                    <h3>프라이빗 오피스</h3>
+                    <p>1~6인 팀을 위한 독립형 오피스 공간</p>
+                    <!--                <a href="/services/private-office" class="btn btn-outline service-cta">자세히 보기</a>-->
+                </div>
+                <div class="service-card">
+                    <div class="service-icon-wrapper">
+                        <!-- <img src="/img/service-lounge.jpg" alt="편안한 공용 라운지" class="service-image"/> -->
+                        <i class="fas fa-couch service-icon"></i> <!-- 예시 아이콘 -->
+                    </div>
+                    <h3>공용 라운지</h3>
+                    <p>자유롭게 소통하고 일할 수 있는 열린 공간</p>
+                    <!--                <a href="/services/lounge" class="btn btn-outline service-cta">자세히 보기</a>-->
+                </div>
+                <div class="service-card">
+                    <div class="service-icon-wrapper">
+                        <!-- <img src="/img/service-meeting-room.jpg" alt="깔끔한 회의실" class="service-image"/> -->
+                        <i class="fas fa-users-cog service-icon"></i> <!-- 예시 아이콘 -->
+                    </div>
+                    <h3>회의실 예약</h3>
+                    <p>필요할 때 간편하게 예약 가능한 회의실</p>
+                    <!--                <a href="/services/meeting-room" class="btn btn-outline service-cta">자세히 보기</a>-->
+                </div>
+            </div>
+        </div>
+    </section>
 
    <!-- 가격 -->
   <section class="section pricing-section">
