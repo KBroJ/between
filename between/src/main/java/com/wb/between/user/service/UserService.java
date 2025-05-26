@@ -34,6 +34,7 @@ public class UserService {
 
     // 인증번호
     private static final String OTP_PREFIX = "OTP_";
+    public static final String OTP_ACCOUNT_LINKING_PREFIX = "OTP_LINK_"; // 계정 연결용 OTP
     private static final int EXPIRATION_TIME = 180; // 3분
 
     // 이메일 인증번호
@@ -375,6 +376,72 @@ public class UserService {
             e.printStackTrace();
             return false;
         }
+    }
+
+
+
+
+    /**
+     * 소셜로그인 계정 연동용 인증번호를 생성하고 세션에 저장 후 SMS로 발송합니다.
+     * 세션 키 접두사를 받아 다양한 컨텍스트에서 사용할 수 있도록 합니다.
+     *
+     * @param session         HttpSession 객체
+     * @param phoneNo         인증번호를 받을 휴대폰 번호 (하이픈 포함 가능)
+     * @param sessionKeyPrefix 세션에 OTP 저장 시 사용할 키의 접두사 (예: OTP_ 또는 OTP_LINK_)
+     * @return 생성된 인증번호
+     */
+    @Transactional
+    public String generateAndSendOtp(HttpSession session, String phoneNo, String sessionKeyPrefix) {
+        log.info("UserService|generateAndSendOtp|시작 ========> ");
+
+        String cleanPhoneNo = phoneNo.replaceAll("-", "");
+        String code = String.format("%06d", new Random().nextInt(1000000)); // 6자리 랜덤 숫자 생성
+        log.info("UserService|generateAndSendOtp|Context: {}, Phone: {}, Code: {}", sessionKeyPrefix, cleanPhoneNo, code);
+
+        String otpKey = sessionKeyPrefix + cleanPhoneNo;
+        String expiryKey = otpKey + "_expiry";
+
+        session.setAttribute(otpKey, code);
+        session.setAttribute(expiryKey, System.currentTimeMillis() + (EXPIRATION_TIME * 1000));
+
+        log.debug("세션 저장: OTP Key [{}], Expiry Key [{}]", otpKey, expiryKey);
+        smsUtil.sendSms(cleanPhoneNo, code); // SMS 발송
+
+        return code;
+    }
+
+    /**
+     * 세션에 저장된 인증번호를 검증합니다. (세션 키 접두사 사용)
+     *
+     * @param session         HttpSession 객체
+     * @param phoneNo         인증번호를 확인하려는 휴대폰 번호 (하이픈 포함 가능)
+     * @param code            사용자가 입력한 인증번호
+     * @param sessionKeyPrefix 세션에 OTP 저장 시 사용된 키의 접두사
+     * @return 유효하면 true, 아니면 false
+     */
+    public boolean verifyOtp(HttpSession session, String phoneNo, String code, String sessionKeyPrefix) {
+        String cleanPhoneNo = phoneNo.replaceAll("-", "");
+        String otpKey = sessionKeyPrefix + cleanPhoneNo;
+        String expiryKey = otpKey + "_expiry";
+
+        String storedCode = (String) session.getAttribute(otpKey);
+        Long expiryTimeMillis = (Long) session.getAttribute(expiryKey);
+        log.debug("UserService|verifyOtp|Context: {}, Phone: {}, InputCode: {}, StoredCode: {}, Expiry: {}",
+                sessionKeyPrefix, cleanPhoneNo, code, storedCode, expiryTimeMillis);
+
+        boolean isValid = (storedCode != null && expiryTimeMillis != null &&
+                System.currentTimeMillis() < expiryTimeMillis &&
+                storedCode.equals(code));
+
+        if (isValid) {
+            log.info("UserService|verifyOtp|인증 성공. 세션에서 OTP 정보 제거: Key [{}]", otpKey);
+            session.removeAttribute(otpKey);
+            session.removeAttribute(expiryKey);
+        } else {
+            log.warn("UserService|verifyOtp|인증 실패. Stored: [{}], Input: [{}], Expired: [{}]",
+                    storedCode, code, (expiryTimeMillis != null && System.currentTimeMillis() >= expiryTimeMillis));
+        }
+        return isValid;
     }
 
 

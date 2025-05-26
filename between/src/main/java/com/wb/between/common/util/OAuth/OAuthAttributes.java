@@ -19,14 +19,16 @@ public class OAuthAttributes {
     private String name;
     private String email;
     private String mobile; // 네이버에서 제공하는 휴대폰 번호
+    private String registrationId;
 
     @Builder
-    public OAuthAttributes(Map<String, Object> attributes, String nameAttributeKey, String name, String email, String mobile) {
+    public OAuthAttributes(Map<String, Object> attributes, String nameAttributeKey, String name, String email, String mobile, String registrationId) {
         this.attributes = attributes;
         this.nameAttributeKey = nameAttributeKey;
         this.name = name;
         this.email = email;
         this.mobile = mobile;
+        this.registrationId = registrationId;
     }
 
     // registrationId(naver, google 등) 와 userNameAttributeName(provider 설정의 user-name-attribute) 을 통해
@@ -34,11 +36,11 @@ public class OAuthAttributes {
     public static OAuthAttributes of(String registrationId, String userNameAttributeName, Map<String, Object> attributes) {
 
         if ("naver".equals(registrationId)) {
-            return ofNaver("email", attributes); // 네이버는 user-name-attribute가 response지만, 실제 고유 ID는 response 내의 id 임
+            return ofNaver("email", attributes, registrationId); // 네이버는 user-name-attribute가 response지만, 실제 고유 ID는 response 내의 id 임
         }
         //카카오
         if("kakao".equals(registrationId)) {
-            return ofKakao("email", attributes);
+            return ofKakao("email", attributes, registrationId);
         }
 
         // 다른 소셜 로그인(Google, Kakao 등) 추가 시 여기에 분기 추가
@@ -49,7 +51,7 @@ public class OAuthAttributes {
 
     // 네이버 사용자 정보 추출
     @SuppressWarnings("unchecked") // 형변환 경고 무시
-    private static OAuthAttributes ofNaver(String userNameAttributeName, Map<String, Object> attributes) {
+    private static OAuthAttributes ofNaver(String userNameAttributeName, Map<String, Object> attributes, String registrationId) {
 
         // 네이버는 최상위에 resultcode, message, response 필드를 가짐
         // 실제 사용자 정보는 response 필드 값인 Map 안에 있음
@@ -69,10 +71,11 @@ public class OAuthAttributes {
                 .mobile((String) response.get("mobile"))    // 네이버는 mobile 제공
                 .attributes(response)                       // attributes에는 response 맵 자체를 저장
                 .nameAttributeKey(userNameAttributeName)    // 여기서는 response 맵 안의 고유 식별자 키 ('id')
+                .registrationId(registrationId)
                 .build();
     }
 
-    private static OAuthAttributes ofKakao(String userNameAttributeName, Map<String, Object> attributes) {
+    private static OAuthAttributes ofKakao(String userNameAttributeName, Map<String, Object> attributes, String registrationId) {
 
         // 카카오 최상위에 id, connected_at, properties, kakao_account 필드를 가짐
         // 이름 정보는 properties Map안에 있음
@@ -99,6 +102,7 @@ public class OAuthAttributes {
                 .mobile("")    // 카카오는 mobile 미제공
                 .attributes(mutableAttributes)                       // attributes에는 response 맵 자체를 저장
                 .nameAttributeKey(userNameAttributeName)    // 여기서는 response 맵 안의 고유 식별자 키 ('id')
+                .registrationId(registrationId)
                 .build();
     }
 
@@ -107,7 +111,9 @@ public class OAuthAttributes {
 
         // 휴대폰 번호에서 '-' 제거 (DB 저장 형식에 맞게)
         String cleanMobile = (this.mobile != null) ? this.mobile.replaceAll("-", "") : null;
+        String loginMethod = (this.registrationId != null) ? this.registrationId.toUpperCase() : "SOCIAL";
 
+    /*
         return User.builder()
                 .name(name)
                 .email(email)
@@ -119,5 +125,17 @@ public class OAuthAttributes {
                 .createDt(LocalDateTime.now())
                 // updateDt는 @PreUpdate 등으로 자동 관리되므로 여기선 설정 불필요
                 .build();
+     */
+        return User.builder()
+                .name(name)
+                .email(email)
+                .phoneNo(cleanMobile)
+                .password("SOCIAL_USER_DUMMY_PASSWORD_" + System.currentTimeMillis())
+                .userStts("일반")
+                .authCd("일반") // 또는 registrationId에 따라 다르게 설정 가능
+                .loginM(loginMethod)
+                .createDt(LocalDateTime.now())
+                .build();
+
     }
 }

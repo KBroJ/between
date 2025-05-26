@@ -54,7 +54,7 @@ public class UserController {
         return "login/findUserInfo";
     }
 
-// 회원가입
+    // 회원가입
     @PostMapping("/signup")
     public String registerUser(
             // @Valid : SignupRequest 객체에서 설정한 유효성 검사 실행
@@ -187,35 +187,71 @@ public class UserController {
 
     }
 
-    // 휴대폰번호 인증번호 전송
+    // 휴대폰번호 인증번호 전송(회원가입, 회원정보 이메일 찾기 시에 사용)
     @PostMapping("/send-verification")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> sendVerificationCode(@RequestBody Map<String, String> request, HttpSession session) {
+    public ResponseEntity<Map<String, Object>> sendVerificationCode(
+            @RequestBody Map<String, String> request,
+            HttpSession session
+    ) {
         log.info("UserController|sendVerificationCode|시작 ==========> request : " + request);
 
         String phoneNo = request.get("phoneNo");
+        String context = request.get("context"); // "signup" 또는 "findEmail"
         Map<String, Object> response = new HashMap<>();
 
+        if (phoneNo == null || context == null) {
+            response.put("success", false);
+            response.put("message", "잘못된 요청입니다. (필수 정보 누락)");
+            return ResponseEntity.badRequest().body(response); // 400 Bad Request
+        }
+
         try {
-            if (userService.isPhoneNumberDuplicated(phoneNo)) {
-                // 1. 휴대폰 번호 중복인 경우
-                log.warn("UserController|sendVerificationCode|중복된 휴대폰 번호: {}", phoneNo);
+            // 1. 휴대폰 번호 유효성 검사
+            boolean phoneExists = userService.isPhoneNumberDuplicated(phoneNo);
 
-                response.put("success", false);
-                response.put("message", "이미 사용 중인 휴대폰 번호입니다.");
+            // 회원가입 - 인증번호 발송
+            if("signup".equalsIgnoreCase(context)) {
+                if (phoneExists) {
+                    // 1. 휴대폰 번호 중복인 경우
+                    log.warn("UserController|sendVerificationCode|중복된 휴대폰 번호: {}", phoneNo);
 
-                return ResponseEntity.ok(response); // 클라이언트가 처리하기 쉽도록 200 OK와 함께 응답
-            } else {
+                    response.put("success", false);
+                    response.put("message", "이미 사용 중인 휴대폰 번호입니다.");
 
-                // 2. 중복되지 않은 경우, 인증번호 생성 및 발송
-                userService.generateAndSendVerificationCode(session, phoneNo);
+                    return ResponseEntity.ok(response); // 클라이언트가 처리하기 쉽도록 200 OK와 함께 응답
+                } else {
 
-                response.put("success", true);
-                response.put("message", "인증번호가 발송되었습니다.");
+                    // 2. 중복되지 않은 경우, 인증번호 생성 및 발송
+                    userService.generateAndSendVerificationCode(session, phoneNo);
 
-                return ResponseEntity.ok(response);
+                    response.put("success", true);
+                    response.put("message", "인증번호가 발송되었습니다.");
+
+                    return ResponseEntity.ok(response);
+                }
             }
-
+            // 회원 정보 찾기(이메일) - 인증번호 발송
+            else if ("findEmail".equalsIgnoreCase(context)) {
+                if (phoneExists) {
+                    // 휴대폰 번호가 DB에 존재해야 함
+                    userService.generateAndSendVerificationCode(session, phoneNo);
+                    response.put("success", true);
+                    response.put("message", "인증번호가 발송되었습니다. 휴대폰을 확인해주세요.");
+                    return ResponseEntity.ok(response);
+                } else {
+                    // 휴대폰 번호가 DB에 존재하지 않음
+                    log.warn("UserController|sendVerificationCode [findEmail]|등록되지 않은 휴대폰 번호: {}", phoneNo);
+                    response.put("success", false);
+                    response.put("message", "가입되지 않은 휴대폰 번호입니다.");
+                    return ResponseEntity.ok(response);
+                }
+            } else {
+                log.warn("UserController|sendVerificationCode|알 수 없는 context: {}", context);
+                response.put("success", false);
+                response.put("message", "잘못된 요청 유형입니다.");
+                return ResponseEntity.badRequest().body(response);
+            }
 
         } catch (Exception e) { // SMS 발송 실패 또는 기타 예외 처리
             log.error("UserController|sendVerificationCode|인증번호 처리 중 알 수 없는 오류 발생: {}", e.getMessage(), e);

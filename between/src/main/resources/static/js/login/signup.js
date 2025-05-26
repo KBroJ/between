@@ -194,7 +194,10 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch('/send-verification', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ phoneNo: phoneNo })
+            body: JSON.stringify({
+                phoneNo: phoneNo,
+                context: "signup"
+            })
         })
         .then(response => {
             if (!response.ok) throw new Error('Network response was not ok');

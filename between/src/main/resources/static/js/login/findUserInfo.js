@@ -90,7 +90,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch('/send-verification', { // 휴대폰 OTP 발송 API
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phoneNo: phoneNo })
+                    body: JSON.stringify({
+                        phoneNo: phoneNo,
+                        context: "findEmail"
+                    })
                 });
                 const result = await response.json();
                 if (response.ok && result.success) {

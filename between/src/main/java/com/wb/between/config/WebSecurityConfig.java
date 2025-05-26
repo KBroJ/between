@@ -2,7 +2,9 @@ package com.wb.between.config;
 
 import com.wb.between.common.util.OAuth.CustomOAuth2UserService;
 import com.wb.between.user.service.UserDetailService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,10 +15,13 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
+@Slf4j
 @RequiredArgsConstructor
 @Configuration
 public class WebSecurityConfig {
@@ -32,7 +37,8 @@ public class WebSecurityConfig {
             "/signup/verify-code", "/findUserInfo/verify-code",
             "/findUserInfo/reqSendEmail", "/findUserInfo/verifyPwdCode", "/api/resetPwd",
             "/login", "/faqList", "/error", "/favicon.ico",  "/api/**",
-            "/oauth2/**", "/admin/**", "/tmp/**"
+            "/oauth2/**", "/admin/**", "/tmp/**",
+            "/social/link-account/**",
     };
     
     // 관리자 
@@ -85,6 +91,55 @@ public class WebSecurityConfig {
         return http.build();
     }
 
+    @Bean
+    public AuthenticationFailureHandler oAuth2LoginFailureHandler() {
+
+        return (request, response, exception) -> {
+            String defaultErrorMessage = "소셜 로그인에 실패했습니다. 다시 시도해주세요.";
+            String redirectUrl = "/login?error=social_auth_failed"; // 기본 실패 리디렉션 URL
+
+            log.warn("OAuth2 Login Failure. Exception type: [{}], Message: [{}]", exception.getClass().getName(), exception.getMessage());
+            // log.debug("OAuth2 Login Failure Stack Trace:", exception);
+
+            if (exception instanceof OAuth2AuthenticationException) {
+                OAuth2Error error = ((OAuth2AuthenticationException) exception).getError();
+
+                if (error != null) {
+                    log.warn("OAuth2AuthenticationException details: Error Code [{}], Description [{}], URI [{}]",
+                            error.getErrorCode(), error.getDescription(), error.getUri());
+
+                    String userFacingMessage = error.getDescription() != null ? error.getDescription() : defaultErrorMessage;
+                    // 세션에 사용자에게 보여줄 메시지 저장 (계정 연결 페이지에서 사용)
+                    request.getSession().setAttribute("socialLinkUserMessage", userFacingMessage);
+                    // 세션에 에러 코드도 저장하여 연결 페이지에서 구체적인 시나리오 파악
+                    request.getSession().setAttribute("socialLinkErrorCode", error.getErrorCode());
+
+
+                    switch (error.getErrorCode()) {
+                        case CustomOAuth2UserService.ERROR_CODE_EMAIL_EXISTS_PHONE_MISMATCH_LINK:
+                        case CustomOAuth2UserService.ERROR_CODE_NEW_EMAIL_PHONE_CONFLICT_LINK:
+                            log.info("Failure Handler: Account linking required for error code [{}]. Redirecting to account linking start page.", error.getErrorCode());
+                            // CustomOAuth2UserService에서 필요한 다른 세션 값들(PENDING_SOCIAL_ATTRIBUTES_SESSION_KEY 등)은 이미 저장됨.
+                            redirectUrl = "/social/link-account/start"; // 계정 연결 시작 페이지
+                            break;
+                        default:
+                            log.warn("Failure Handler: Unhandled OAuth2Error code [{}]. Redirecting to login page with error.", error.getErrorCode());
+                            request.getSession().setAttribute("socialLoginError", userFacingMessage); // 일반 로그인 페이지 에러
+                            // redirectUrl은 이미 /login?error=social_auth_failed 로 설정되어 있음
+                            break;
+                    }
+                } else { // OAuth2AuthenticationException이지만 OAuth2Error 객체가 없는 경우
+                    request.getSession().setAttribute("socialLoginError", defaultErrorMessage);
+                }
+            } else { // OAuth2AuthenticationException이 아닌 다른 유형의 로그인 예외
+                log.error("Failure Handler: Non-OAuth2AuthenticationException during social login.", exception);
+                request.getSession().setAttribute("socialLoginError", "로그인 처리 중 예상치 못한 오류가 발생했습니다.");
+            }
+            response.sendRedirect(request.getContextPath() + redirectUrl);
+        };
+    }
+
+
     // 인증 관리자 관련 설정
     /*
      *
@@ -130,6 +185,7 @@ public class WebSecurityConfig {
         };
     }
 
+    /*
     @Bean
     public AuthenticationFailureHandler oAuth2LoginFailureHandler() {
         // 실패 시 로직 구현 (예: 에러 메시지와 함께 로그인 페이지로 리다이렉트)
@@ -138,5 +194,7 @@ public class WebSecurityConfig {
             response.sendRedirect("/login?error=oauth_fail"); // 예시: 실패 시 쿼리 파라미터와 함께 리다이렉트
         };
     }
+
+    */
 }
 

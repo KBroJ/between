@@ -1,16 +1,20 @@
 package com.wb.between.common.util.OAuth;
 
 import com.wb.between.admin.role.domain.Role;
+import com.wb.between.common.util.MaskingUtils;
 import com.wb.between.role.repository.RoleRepository;
 import com.wb.between.user.domain.User;
 import com.wb.between.user.repository.UserRepository;
 import com.wb.between.userrole.domain.UserRole;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
@@ -80,19 +84,31 @@ import java.util.Optional;
             인증이 성공적으로 완료되었으므로, 사용자를 WebSecurityConfig에 설정된 성공 URL (defaultSuccessUrl("/")) 또는 로그인 전 접근하려 했던 페이지로 리디렉션 시킵니다.
 
 */
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
     private final UserRepository userRepository;
-    // HttpSession 주입 (선택적: 세션에 사용자 정보 저장 시 필요)
-    // private final HttpSession httpSession;
-
     private final RoleRepository roleRepository;
+    private final HttpSession httpSession;
 
     // 기본 역할 코드 상수 정의 (설정 파일 등으로 관리하는 것이 더 좋음)
     private static final String DEFAULT_ROLE_CODE = "ROLE_USER"; // 일반 사용자 역할 코드
     private static final String STAFF_ROLE_CODE = "ROLE_STAFF";   // 임직원 역할 코드 (예시)
+
+    // 계정 연결 시 세션에 저장할 소셜 정보 키
+    public static final String PENDING_SOCIAL_ATTRIBUTES_SESSION_KEY = "pendingSocialAttributes";
+    // 세션에 저장될 키 이름들 (계정 연결 흐름용)
+    public static final String LINK_TARGET_EMAIL_SESSION_KEY = "linkTargetEmail"; // 연결할 기존 계정 이메일
+    public static final String LINK_VERIFICATION_PHONE_SESSION_KEY = "linkVerificationPhone"; // 인증에 사용할 전화번호
+    public static final String CONFLICTING_ACCOUNT_EMAIL_SESSION_KEY = "conflictingAccountEmail"; // 충돌 계정 이메일 (폰 중복 시)
+    public static final String CONFLICTING_ACCOUNT_PHONE_SESSION_KEY = "conflictingAccountPhone"; // 충돌 계정 전화번호 (폰 중복 시)
+    public static final String LINK_CONTEXT_SESSION_KEY = "accountLinkingContext"; // 연결 흐름 구분용
+
+    // 새로운 에러 코드 정의
+    public static final String ERROR_CODE_EMAIL_EXISTS_PHONE_MISMATCH_LINK = "EMAIL_EXISTS_PHONE_MISMATCH_LINK";
+    public static final String ERROR_CODE_NEW_EMAIL_PHONE_CONFLICT_LINK = "NEW_EMAIL_PHONE_CONFLICT_LINK";
 
 
     @Override
@@ -117,7 +133,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
 
         // 4. 소셜로그인 시 사용자 존재 유무 파악 후 없으면 신규 생성
-        User user = snsSaveOrLogin(attributes);
+        User user = snsSaveOrLogin(attributes, registrationId);
         System.out.println("CustomOAuth2UserService|loadUser|user = " + user);
 
         // 5. 세션에 사용자 정보 저장 (선택적)
@@ -133,11 +149,138 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         return user;
     }
 
-    // 소셜로그인 시 사용자 존재 유무 파악 후 없으면 신규 생성
-    private User snsSaveOrLogin(OAuthAttributes attributes) {
-        System.out.println("CustomOAuth2UserService|saveOrUpdate|Start ===========> attributes = " + attributes);
+    // 소셜로그인 시 사용자 존재 유무 및 휴대번호 중복 여부 파악 후 없으면 저장하거나 업데이트
+    private User snsSaveOrLogin(OAuthAttributes attributes, String registrationId) {
+        log.info("CustomOAuth2UserService|saveOrUpdate|Start ===========> attributes : {}, registrationId : {}} ", attributes.getAttributes(), registrationId);
 
-        // 1. 이메일로 사용자 조회(없으면 null 리턴)
+        String socialEmail = attributes.getEmail();
+        String rawSocialMobile = attributes.getMobile(); // 소셜 로그인 시 제공되는 휴대폰 번호(null 일 수 있음)
+        String cleanSocialMobile = (rawSocialMobile != null) ? rawSocialMobile.replaceAll("-", "") : null;
+
+        // 소셜 이메일로 기존 사용자 있는지 여부 조회
+//        Optional<User> userOptionalByEmail = userRepository.findByEmail(socialEmail);
+        Optional<User> userOptionalByEmail = userRepository.findByUsernameWithRolesAndPermissions(socialEmail);
+
+
+        // 1. 소셜 이메일이 같은 기존 사용자가 있는 경우
+        if (userOptionalByEmail.isPresent()) {
+            User existingUser = userOptionalByEmail.get();
+            log.info("CustomOAuth2UserService|snsSaveOrLogin|기존 사용자 발견 (이메일 일치): {}", existingUser.getEmail());
+
+            // 1-1. 이메일 일치, 휴대폰 번호 일치 - 기존 사용자로 판단하여 로그인 방법(LoginM) 업데이트 후 로그인 진행
+            if(java.util.Objects.equals(existingUser.getPhoneNo(), cleanSocialMobile)) {
+                log.info("CustomOAuth2UserService|snsSaveOrLogin|이메일 및 휴대폰 번호 일치.");
+                log.info("CustomOAuth2UserService|snsSaveOrLogin|회원 loginM {} : ", existingUser.getLoginM());
+
+                // 계정 연동 안되어 있을 때(LoginM이 null 이거나 다른 값일 때)
+                if(existingUser.getLoginM() == null || !existingUser.getLoginM().equals(registrationId.toUpperCase())) {
+                    log.info("CustomOAuth2UserService|snsSaveOrLogin|loginM 업데이트 시도: {}", cleanSocialMobile);
+                    existingUser.setLoginM(registrationId.toUpperCase());
+                    return userRepository.save(existingUser);
+                } else {
+                // 계정 연동 되어 있을 때
+                    log.info("CustomOAuth2UserService|snsSaveOrLogin|기존 사용자 로그인 방법 업데이트: {}", existingUser.getLoginM());
+                    log.info("CustomOAuth2UserService|snsSaveOrLogin|기존 사용자 로그인 진행 | existingUser : {}", existingUser);
+                    return existingUser;
+                }
+
+            } else {
+            // 1-2. 이메일 일치, 휴대폰 번호 불일치
+                log.warn("이메일 {}은(는) 일치하나 휴대폰 번호가 다릅니다 (기존: {}, 소셜: {}). " +
+                                "기존 계정의 휴대폰 인증 후 소셜 계정 연결을 유도합니다.",
+                        existingUser.getEmail(), existingUser.getPhoneNo(), cleanSocialMobile);
+
+                httpSession.setAttribute(PENDING_SOCIAL_ATTRIBUTES_SESSION_KEY, attributes); // pendingSocialAttributes : 소셜 정보 세션 저장
+                httpSession.setAttribute(LINK_TARGET_EMAIL_SESSION_KEY, existingUser.getEmail()); // linkTargetEmail : 기존 회원 계정 이메일
+                httpSession.setAttribute(LINK_VERIFICATION_PHONE_SESSION_KEY, cleanSocialMobile);   // linkVerificationPhone : 기존 회원 계정 전화번호
+                httpSession.setAttribute(LINK_CONTEXT_SESSION_KEY, "LINK_SOCIAL_TO_EXISTING_EMAIL_VERIFY_EXISTING_PHONE");  // accountLinkingContext : 계정 연결 흐름 구분
+
+                // 안내 및 인증 페이지로 이동 설정
+                throw new OAuth2AuthenticationException(
+                        new OAuth2Error(
+                                ERROR_CODE_EMAIL_EXISTS_PHONE_MISMATCH_LINK,
+                                "이 이메일(" + socialEmail + ")은 이미 가입되어 있습니다. " +
+                                        registrationId.toUpperCase() + " 계정을 연결하려면 기존에 등록된 휴대폰 번호로 인증을 완료해주세요.",
+                                null
+                        ),
+                        "Email matches, but phone number differs. Verification of existing account's phone needed to link social account."
+                );
+            }
+
+        } else {
+        // 2. 이메일이 불일치
+            log.info("CustomOAuth2UserService|snsSaveOrLogin|이메일이 같은 기존 사용자가 없는 경우");
+
+            // 2-1. 다른 계정이 이미 소셜 로그인 휴대폰 번호를 사용 중일 경우
+
+            // 휴대폰 번호로 사용자 조회
+            Optional<User> userOptionalByPhone = userRepository.findByPhoneNo(cleanSocialMobile);
+
+            // 이메일 불일치, 휴대폰 번호 일치
+            if (userOptionalByPhone.isPresent()) {
+                User existingUserWithThisPhone = userOptionalByPhone.get();
+                log.warn("소셜 프로필의 휴대폰 번호 ({})가 기존 다른 계정 (이메일: {})에 이미 등록되어 있습니다. 계정 연결을 유도합니다.",
+                        cleanSocialMobile, existingUserWithThisPhone.getEmail());
+
+                httpSession.setAttribute(PENDING_SOCIAL_ATTRIBUTES_SESSION_KEY, attributes);
+                httpSession.setAttribute(CONFLICTING_ACCOUNT_EMAIL_SESSION_KEY, existingUserWithThisPhone.getEmail());
+                httpSession.setAttribute(CONFLICTING_ACCOUNT_PHONE_SESSION_KEY, cleanSocialMobile);
+                httpSession.setAttribute(LINK_CONTEXT_SESSION_KEY, "LINK_SOCIAL_TO_EXISTING_PHONE");
+
+                throw new OAuth2AuthenticationException(
+                        new OAuth2Error(
+                                ERROR_CODE_NEW_EMAIL_PHONE_CONFLICT_LINK,
+                                "이 휴대폰 번호(" + rawSocialMobile + ")는 이미 다른 계정(" + MaskingUtils.maskEmail(existingUserWithThisPhone.getEmail()) +")에 등록되어 있습니다. 해당 계정에 소셜 계정을 연결하시겠습니까?",
+                                null
+                        ),
+                        "New social email, but phone number conflicts with another account. Account linking suggested."
+                );
+            } else {
+                // 2-2. 이메일, 휴대번호가 중복되지 않을 경우 > 신규 가입
+
+                User newUser = attributes.toEntity();
+                newUser.setLoginM(registrationId.toUpperCase()); // 가입 경로 설정 (NAVER, KAKAO 등)
+
+                log.info("CustomOAuth2UserService|snsSaveOrLogin|신규 사용자 엔티티 생성: email={}, phoneNo={}", newUser.getEmail(), newUser.getPhoneNo());
+
+                // 4. 역할 할당
+                String targetRoleCode = DEFAULT_ROLE_CODE;
+                if (newUser.getEmail() != null && newUser.getEmail().endsWith("@winbit.kr")) {
+                    targetRoleCode = STAFF_ROLE_CODE;
+                }
+                Role assignedRole = roleRepository.findByRoleCode(targetRoleCode)
+                        .orElseThrow(() -> {
+//                            log.error("CustomOAuth2UserService|snsSaveOrLogin|역할 코드 {}를 찾을 수 없습니다.", targetRoleCode);
+                            return new IllegalStateException("기본 사용자 역할을 찾을 수 없습니다. 시스템 설정을 확인해주세요.");
+                        });
+
+                UserRole ur = new UserRole();
+                ur.setUser(newUser);
+                ur.setRole(assignedRole);
+
+                if (newUser.getUserRole() == null) { // User 엔티티에서 @Builder.Default로 초기화 권장
+                    newUser.setUserRole(new HashSet<>());
+                }
+                newUser.getUserRole().add(ur);
+
+                // 5. 사용자 저장
+                User savedUser = userRepository.save(newUser);
+                log.info("CustomOAuth2UserService|snsSaveOrLogin|신규 사용자 저장 완료: {}", savedUser.getEmail());
+
+                // 저장된 사용자의 ID를 사용하여, 모든 연관 관계(권한 포함)가 로드된 User 객체를 다시 조회하여 반환합니다.
+                return userRepository.findByIdWithAuthorities(savedUser.getUserNo())
+                        .orElseThrow(() -> {
+                            log.error("CustomOAuth2UserService|snsSaveOrLogin|신규 저장 후 사용자 ID [{}] 조회 실패 (authorities 포함).", savedUser.getUserNo());
+                            return new IllegalStateException("저장 후 사용자 정보를 가져오는 데 실패했습니다: " + savedUser.getUserNo());
+                        });
+
+            }
+
+        }
+
+// =====================================================================================================================
+    /*
+        // 1. 이메일, 휴대번호로 사용자 조회(없으면 null 리턴)
         Optional<User> optionalUser = userRepository.findByEmailAndPhoneNo(attributes.getEmail(), attributes.getMobile().replaceAll("-", ""));
 
         User user; // 최종적으로 저장할 User 객체를 담을 변수
@@ -185,7 +328,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
             return savedUser;
         }
-
+    */
 
     /*
         람다식 사용 예시
