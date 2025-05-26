@@ -2,59 +2,59 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/layout}">
-<head>
-    <title th:text="${pageTitle ?: '소셜 계정 연결'}">소셜 계정 연결</title>
-    <link rel="stylesheet" th:href="@{/css/login/account-linking.css}"/>
-    <meta name="_csrf" th:content="${_csrf?.token}" th:if="${_csrf}"/>
-    <meta name="_csrf_header" th:content="${_csrf?.headerName}" th:if="${_csrf}"/>
-</head>
-<body>
-<main layout:fragment="content">
-    <div class="linking-container">
-        <h1 th:text="${pageTitle ?: '소셜 계정 연결'}">소셜 계정 연결</h1>
+    <head>
+        <title th:text="${pageTitle ?: '소셜 계정 연결'}">소셜 계정 연결</title>
+        <link rel="stylesheet" th:href="@{/css/login/account-linking.css}"/>
+        <meta name="_csrf" th:content="${_csrf?.token}" th:if="${_csrf}"/>
+        <meta name="_csrf_header" th:content="${_csrf?.headerName}" th:if="${_csrf}"/>
+    </head>
+    <body>
+        <main layout:fragment="content">
+            <div class="linking-container">
+                <h1 th:text="${pageTitle ?: '소셜 계정 연결'}">소셜 계정 연결</h1>
 
-        <p class="info-message main-guide" th:if="${userMessage}" th:utext="${userMessage}"></p>
-        <p class="info-message context-guide" th:if="${displayContextMessage}" th:utext="${displayContextMessage}"></p>
+                <p class="info-message main-guide" th:if="${userMessage}" th:utext="${userMessage}"></p>
+                <p class="info-message context-guide" th:if="${displayContextMessage}" th:utext="${displayContextMessage}"></p>
 
-        <div id="initial-action-section" class="action-section">
-            <p class="otp-send-guide">
-                인증을 위해 휴대폰 번호
-                <strong th:text="${phoneToVerifyDisplay ?: '알 수 없는 번호'}">[마스킹된 폰번호]</strong>
-                로 인증번호를 발송합니다.
-            </p>
-            <button type="button" id="sendLinkOtpBtn" class="btn btn-primary btn-block">인증번호 발송</button>
-        </div>
-
-        <div id="verify-otp-section" class="action-section" style="display: none;">
-            <div class="form-group">
-                <label for="linkOtpCode">인증번호</label>
-                <div class="verification-group">
-                    <div class="verification-input-wrapper">
-                        <input type="text" id="linkOtpCode" class="form-control" placeholder="인증번호 6자리" maxlength="6">
-                        <span id="linkOtpTimer" class="otp-timer" style="display: none;">03:00</span>
-                    </div>
-                    <button type="button" id="resendLinkOtpBtn" class="btn btn-secondary btn-sm resend-btn" style="display: none;">재전송</button>
+                <div id="initial-action-section" class="action-section">
+                    <p class="otp-send-guide">
+                        인증을 위해 휴대폰 번호
+                        <strong th:text="${phoneToVerifyDisplay ?: '알 수 없는 번호'}">[마스킹된 폰번호]</strong>
+                        로 인증번호를 발송합니다.
+                    </p>
+                    <button type="button" id="sendLinkOtpBtn" class="btn btn-primary btn-block">인증번호 발송</button>
                 </div>
-                <p id="otp-message" class="message"></p> </div>
-            <button type="button" id="verifyAndLinkBtn" class="btn btn-success btn-block">인증 및 계정 연결</button>
-        </div>
 
-        <div id="linking-result-message-area" style="margin-top: 20px;">
-            <p id="linking-error-message" class="message error-message" style="display: none;"></p>
-            <p id="linking-success-message" class="message success-message" style="display: none;"></p>
-        </div>
+                <div id="verify-otp-section" class="action-section" style="display: none;">
+                    <div class="form-group">
+                        <label for="linkOtpCode">인증번호</label>
+                        <div class="verification-group">
+                            <div class="verification-input-wrapper">
+                                <input type="text" id="linkOtpCode" class="form-control" placeholder="인증번호 6자리" maxlength="6">
+                                <span id="linkOtpTimer" class="otp-timer" style="display: none;">03:00</span>
+                            </div>
+                            <button type="button" id="resendLinkOtpBtn" class="btn btn-secondary btn-sm resend-btn" style="display: none;">재전송</button>
+                        </div>
+                        <p id="otp-message" class="message"></p> </div>
+                    <button type="button" id="verifyAndLinkBtn" class="btn btn-success btn-block">인증 및 계정 연결</button>
+                </div>
 
-        <div class="links">
-            <a th:href="@{/login}">로그인 페이지로 돌아가기</a>
-            <span class="separator">|</span>
-            <a th:href="@{/}">메인으로 가기</a>
-        </div>
-    </div>
-</main>
+                <div id="linking-result-message-area" style="margin-top: 20px;">
+                    <p id="linking-error-message" class="message error-message" style="display: none;"></p>
+                    <p id="linking-success-message" class="message success-message" style="display: none;"></p>
+                </div>
 
-<th:block layout:fragment="page-script">
-    <script th:src="@{/js/login/account-linking.js}"></script>
-</th:block>
+                <div class="links">
+                    <a th:href="@{/login}">로그인 페이지로 돌아가기</a>
+                    <span class="separator">|</span>
+                    <a th:href="@{/}">메인으로 가기</a>
+                </div>
+            </div>
+        </main>
 
-</body>
+        <th:block layout:fragment="page-script">
+            <script th:src="@{/js/login/account-linking.js}"></script>
+        </th:block>
+
+    </body>
 </html>
