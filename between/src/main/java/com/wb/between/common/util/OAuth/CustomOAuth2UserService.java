@@ -187,12 +187,12 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             } else {
             // 1-2. 이메일 일치, 휴대폰 번호 불일치
                 log.warn("이메일 {}은(는) 일치하나 휴대폰 번호가 다릅니다 (기존: {}, 소셜: {}). " +
-                                "기존 계정의 휴대폰 인증 후 소셜 계정 연결을 유도합니다.",
+                                "소셜 계정의 휴대폰 번호로 인증 후 소셜 계정 연결을 유도합니다.",
                         existingUser.getEmail(), existingUser.getPhoneNo(), cleanSocialMobile);
 
                 httpSession.setAttribute(PENDING_SOCIAL_ATTRIBUTES_SESSION_KEY, attributes); // pendingSocialAttributes : 소셜 정보 세션 저장
                 httpSession.setAttribute(LINK_TARGET_EMAIL_SESSION_KEY, existingUser.getEmail()); // linkTargetEmail : 기존 회원 계정 이메일
-                httpSession.setAttribute(LINK_VERIFICATION_PHONE_SESSION_KEY, cleanSocialMobile);   // linkVerificationPhone : 기존 회원 계정 전화번호
+                httpSession.setAttribute(LINK_VERIFICATION_PHONE_SESSION_KEY, cleanSocialMobile);   // linkVerificationPhone : 소셜 계정 전화번호
                 httpSession.setAttribute(LINK_CONTEXT_SESSION_KEY, "LINK_SOCIAL_TO_EXISTING_EMAIL_VERIFY_EXISTING_PHONE");  // accountLinkingContext : 계정 연결 흐름 구분
 
                 // 안내 및 인증 페이지로 이동 설정
