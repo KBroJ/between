@@ -37,7 +37,7 @@ public class WebSecurityConfig {
             "/signup/verify-code", "/findUserInfo/verify-code",
             "/findUserInfo/reqSendEmail", "/findUserInfo/verifyPwdCode", "/api/resetPwd",
             "/login", "/faqList", "/error", "/favicon.ico",  "/api/**",
-            "/oauth2/**", "/admin/**", "/tmp/**",
+            "/oauth2/**", "/tmp/**",
             "/social/link-account/**",
     };
     
