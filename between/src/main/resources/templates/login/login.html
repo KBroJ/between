@@ -31,18 +31,13 @@
                   <div class="col-12 col-lg-10 col-xl-8">
 
                     <div th:if="${param.error}" class="alert alert-danger" role="alert">
-                        <span th:if="${session.SPRING_SECURITY_LAST_EXCEPTION != null}" th:text="${session.SPRING_SECURITY_LAST_EXCEPTION.message}">
-                            아이디 또는 비밀번호가 올바르지 않습니다.
-                        </span>
-                      <span th:if="${session.SPRING_SECURITY_LAST_EXCEPTION == null and session.socialLoginError == null and session.errorMessage == null}">
-                            로그인 처리 중 오류가 발생했습니다.
-                        </span>
+                      <span th:text="${session.errorMessage ?: '로그인에 실패했습니다.'}"></span>
                     </div>
+
                     <div th:if="${session.socialLoginError != null}" class="alert alert-warning" role="alert" th:text="${session.socialLoginError}">
                     </div>
                     <div th:if="${session.errorMessage != null}" class="alert alert-danger" role="alert" th:text="${session.errorMessage}">
                     </div>
-
 
                     <div class="row gy-5 justify-content-center">
                       <div class="col-12 col-lg-5">
