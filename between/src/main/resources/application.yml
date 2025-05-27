@@ -47,7 +47,8 @@ spring:
               - mobile
             client-name: Naver
             authorization-grant-type: authorization_code
-            redirect-uri: http://localhost:8080/login/oauth2/code/naver   # 표준 기본 콜백 URL : /{baseUrl}/login/oauth2/code/{registrationId} 패턴
+#            redirect-uri: http://localhost:8080/login/oauth2/code/naver   # 표준 기본 콜백 URL : /{baseUrl}/login/oauth2/code/{registrationId} 패턴
+            redirect-uri: "{baseUrl}/login/oauth2/code/naver"
           kakao:
             client-id: 
             client-secret: 
