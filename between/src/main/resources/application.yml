@@ -7,17 +7,22 @@ logging:
     # 쿼리 바인딩 로그찍기 참고 : https://byunsw4.tistory.com/25
     org.hibernate.orm.jdbc.bind: trace  # query의 ?에 어떤 값이 들어가는지 추적할 수 있는 설정(TRACE Log에 값을 보여줍니다.)
     com.wb.between: debug
+    io.lettuce.core: DEBUG  # 또는 TRACE
+    org.springframework.data.redis: DEBUG
+#    org.springframework.boot.context.config: TRACE
+#    org.springframework.boot.context.properties: TRACE
+#    org.springframework.core.env: TRACE
 
 spring:
 
   # DB Connection Setting(DB 연결 설정)
   datasource:
-  # Local DB(MySQL)
-#    url: jdbc:mysql://localhost:3306/wb_between_local?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-#    username: root
-#    password: 1qaz2wsx!@
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-  # Winbit Server DB(MySQL)
+    # Local DB(MySQL)
+    #    url: jdbc:mysql://localhost:3306/wb_between_local?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    #    username: root
+    #    password: 1qaz2wsx!@
+    #    driver-class-name: com.mysql.cj.jdbc.Driver
+    # Winbit Server DB(MySQL)
     url: jdbc:mysql://10.1.2.171:3306/wb_between
     username: root
     password: 1qaz2wsx!@
@@ -47,7 +52,7 @@ spring:
               - mobile
             client-name: Naver
             authorization-grant-type: authorization_code
-#            redirect-uri: http://localhost:8080/login/oauth2/code/naver   # 표준 기본 콜백 URL : /{baseUrl}/login/oauth2/code/{registrationId} 패턴
+            #            redirect-uri: http://localhost:8080/login/oauth2/code/naver   # 표준 기본 콜백 URL : /{baseUrl}/login/oauth2/code/{registrationId} 패턴
             redirect-uri: "{baseUrl}/login/oauth2/code/naver"
           kakao:
             client-id: 
@@ -93,22 +98,30 @@ spring:
       filter:
         enabled: true
 
+
 # 예약 시 동시성 해결 위한 Redis Lock 설정
 redis:
   # Winbit Redis Setting(회사서버)
   host: 10.1.2.166
   port: 6379
-  password: winbit01!
- # host: 127.0.0.1
- # port: 6379
- # password: winbit01!
+  #  password: winbit01!
+  password: strongPassword
+  # host: 127.0.0.1
+  # port: 6379
+  # password: winbit01!
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "env,health,info"
 
 # 휴대폰 본인인증 SMS 발송 API(coolSMS) 설정
 coolsms:
   api:
-#    key: "발급받은 API KEY"
-#    secret: "발급받은 API SECRET"
-#    number: 01012345678
+    #    key: "발급받은 API KEY"
+    #    secret: "발급받은 API SECRET"
+    #    number: 01012345678
     key: 
     secret: 
     from: 01081081851
