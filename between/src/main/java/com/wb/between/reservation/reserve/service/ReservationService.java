@@ -15,6 +15,7 @@ import com.wb.between.user.domain.User;
 import com.wb.between.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -53,6 +54,12 @@ public class ReservationService {
 
     @Autowired
     private KakaoPayService kakaoPayService; // 카카오페이 취소 API 호출 위해 추가
+
+    @Value("${redis.host}") // 설정 파일에 값이 없으면 기본값 "localhost" 사용
+    private String redisHost;
+
+    @Value("${redis.port}")    // 설정 파일에 값이 없으면 기본값 6379 사용
+    private int redisPort;
 
     private static final long LOCK_TIMEOUT_SECONDS = 10; // 락 유지 시간 (초)
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
@@ -132,12 +139,27 @@ public class ReservationService {
         // 3. Redis 락 키 정의 (좌석 + 날짜 + 시간대)
         //    시간대별로 락을 거는 것이 가장 정확하지만, 키가 너무 많아질 수 있음.
         //    여기서는 좌석 + 날짜 단위로 락을 걸고, DB 조회로 시간 중복을 재확인하는 방식 사용.
+        String mainLockKeyPrefix = String.format("lock:seat:%s:%s", requestDto.getItemId(), requestDto.getReservationDate());
+        String mainLockKey = mainLockKeyPrefix + (("HOURLY".equals(requestDto.getPlanType()) && requestDto.getSelectedTimes() != null && !requestDto.getSelectedTimes().isEmpty()) ? ":" + String.join("-", requestDto.getSelectedTimes()) : ":operation");
         String lockKey = String.format("lock:seat:%s:%s", requestDto.getItemId(), requestDto.getReservationDate());
         String lockValue = UUID.randomUUID().toString(); // 락 소유자 식별 위한 값
         Boolean lockAcquired = false;
+
+        System.out.printf("[Service] Redis 락 시도 예정 - 대상 Redis: %s:%d, Lock Key: %s%n",
+                redisHost, redisPort, mainLockKey);
+
         try {
+
             // 4. 락 획득 시도 (setIfAbsent: 키가 없을 때만 true 반환)
             lockAcquired = redisTemplate.opsForValue().setIfAbsent(lockKey, lockValue, Duration.ofSeconds(LOCK_TIMEOUT_SECONDS));
+
+            if (lockAcquired == null || !lockAcquired) {
+                System.err.printf("[Service] 락 획득 실패 (이미 사용 중) - 대상 Redis: %s:%d, Lock Key: %s%n",
+                        redisHost, redisPort, mainLockKey);
+                throw new RuntimeException("다른 사용자가 해당 좌석/시간에 대한 작업을 진행 중입니다. 잠시 후 다시 시도해주세요.");
+            }
+            System.out.printf("[Service] Redis 락 획득 성공 - 대상 Redis: %s:%d, Lock Key: %s%n",
+                    redisHost, redisPort, mainLockKey);
 
             if (lockAcquired == null || !lockAcquired) {
                 System.out.println("락 획득 실패: " + lockKey);
