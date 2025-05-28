@@ -97,15 +97,28 @@ spring:
     hiddenmethod:
       filter:
         enabled: true
-
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:wb-redis}
+      port: ${SPRING_REDIS_PORT:6379}
+      password: ${SPRING_REDIS_PASSWORD:strongPassword}
 
 # 예약 시 동시성 해결 위한 Redis Lock 설정
 redis:
-  # Winbit Redis Setting(회사서버)
-  host: 10.1.2.166
-  port: 6379
-  #  password: winbit01!
-  password: strongPassword
+  # Winbit Redis Setting(회사서버) -> Docker 환경용으로 수정
+  host: ${SPRING_REDIS_HOST:wb-redis}   # Docker Compose에서 설정한 SPRING_REDIS_HOST 환경 변수 사용
+  # 만약 환경 변수가 없다면 기본값으로 'wb-redis' 사용 (또는 이전 IP를 기본값으로 둘 수도 있음)
+  port: ${SPRING_REDIS_PORT:6379}      # Docker Compose에서 설정한 SPRING_REDIS_PORT 환경 변수 사용
+  # 만약 환경 변수가 없다면 기본값으로 6379 사용
+  password: ${SPRING_REDIS_PASSWORD:strongPassword} # Docker Compose에서 설정할 SPRING_REDIS_PASSWORD 환경 변수 사용
+  # 만약 환경 변수가 없다면 기본값으로 'strongPassword' 사용
+
+#
+#  # Winbit Redis Setting(회사서버)
+#  host: 10.1.2.166
+#  port: 6379
+#  #  password: winbit01!
+#  password: strongPassword
   # host: 127.0.0.1
   # port: 6379
   # password: winbit01!
