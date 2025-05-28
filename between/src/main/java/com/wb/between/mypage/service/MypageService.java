@@ -18,6 +18,7 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
 
@@ -131,7 +132,8 @@ public class MypageService {
                                                         LocalDate startDate,
                                                         LocalDate endDate) {
 
-        LocalDateTime now = LocalDateTime.now();
+        ZoneId seoulZoneId = ZoneId.of("Asia/Seoul");
+        LocalDateTime now = LocalDateTime.now(seoulZoneId);
         LocalDateTime startDateTime = (startDate != null) ? startDate.atStartOfDay() : null;
         LocalDateTime endDateTimePlusOne = (endDate != null) ? endDate.plusDays(1).atStartOfDay() : null;
 
@@ -175,7 +177,8 @@ public class MypageService {
                                                             LocalDate endDate,
                                                             Pageable pageable) {
 
-        LocalDateTime now = LocalDateTime.now();
+        ZoneId seoulZoneId = ZoneId.of("Asia/Seoul");
+        LocalDateTime now = LocalDateTime.now(seoulZoneId);
         LocalDateTime startDateTime = (startDate != null) ? startDate.atStartOfDay() : null;
         LocalDateTime endDateTimePlusOne = (endDate != null) ? endDate.plusDays(1).atStartOfDay() : null;
 

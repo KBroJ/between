@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -253,7 +254,8 @@ public class MyReservationService {
     }
 
     public List<MyReservationDto> findWinbitReservation() {
-        LocalDateTime now = LocalDateTime.now();
+        ZoneId seoulZoneId = ZoneId.of("Asia/Seoul");
+        LocalDateTime now = LocalDateTime.now(seoulZoneId);
         String winbitEmail = "@winbit.kr";
         List<Reservation> findWinbitReservation = myReservationRepository.findWinbitReservation(now, winbitEmail);
 
