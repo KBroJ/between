@@ -65,12 +65,15 @@ public class AdminBannerService {
         log.debug("imageUrlForDb = {}", imageUrlForDb);
         String originalFileName = null;
 
-        // 개발 단계용 임시 업로드 경로 (주의: 실제 운영에서는 외부 설정으로 관리해야 합니다)
-        String tempUploadPath = "/tmp/banner_uploads"; // 예시 경로 (Windows: "C:/temp/banner_uploads")
-        String webBasePath = "/tmp/banner_uploads"; // 브라우저용 URL 경로
+        // 1. 컨테이너 내부의 영속적인 파일 저장 경로 (예: Tomcat 작업 디렉토리 내)
+        //    이 경로는 docker-compose.yml 에서 호스트 경로와 매핑됩니다.
+        String persistentUploadPathInContainer = "/usr/local/tomcat/webapps/uploaded_banners"; // 예시 경로
+
+        // 2. 브라우저가 접근할 기본 URL 경로 (Apache가 이 URL로 파일을 제공하도록 설정)
+        String webAccessBasePath = "/uploaded_banners"; // 예시 URL 경로
 
 
-        Path uploadDirectory = Paths.get(tempUploadPath);
+        Path uploadDirectory = Paths.get(persistentUploadPathInContainer);
 
         if(bannerImgFile != null && !bannerImgFile.isEmpty()) {
             // 업로드 디렉토리가 없으면 생성
@@ -105,7 +108,7 @@ public class AdminBannerService {
             // DB에 저장할 이미지 URL 업데이트 (실제 서비스에서는 웹 접근 가능한 URL이어야 함)
             // 개발 단계에서는 저장된 파일 경로 또는 가상의 웹 경로를 사용할 수 있습니다.
             // 예: imageUrlForDb = "/uploaded-banners/" + storedFileName; (웹 서버 설정 필요)
-            imageUrlForDb = webBasePath + "/" + storedFileName;
+            imageUrlForDb = webAccessBasePath  + "/" + storedFileName;
             log.info("DB에 저장될 이미지 경로: {}", imageUrlForDb);
         }
 
