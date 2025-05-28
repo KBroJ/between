@@ -76,9 +76,9 @@ public class KakaoPayService {
         params.add("total_amount", String.valueOf(requestDto.getTotalAmount())); // 최종 결제 금액
         params.add("tax_free_amount", "0"); // 비과세 금액
         // --- !!! 리다이렉트 URL 확인 및 실제 주소로 변경 !!! ---
-        params.add("approval_url", "http://localhost:8080/api/payment/kakao/approve"); // 결제 성공 시 돌아올 백엔드 주소
-        params.add("cancel_url", "http://localhost:8080/api/payment/kakao/cancel");   // 결제 취소 시 돌아올 백엔드 주소
-        params.add("fail_url", "http://localhost:8080/api/payment/kakao/fail");     // 결제 실패 시 돌아올 백엔드 주소
+        params.add("approval_url", "http://10.1.2.166/api/payment/kakao/approve"); // 결제 성공 시 돌아올 백엔드 주소
+        params.add("cancel_url", "http://10.1.2.166/api/payment/kakao/cancel");   // 결제 취소 시 돌아올 백엔드 주소
+        params.add("fail_url", "http://10.1.2.166/api/payment/kakao/fail");     // 결제 실패 시 돌아올 백엔드 주소
         // --------------------------------------------------
 
         HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(params, headers);
