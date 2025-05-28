@@ -18,7 +18,7 @@
   <div class="swiper">
     <div class="swiper-wrapper">
       <div class="swiper-slide" th:each="banner : ${bannerList}">
-        <img th:src="@{${banner.bImageUrl}}" alt="" onerror="this.style.display='none';"/>
+        <img th:src="${banner.bImageUrl}" alt="" onerror="this.style.display='none';"/>
       </div>
     </div>
 

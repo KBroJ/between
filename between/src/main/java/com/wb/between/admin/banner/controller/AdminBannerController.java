@@ -75,7 +75,7 @@ public class AdminBannerController {
             //등록
             adminBannerService.registMainBanner(adminBannerRegistReqDto);
             redirectAttributes.addFlashAttribute("alertMessage", "배너정보가 성공적으로 등록되었습니다."); // 성공
-            return "admin/banner/banner-manage";
+            return "redirect:/admin/banner";
         } catch (CustomException ex) {
             log.error("registMainBanner|error = {}", ex.getMessage());
             model.addAttribute("result", "fail");
