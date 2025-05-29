@@ -91,138 +91,131 @@ public class ReservationService {
         LocalDate reservationDate = LocalDate.parse(requestDto.getReservationDate());
         LocalDateTime startDateTime;
         LocalDateTime endDateTime;
+        String planType = requestDto.getPlanType();
 
-        switch (requestDto.getPlanType()) {
+        switch (planType) {
             case "HOURLY":
-                if (requestDto.getSelectedTimes() == null || requestDto.getSelectedTimes().isEmpty()) {
-                    throw new IllegalArgumentException("시간제는 예약 시간을 선택해야 합니다.");
-                }
-
                 List<String> selectedTimes = requestDto.getSelectedTimes();
-
+                if (selectedTimes == null || selectedTimes.isEmpty()) {
+                    throw new IllegalArgumentException("시간제 예약은 시간을 1개 이상 선택해야 합니다.");
+                }
                 List<LocalTime> times = selectedTimes.stream()
                         .map(timeStr -> LocalTime.parse(timeStr, TIME_FORMATTER))
                         .sorted()
                         .collect(Collectors.toList());
 
-                if (times.size() > 1) {
+                if (times.size() > 1) { // 여러 시간 선택 시 연속성 검사
                     for (int i = 0; i < times.size() - 1; i++) {
                         if (!times.get(i).plusHours(1).equals(times.get(i + 1))) {
-                            // 에러 발생시켜서 프론트엔드로 메시지 전달
-                            throw new IllegalArgumentException("시간제 예약은 연속된 시간으로만 한 번에 요청할 수 있습니다. 각각 다른 시간대 예약은 개별적으로 예약해주세요.");
+                            throw new IllegalArgumentException("시간제 예약은 연속된 시간으로만 한 번에 요청할 수 있습니다. 떨어진 시간은 개별적으로 예약해주세요.");
                         }
                     }
                 }
-
-                // 선택된 시간 중 가장 빠른 시간과 가장 마지막 시간 + 1시간으로 계산 (연속 사용 가정)
-                requestDto.getSelectedTimes().sort(Comparator.naturalOrder());
-                LocalTime startTime = LocalTime.parse(requestDto.getSelectedTimes().get(0), TIME_FORMATTER);
-                LocalTime lastTime = LocalTime.parse(requestDto.getSelectedTimes().get(requestDto.getSelectedTimes().size() - 1), TIME_FORMATTER);
-                startDateTime = reservationDate.atTime(startTime);
-                endDateTime = reservationDate.atTime(lastTime.plusHours(1)); // 마지막 시간 + 1시간
+                startDateTime = reservationDate.atTime(times.get(0));
+                endDateTime = reservationDate.atTime(times.get(times.size() - 1).plusHours(1));
                 break;
             case "DAILY":
                 startDateTime = reservationDate.atTime(OPEN_TIME);
-                endDateTime = reservationDate.atTime(CLOSE_TIME); // 당일 종료 시간까지
+                endDateTime = reservationDate.plusDays(1).atTime(OPEN_TIME); // 다음 날 00:00 미포함
                 break;
             case "MONTHLY":
-                startDateTime = reservationDate.atTime(OPEN_TIME); // 시작일 운영 시작 시간
-                endDateTime = reservationDate.plusMonths(1).atTime(CLOSE_TIME); // 한 달 뒤 종료 시간
+                startDateTime = reservationDate.atTime(OPEN_TIME);
+                endDateTime = reservationDate.plusMonths(1).atTime(OPEN_TIME); // 다음 달 같은 날짜 00:00 미포함
                 break;
             default:
-                throw new IllegalArgumentException("알 수 없는 요금제 타입입니다.");
+                throw new IllegalArgumentException("알 수 없는 요금제 타입입니다: " + planType);
+        }
+        System.out.printf("[Service] 계산된 예약 시간: PlanType=%s, Start=%s, End=%s%n", planType, startDateTime, endDateTime);
+
+        // 3. Redis 락 키 정의 및 획득
+        // 시간제는 선택된 시간 범위 전체를 하나의 락 대상으로 봄
+        String lockKey = String.format("lock:seat:%s:%s:%s-%s",
+                requestDto.getItemId(),
+                reservationDate.toString(),
+                startDateTime.toLocalTime().format(TIME_FORMATTER),
+                endDateTime.toLocalTime().format(TIME_FORMATTER)
+        );
+        if (!"HOURLY".equals(planType)) { // 일일권, 월정액권은 날짜까지만으로도 충분할 수 있음 (정책에 따라 조정)
+            lockKey = String.format("lock:seat:%s:%s:%s", requestDto.getItemId(), reservationDate.toString(), planType);
         }
 
-        // 3. Redis 락 키 정의 (좌석 + 날짜 + 시간대)
-        //    시간대별로 락을 거는 것이 가장 정확하지만, 키가 너무 많아질 수 있음.
-        //    여기서는 좌석 + 날짜 단위로 락을 걸고, DB 조회로 시간 중복을 재확인하는 방식 사용.
-        String mainLockKeyPrefix = String.format("lock:seat:%s:%s", requestDto.getItemId(), requestDto.getReservationDate());
-        String mainLockKey = mainLockKeyPrefix + (("HOURLY".equals(requestDto.getPlanType()) && requestDto.getSelectedTimes() != null && !requestDto.getSelectedTimes().isEmpty()) ? ":" + String.join("-", requestDto.getSelectedTimes()) : ":operation");
-        String lockKey = String.format("lock:seat:%s:%s", requestDto.getItemId(), requestDto.getReservationDate());
-        String lockValue = UUID.randomUUID().toString(); // 락 소유자 식별 위한 값
+        String lockValue = UUID.randomUUID().toString();
         Boolean lockAcquired = false;
 
-        System.out.printf("[Service] Redis 락 시도 예정 - 대상 Redis: %s:%d, Lock Key: %s%n",
-                redisHost, redisPort, mainLockKey);
+        System.out.printf("[Service] Redis 락 시도 예정 - 대상 Redis: %s:%d, Lock Key: %s%n", redisHost, redisPort, lockKey);
 
         try {
-
-            // 4. 락 획득 시도 (setIfAbsent: 키가 없을 때만 true 반환)
             lockAcquired = redisTemplate.opsForValue().setIfAbsent(lockKey, lockValue, Duration.ofSeconds(LOCK_TIMEOUT_SECONDS));
 
             if (lockAcquired == null || !lockAcquired) {
-                System.err.printf("[Service] 락 획득 실패 (이미 사용 중) - 대상 Redis: %s:%d, Lock Key: %s%n",
-                        redisHost, redisPort, mainLockKey);
+                System.err.printf("[Service] 락 획득 실패 (이미 사용 중) - Lock Key: %s%n", lockKey);
                 throw new RuntimeException("다른 사용자가 해당 좌석/시간에 대한 작업을 진행 중입니다. 잠시 후 다시 시도해주세요.");
             }
-            System.out.printf("[Service] Redis 락 획득 성공 - 대상 Redis: %s:%d, Lock Key: %s%n",
-                    redisHost, redisPort, mainLockKey);
+            System.out.printf("[Service] Redis 락 획득 성공 - Lock Key: %s%n", lockKey);
 
-            if (lockAcquired == null || !lockAcquired) {
-                System.out.println("락 획득 실패: " + lockKey);
-                throw new RuntimeException("다른 사용자가 현재 좌석/날짜를 예약 중입니다. 잠시 후 다시 시도해주세요.");
-            }
-            System.out.println("락 획득 성공: " + lockKey);
-
-            // --- !!! CRITICAL SECTION START (락 확보 상태) !!! ---
-
-            // 5. 예약 가능 여부 DB에서 최종 확인 (중복 예약 방지)
-            long overlappingCount = reservationRepository.countOverlappingReservations(
+            // --- CRITICAL SECTION START ---
+            // 4. 예약 가능 여부 DB에서 최종 확인
+            long overlappingCount = reservationRepository.countAnyOverlappingReservations(
                     requestDto.getItemId(), startDateTime, endDateTime);
 
             if (overlappingCount > 0) {
-                System.out.println("중복 예약 발견됨: " + lockKey);
-                throw new RuntimeException("선택하신 시간에 이미 예약이 존재합니다.");
+                System.out.println("[Service] 중복 예약 발견됨: " + lockKey);
+                throw new RuntimeException("선택하신 시간에 이미 다른 예약이 존재합니다.");
             }
-            System.out.println("DB 예약 가능 확인 완료");
+            System.out.println("[Service] DB 예약 가능 확인 완료.");
 
-            // 6. 가격 재계산
+            // 5. 가격 계산
+            Seat targetSeat = seatRepository.findById(requestDto.getItemId()) // 좌석 정보 조회 (가격 가져오기 위해)
+                    .orElseThrow(() -> new EntityNotFoundException("좌석 정보를 찾을 수 없습니다: " + requestDto.getItemId()));
+
             String basePriceStr = calculateBasePrice(requestDto.getPlanType(), requestDto.getSelectedTimes());
             String discountPriceStr = calculateDiscount(basePriceStr, requestDto.getCouponId());
             String finalPriceStr = calculateFinalPrice(basePriceStr, discountPriceStr);
+            System.out.printf("[Service] 가격 계산 완료: Base=%s, Discount=%s, Final=%s%n", basePriceStr, discountPriceStr, finalPriceStr);
 
-            // 임직원 0원 무료 처리 로직
-            boolean isAuth = "임직원".equals(authCd);
-            if(isAuth){
-                System.out.println("임직원 권한 유저 확인 0원으로 계산 처리 합시다.");
+
+
+            // 6. 임직원 0원 처리
+            boolean isEmployee = "임직원".equals(authCd); // authCd 사용
+            if (isEmployee) {
+                System.out.println("[Service] 임직원 확인. 최종 가격 0원으로 조정.");
                 finalPriceStr = "0";
-                discountPriceStr = basePriceStr;
+                discountPriceStr = basePriceStr; // 할인액을 원금으로 (0원 만들기 위해)
             }
-            boolean isZeroPrice = "0".equals(finalPriceStr); // 0원 확인
-            boolean isConfirmedImmediately = isAuth && isZeroPrice;
-            Boolean statusToSet = isConfirmedImmediately ? Boolean.TRUE : null;
 
             // 7. Reservation Entity 생성 및 저장
             Reservation reservation = new Reservation();
             reservation.setUserNo(userNo);
             reservation.setSeatNo(requestDto.getItemId());
-            reservation.setTotalPrice(finalPriceStr); // 계산된 최종 가격
-            reservation.setResPrice(basePriceStr);    // 할인 전 가격
-            reservation.setDcPrice(discountPriceStr); // 할인액
-            // reservation.setUserCpNo(...); // 사용된 쿠폰 ID 저장 필요시
+            reservation.setTotalPrice(finalPriceStr);
+            reservation.setResPrice(basePriceStr);
+            reservation.setDcPrice(discountPriceStr);
+            if (requestDto.getCouponId() != null && !requestDto.getCouponId().isBlank()) {
+                reservation.setUserCpNo(Long.parseLong(requestDto.getCouponId()));
+            }
             reservation.setResStart(startDateTime);
             reservation.setResEnd(endDateTime);
-            reservation.setPlanType(requestDto.getPlanType()); // Entity에 필드 추가 시
-            // resDt, moDt는 @CreationTimestamp, @UpdateTimestamp로 자동 관리
-            // 임직원 0원 처리
-            reservation.setResStatus(statusToSet); // 상태 설정
-            System.out.println("[Service] DB 저장 직전 reservation 객체 상태: " + reservation.getResStatus()); // <<<--- 로그 1: 저장 직전 상태
+            reservation.setPlanType(planType);
+
+            boolean isZeroPrice = "0".equals(finalPriceStr);
+            boolean isConfirmedImmediately = isEmployee && isZeroPrice;
+            reservation.setResStatus(isConfirmedImmediately ? Boolean.TRUE : null); // 상태 설정
+            System.out.println("[Service] DB 저장 직전 reservation 객체 상태: " + reservation.getResStatus());
 
             Reservation savedReservation = reservationRepository.save(reservation);
             System.out.println("[Service] >>> DB Reservation 저장 완료! ResNo: " + savedReservation.getResNo() + ", Status: " + savedReservation.getResStatus());
-            /*Reservation savedReservation = reservationRepository.save(reservation);
-            System.out.println("DB에 예약 정보 저장 성공 (상태: 보류): " + savedReservation.getResNo());*/
-            return savedReservation; // 생성된 예약 정보 반환
+            // --- CRITICAL SECTION END ---
+            return savedReservation;
 
         } finally {
-            // 8. 락 해제 (내가 획득한 락만 해제)
-            if (Boolean.TRUE.equals(lockAcquired)) { // null 체크 포함
+            // 8. 락 해제
+            if (Boolean.TRUE.equals(lockAcquired)) {
                 String redisValue = redisTemplate.opsForValue().get(lockKey);
-                if (lockValue.equals(redisValue)) { // 내가 설정한 값이 맞는지 확인 후 삭제 (안전장치)
+                if (lockValue.equals(redisValue)) {
                     redisTemplate.delete(lockKey);
-                    System.out.println("락 해제 성공: " + lockKey);
+                    System.out.println("[Service] 락 해제 성공: " + lockKey);
                 } else {
-                    System.out.println("락 해제 실패: 락 소유자가 다르거나 만료됨 - " + lockKey);
+                    System.out.println("[Service] 락 해제 실패: 락 소유자가 다르거나 만료됨 - " + lockKey);
                 }
             }
         }
@@ -237,6 +230,8 @@ public class ReservationService {
             default: return "0";
         }
     }
+
+
     private String calculateDiscount(String basePriceStr, String couponId) {
         if (couponId == null || couponId.isEmpty()) return "0";
         int basePrice = Integer.parseInt(basePriceStr);
