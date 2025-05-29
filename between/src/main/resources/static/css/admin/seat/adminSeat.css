@@ -6,3 +6,12 @@
 .text-danger-emphasis { color: var(--bs-danger-text-emphasis); }
 /* 더 작은 버튼을 위한 스타일 */
 .btn-xs { padding: 0.1rem 0.4rem; font-size: 0.75rem; }
+
+body {
+    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+    line-height: normal;
+}
+
+ul {
+   padding-left: 0;
+}

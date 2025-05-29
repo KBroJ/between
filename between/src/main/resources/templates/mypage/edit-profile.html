@@ -10,13 +10,13 @@
 <body>
 <div layout:fragment="mypage-content">
   <h1 class="main-title">회원정보 수정</h1>
-  <div class="card info-card" th:object="${userInfo}">
+  <div class="card info-card"  th:object="${userInfo}">
     <form th:action="@{/mypage/edit}" method="post" class="profile-form">
       <!-- put 처리 -->
       <input type="hidden" name="_method" value="put" />
       <section class="info-section">
         <div class="info-grid">
-          <div class="form-group">
+          <div class="info-item">
             <label for="name">이름</label>
             <input type="text" id="name" name="name" th:field="*{name}" />
             <div th:if="${#fields.hasErrors('phoneNo')}"
@@ -25,7 +25,8 @@
             <div class="error-message js-error" id="name-js-error" style="display: none;"></div>
           </div>
 
-          <div class="form-group">
+
+          <div class="info-item">
             <label for="phone">연락처</label>
             <input type="text" id="phone" name="phone" th:field="*{phoneNo}" />
             <div th:if="${#fields.hasErrors('phoneNo')}"
@@ -34,47 +35,16 @@
           <!-- 클라이언트 측 오류 메시지 표시용 (JavaScript) -->
           <div class="error-message js-error" id="phone-js-error" style="display: none;"></div>
 
-          <div class="form-actions">
-            <button type="submit" class="btn-primary">정보 수정</button>
+          <div class="card-footer">
+            <button type="submit" class="btn btn-danger">정보 수정</button>
           </div>
         </div>
       </section>
     </form>
   </div>
 
-
-<!--  <h1 class="main-title">회원정보 수정</h1>-->
-<!--  <div class="card info-card" th:object="${userInfo}">-->
-<!--    <div class="card-header">-->
-
-<!--    </div>-->
-<!--    <div th:object="${userInfo}">-->
-<!--      <form th:action="@{/mypage/edit}" method="post" class="profile-form">-->
-<!--        &lt;!&ndash; put 처리 &ndash;&gt;-->
-<!--        <input type="hidden" name="_method" value="put" />-->
-<!--        <div class="form-group">-->
-<!--          <label for="name">이름</label>-->
-<!--          <input type="text" id="name" name="name" th:field="*{name}" />-->
-<!--          <div th:if="${#fields.hasErrors('phoneNo')}"-->
-<!--               th:errors="*{phoneNo}">이름 에러 메시지</div>-->
-<!--          &lt;!&ndash; 클라이언트 측 오류 메시지 표시용 (JavaScript) &ndash;&gt;-->
-<!--          <div class="error-message js-error" id="name-js-error" style="display: none;"></div>-->
-<!--        </div>-->
-<!--        <div class="form-group">-->
-<!--          <label for="phone">연락처</label>-->
-<!--          <input type="text" id="phone" name="phone" th:field="*{phoneNo}" />-->
-<!--          <div th:if="${#fields.hasErrors('phoneNo')}"-->
-<!--               th:errors="*{phoneNo}">전화번호 에러 메시지</div>-->
-<!--        </div>-->
-<!--        <div class="error-message js-error" id="phone-js-error" style="display: none;"></div>-->
-<!--        <div class="form-actions">-->
-<!--          <button type="submit" class="btn-primary">정보 수정</button>-->
-<!--        </div>-->
-<!--      </form>-->
-<!--    </div>-->
-
-  </div>
 </div>
+
 <th:block layout:fragment="page-script">
   <script>
     $(document).ready(function () {
@@ -109,6 +79,25 @@
           return false;
         } else {
           clearError($phoneError);
+
+          $.ajax({
+            url: '/mypage/check-phone-duplicate', // 실제 중복 체크 API 엔드포인트
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ phone: phoneValue }),
+            success: function(response) {
+              // 서버로부터 받은 응답 처리
+              console.log(response);
+              if (response === 'notAvailable') {
+                showError($phoneError, '연락처가 중복됩니다.')
+              };
+            },
+            error: function(xhr, status, error) {
+              console.error("Error: ", error);
+              // showError($phoneError, '서버 통신 오류');
+            }
+          })
+
           return true;
         }
       }

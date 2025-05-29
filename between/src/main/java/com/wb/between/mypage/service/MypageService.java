@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -230,5 +231,15 @@ public class MypageService {
     @Transactional
     public void accountDeletion(Long userNo) {
         userRepository.deleteById(userNo);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean checkDuplicate(String phoneNo){
+        Optional<User> userOptional = userRepository.findByPhoneNo(phoneNo);
+        if (userOptional.isPresent()) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

@@ -90,38 +90,38 @@
       </div>
 
       <!-- 결과 테이블 영역 -->
-      <div class="table-area">
-        <table class="results-table">
-          <thead>
-          <tr>
-            <th scope="col">선택</th>
-            <th scope="col">번호</th>
-            <th scope="col">권한 코드</th>
-            <th scope="col">권한 명</th>
-<!--            <th scope="col">권한 설명</th>-->
-          </tr>
-          </thead>
-          <tbody id="resultsBody">
-          <!-- 검색 결과가 여기에 동적으로 추가됩니다 -->
-          <!-- 예시 행 (실제로는 JS로 생성) -->
-          <tr th:each="permission : ${adminPermissionList}">
-            <td>
-              <input type="checkbox"
-                     th:id="'perm-' + ${permission.permissionId}"
-                     name="permissionIds"
-                     th:value="${permission.permissionId}"/>
-            </td>
-            <td th:text="${permission.permissionId}"></td>
-            <td th:text="${permission.permissionCode}"></td>
-            <td th:text="${permission.permissionName}"></td>
-<!--            <td th:text="${permission.description}"></td>-->
-          </tr>
-          <tr th:if="${adminPermissionList.empty}">
-            <td colspan="6" class="no-data">조회된 역할 목록이 없습니다.</td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
+<!--      <div class="table-area">-->
+<!--        <table class="results-table">-->
+<!--          <thead>-->
+<!--          <tr>-->
+<!--            <th scope="col">선택</th>-->
+<!--            <th scope="col">번호</th>-->
+<!--            <th scope="col">권한 코드</th>-->
+<!--            <th scope="col">권한 명</th>-->
+<!--&lt;!&ndash;            <th scope="col">권한 설명</th>&ndash;&gt;-->
+<!--          </tr>-->
+<!--          </thead>-->
+<!--          <tbody id="resultsBody">-->
+<!--          &lt;!&ndash; 검색 결과가 여기에 동적으로 추가됩니다 &ndash;&gt;-->
+<!--          &lt;!&ndash; 예시 행 (실제로는 JS로 생성) &ndash;&gt;-->
+<!--          <tr th:each="permission : ${adminPermissionList}">-->
+<!--            <td>-->
+<!--              <input type="checkbox"-->
+<!--                     th:id="'perm-' + ${permission.permissionId}"-->
+<!--                     name="permissionIds"-->
+<!--                     th:value="${permission.permissionId}"/>-->
+<!--            </td>-->
+<!--            <td th:text="${permission.permissionId}"></td>-->
+<!--            <td th:text="${permission.permissionCode}"></td>-->
+<!--            <td th:text="${permission.permissionName}"></td>-->
+<!--&lt;!&ndash;            <td th:text="${permission.description}"></td>&ndash;&gt;-->
+<!--          </tr>-->
+<!--          <tr th:if="${adminPermissionList.empty}">-->
+<!--            <td colspan="6" class="no-data">조회된 역할 목록이 없습니다.</td>-->
+<!--          </tr>-->
+<!--          </tbody>-->
+<!--        </table>-->
+<!--      </div>-->
 
 <!--      <div class="permissions-checkbox-group">-->
 <!--        <div th:each="permission : ${adminPermissionList}" class="permission-item">-->

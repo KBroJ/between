@@ -26,13 +26,7 @@ public class CouponService {
      */
     @Transactional
     public void signUpCoupon(User user) {
-        long couponId;
-        //1. 지급 쿠폰 분기
-        if(user.getEmail().endsWith("@winbit.kr")) {
-            couponId = 2L;
-        } else {
-            couponId = 1L;
-        }
+        long couponId = 1L;
 
         //1. 회원가입 쿠폰 조회
         Coupon coupon = couponRepository.findById(couponId).orElseThrow(()-> new CustomException(ErrorCode.INVALID_INPUT));

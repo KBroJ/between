@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -26,6 +28,7 @@ import java.util.List;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 @Slf4j
 @Controller
@@ -409,5 +412,21 @@ public class MypageController {
         }
     }
 
+    @PostMapping("/check-phone-duplicate")
+    @ResponseBody
+    public ResponseEntity<?> checkDuplicate(@RequestBody Map<String, String> payload) {
+        log.debug("payload {}", payload);
+        boolean isAvailable = mypageService.checkDuplicate(payload.get("phone"));
+        log.debug("isAvailable {}", isAvailable);
+        if (isAvailable) {
+            return ResponseEntity.ok()
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .body("available");
+        } else {
+            return ResponseEntity.ok()
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .body("notAvailable");
+        }
+    }
 
 }

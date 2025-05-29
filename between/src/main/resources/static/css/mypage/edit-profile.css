@@ -6,349 +6,136 @@
     padding-bottom: 10px;
 }
 
-/* Card Styles (used within content) */
-.card {
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    margin-bottom: 32px; /* Space between cards */
-    padding: 24px;
+/* 기본 카드 스타일 (Bootstrap 등을 사용하지 않는 경우의 예시) */
+.card.info-card {
+    border: 1px solid #e0e0e0; /* 연한 회색 테두리 */
+    border-radius: 8px; /* 둥근 모서리 */
+    background-color: #ffffff; /* 흰색 배경 */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* 약간의 그림자 */
+    margin-bottom: 20px; /* 카드 아래 여백 */
+    overflow: hidden; /* 내부 요소가 넘칠 경우 숨김 (border-radius 유지) */
 }
 
-/* Info Card Specifics */
-.info-card .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap; /* Allow wrapping */
-    gap: 16px; /* Add gap for wrapped items */
-    padding-bottom: 16px;
-    margin-bottom: 24px;
-    border-bottom: 1px solid #e9ecef; /* Separator line */
+/* 카드 제목 스타일 (필요하다면 추가) */
+.info-card h1 {
+    font-size: 1.5em; /* 제목 크기 */
+    padding: 15px 20px; /* 제목 영역 안쪽 여백 */
+    margin: 0; /* 기본 마진 제거 */
+    border-bottom: 1px solid #e0e0e0; /* 제목 아래 구분선 */
 }
 
-.info-card .card-title {
-    font-size: 1.25rem; /* 20px */
-    font-weight: 600;
-    color: #212529;
+/* 폼 내부 기본 패딩 */
+.info-card form {
+    padding: 20px; /* 폼 안쪽 여백 */
 }
 
-/* 전체 영역 */
-.profile-edit-wrapper {
-    background-color: #ffffff;
-    padding: 32px;
-    border-radius: 12px;
-    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-/* 제목 */
-.profile-edit-wrapper h2 {
-    font-size: 22px;
-    font-weight: 600;
-    margin-bottom: 24px;
-    border-bottom: 1px solid #e5e7eb;
-    padding-bottom: 10px;
-}
-
-/* form 구조 */
-.profile-form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-/* label + input 묶음 */
-.form-group label {
-    display: block;
-    font-weight: 500;
-    margin-bottom: 6px;
-    color: #333;
-}
-
-.form-group input {
-    width: 100%;
-    padding: 10px 12px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    background-color: #fafafa;
-    transition: border 0.3s;
-}
-
-.form-group input:focus {
-    border-color: #1976d2;
-    outline: none;
-    background-color: #fff;
-}
-
-/* 버튼 영역 */
-.form-actions {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    margin-top: 30px;
-}
-
-.btn-primary {
-    background-color: #1976d2;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    font-size: 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.btn-primary:hover {
-    background-color: #1259aa;
-}
-
-.btn-danger {
-    background-color: #ef4444;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    font-size: 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.btn-danger:hover {
-    background-color: #dc2626;
-}
-
-
-/* 신규 CSS */
-/* 카드 기본 스타일 */
-.detail-card {
-    background-color: #ffffff;
-    border-radius: 12px; /* 둥근 모서리 */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* 그림자 효과 */
-    padding: 25px 30px;
-    margin: 30px auto; /* 상하 여백 및 가로 중앙 정렬 (필요시 조정) */
-    max-width: 900px; /* 카드의 최대 너비 */
-    width: 100%;
-    box-sizing: border-box;
-}
-
-/* 카드 제목 */
-.card-title {
-    font-size: 1.6em; /* 제목 크기 */
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-}
-
-.card-title-icon {
-    margin-right: 10px;
-    color: #555; /* 아이콘 색상 */
-}
-
-/* 구분선 */
-.card-divider {
-    border: 0;
-    height: 1px;
-    background-color: #e9ecef; /* 구분선 색상 */
-    margin: 25px 0; /* 구분선 상하 여백 */
-}
-
-/* 정보 섹션 제목 */
-.info-section {
-    margin-bottom: 20px; /* 섹션 간 여백 */
-}
-
-.section-title {
-    font-size: 1.2em;
-    font-weight: 500;
-    color: #444;
+/* 서버 메시지 스타일 (Bootstrap alert 클래스 모방) */
+.alert {
+    padding: 10px 15px;
     margin-bottom: 15px;
-    padding-bottom: 5px;
-    border-bottom: 2px solid #eee; /* 섹션 제목 밑줄 */
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+.alert-danger {
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+}
+.alert-success {
+    color: #3c763d;
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
 }
 
-/* 정보 표시 그리드 (기본 정보) */
-.info-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* 반응형 그리드 */
-    gap: 10px 20px; /* 행/열 간격 */
+/* 각 정보 항목 스타일 */
+.info-item {
+    margin-bottom: 15px; /* 항목 사이 아래 여백 */
 }
 
-.info-grid p {
-    margin-bottom: 8px; /* 정보 항목 간 여백 */
-    font-size: 0.95em;
-    color: #555;
-    display: flex; /* 아이콘과 텍스트 정렬 */
-    align-items: center;
+/* 라벨 스타일 */
+.info-item label {
+    display: block; /* 라벨을 블록 요소로 만들어 줄바꿈 유도 */
+    margin-bottom: 5px; /* 라벨과 입력 필드 사이 여백 */
+    font-weight: bold; /* 약간 굵게 */
+    font-size: 0.9em; /* 약간 작은 글씨 */
+    color: #333; /* 진한 회색 */
 }
 
-.info-icon {
-    margin-right: 8px;
-    color: #888; /* 아이콘 색상 */
-    width: 16px; /* 아이콘 너비 고정 */
-    text-align: center;
+/* 입력 필드(input[type=password]) 기본 스타일 */
+.info-item input[type="password"],
+.info-item input[type="text"] /* 다른 타입도 필요하면 추가 */
+{
+    width: 100%; /* 부모 요소 너비에 맞춤 */
+    padding: 10px; /* 안쪽 여백 */
+    border: 1px solid #ccc; /* 회색 테두리 */
+    border-radius: 4px; /* 약간 둥근 모서리 */
+    box-sizing: border-box; /* 패딩과 테두리를 너비 계산에 포함 */
+    font-size: 1em; /* 기본 글씨 크기 */
 }
 
-.info-grid p strong {
-    display: inline-block;
-    width: 90px; /* 라벨 너비 고정 (선택적) */
-    color: #333;
-    margin-right: 10px;
+/* 입력 필드 포커스 시 스타일 */
+.info-item input[type="password"]:focus,
+.info-item input[type="text"]:focus {
+    border-color: #007bff; /* 파란색 테두리 (예시) */
+    outline: none; /* 기본 아웃라인 제거 */
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); /* 포커스 시 그림자 효과 (선택적) */
 }
 
-/* 계정 설정 그리드 */
-.setting-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 15px 20px;
+/* 비밀번호 확인 메시지 스타일 */
+#passwordConfirmMessage {
+    display: block; /* 메시지도 별도 라인 차지하도록 */
+    margin-top: 5px; /* 입력 필드와 메시지 사이 여백 */
+    font-size: 0.85em; /* 약간 작은 글씨 */
+    min-height: 1.2em; /* 메시지 없을 때 높이 유지 (레이아웃 깨짐 방지) */
 }
 
-/* 계정 설정 섹션의 Select Box 스타일 */
-.setting-grid .form-select { /* .form-select 에 직접 지정해도 되지만, 이 섹션에만 적용 시 */
-    /* width: 100%; */ /* 만약 100%로 되어있다면 이 줄을 주석 처리하거나 삭제 */
-    width: 180px;      /* 예시: 고정 너비 지정 */
-    /* 또는 */
-    /* max-width: 200px; */ /* 예시: 최대 너비 지정 */
-
-    padding: 8px 12px;
-    border: 1px solid #ced4da;
-    border-radius: 6px;
-    font-size: 0.95em;
-    background-color: #fff;
-    height: 40px;
-    cursor: pointer;
+/* 카드 푸터 스타일 */
+.card-footer {
+    padding: 15px 20px; /* 푸터 안쪽 여백 */
+    border-top: 1px solid #e0e0e0; /* 위쪽 구분선 */
+    text-align: right; /* 버튼을 오른쪽 정렬 (선택적) */
 }
 
-.form-group {
-    display: flex;
-    flex-direction: column; /* 라벨과 셀렉트 수직 배치 */
-}
-
-.form-group label {
-    margin-bottom: 6px;
-    font-size: 0.9em;
-    color: #333;
-    font-weight: 500; /* 라벨 약간 굵게 */
-    display: flex;
-    align-items: center;
-}
-
-.form-select {
-    padding: 8px 12px;
-    border: 1px solid #ced4da;
-    border-radius: 6px;
-    font-size: 0.95em;
-    background-color: #fff;
-    height: 40px; /* 다른 input과 높이 유사하게 */
-    cursor: pointer;
-}
-.form-select:focus {
-    border-color: #86b7fe;
-    outline: 0;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-}
-
-
-/* 예약 테이블 */
-.table-responsive {
-    overflow-x: auto; /* 작은 화면에서 가로 스크롤 */
-}
-
-.reservation-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-    font-size: 0.9em;
-}
-
-.reservation-table th,
-.reservation-table td {
-    border: 1px solid #e9ecef;
-    padding: 10px 12px;
-    text-align: center;     /* 텍스트 가운데 정렬 적용 */
-    vertical-align: middle;
-}
-
-.reservation-table thead th {
-    background-color: #f8f9fa; /* 테이블 헤더 배경색 */
-    font-weight: 500;
-    color: #495057;
-}
-
-/* 짝수 행 배경색 : 가독성 향상 */
-.reservation-table tbody tr:nth-child(even) {
-    background-color: #fTcfcfd;
-}
-.reservation-table tbody tr:hover {
-    background-color: #f1f3f5; /* 행 호버 효과 */
-}
-
-.text-center {
-    text-align: center;
-}
-
-/* 버튼 영역 */
-.card-actions {
-    margin-top: 30px; /* 버튼 영역 상단 여백 */
-    display: flex;
-    justify-content: flex-end; /* 버튼 우측 정렬 */
-    gap: 10px; /* 버튼 사이 간격 */
-}
-
-/* 기본 버튼 스타일 */
+/* 버튼 기본 스타일 (Bootstrap btn 클래스 모방) */
 .btn {
     display: inline-block;
-    font-weight: 500;
-    line-height: 1.5;
+    font-weight: 400;
     color: #212529;
     text-align: center;
-    text-decoration: none;
     vertical-align: middle;
     cursor: pointer;
     user-select: none;
     background-color: transparent;
     border: 1px solid transparent;
-    padding: 8px 16px; /* 버튼 크기 */
-    font-size: 0.95em;
-    border-radius: 6px; /* 버튼 둥근 모서리 */
+    padding: 8px 15px; /* 버튼 안쪽 여백 */
+    font-size: 1em;
+    line-height: 1.5;
+    border-radius: 4px;
     transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
-/* 주요 버튼 (수정) */
+/* 파란색 버튼 스타일 (예시) */
 .btn-primary {
     color: #fff;
-    background-color: #0d6efd; /* 파란색 계열 */
-    border-color: #0d6efd;
+    background-color: #007bff;
+    border-color: #007bff;
 }
+
 .btn-primary:hover {
-    background-color: #0b5ed7;
-    border-color: #0a58ca;
-}
-
-/* 보조 버튼 (목록으로) */
-.btn-secondary {
     color: #fff;
-    background-color: #6c757d; /* 회색 계열 */
-    border-color: #6c757d;
-}
-.btn-secondary:hover {
-    background-color: #5c636a;
-    border-color: #565e64;
+    background-color: #0056b3;
+    border-color: #004085;
 }
 
-/* 위험 버튼 (탈퇴 처리) */
+/* 빨간색 버튼 스타일 (기존 사용) */
 .btn-danger {
     color: #fff;
-    background-color: #dc3545; /* 빨간색 계열 */
+    background-color: #dc3545;
     border-color: #dc3545;
 }
-.btn-danger:hover {
-    background-color: #bb2d3b;
-    border-color: #b02a37;
-}
 
+.btn-danger:hover {
+    color: #fff;
+    background-color: #c82333;
+    border-color: #bd2130;
+}

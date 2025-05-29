@@ -10,7 +10,7 @@
 
 <section layout:fragment="admin-content">   <!-- Main Content -->
 
-  <h1 class="main-title">메인 관리 화면</h1>
+  <h1 class="main-title">배너 등록</h1>
   <div class="container">
     <div class="banner-list-container">
       <form id="banner-form" th:action="@{/admin/banner/regist}" th:object="${bannerInfo}" method="post"
@@ -27,10 +27,10 @@
           <small>배너를 설명하는 문구 또는 이미지 대체 텍스트 (웹 접근성)</small>
         </div>
 
-        <div class="form-group">
-          <label for="banner-url">경로:</label>
-          <input type="text" id="banner-url" name="bImageUrl" th:field="*{bImageUrl}" placeholder="https://example.com/page">
-        </div>
+<!--        <div class="form-group">-->
+<!--          <label for="banner-url">경로:</label>-->
+<!--          <input type="text" id="banner-url" name="bImageUrl" th:field="*{bImageUrl}" placeholder="https://example.com/page">-->
+<!--        </div>-->
 
         <div class="form-group">
           <label for="sortOrder">순서:</label>

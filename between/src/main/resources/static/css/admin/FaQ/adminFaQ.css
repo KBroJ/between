@@ -1,5 +1,4 @@
 /* 페이지 기본 여백 및 카드 스타일 */
-body { padding-top: 20px; padding-bottom: 60px; background-color: #f8f9fa; font-family: 'Noto Sans KR', sans-serif; }
 .container { max-width: 960px; background-color: #fff; padding: 2rem; border-radius: 0.5rem; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
 .table th, .table td { vertical-align: middle; }
 .table th { white-space: nowrap; }
@@ -14,3 +13,12 @@ body { padding-top: 20px; padding-bottom: 60px; background-color: #f8f9fa; font-
 /* Modal 내부 textarea 높이 조정 */
 #faq-edit-modal-form textarea { min-height: 120px; }
 #faq-edit-modal-form #edit-faq-answer { min-height: 200px; }
+
+ body {
+    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+     line-height: normal;
+ }
+
+ul {
+    padding-left: 0;
+}

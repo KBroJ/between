@@ -25,9 +25,19 @@ public class MypageUserInfoResDto {
                 .userNo(user.getUserNo())
                 .email(user.getEmail())
                 .name(user.getName())
-                .phoneNo(user.getPhoneNo())
+                .phoneNo(phoneNumber(user.getPhoneNo()))
                 .createDt(user.getCreateDt())
                 .build();
+    }
+
+    // 휴대폰 번호 커스텀
+    private static String phoneNumber(String phoneNo) {
+        if (phoneNo != null && phoneNo.length() == 11) {
+            return phoneNo.substring(0, 3) + "-" +  phoneNo.substring(3, 7)+ "-" + phoneNo.substring(7, 11);
+        } else if (phoneNo != null && phoneNo.length() == 10) {
+            return phoneNo.substring(0, 3) + "-" + phoneNo.substring(3, 6) + "-" + phoneNo.substring(6, 10);
+        }
+        return phoneNo;
     }
 
 }

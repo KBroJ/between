@@ -268,5 +268,6 @@ public class AdminMenuService {
     //메뉴 갱신
     public void refreshMenu(){
         menuCacheService.refreshHeaderMenus();
+        menuCacheService.refreshSideMenus();
     }
 }
