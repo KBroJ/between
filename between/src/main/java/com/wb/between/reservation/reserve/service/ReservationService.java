@@ -22,10 +22,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // 중요!
 
-import java.time.Duration; // Redis TTL 설정용
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -277,7 +274,10 @@ public class ReservationService {
         if (Boolean.FALSE.equals(reservation.getResStatus())) { // 이미 취소된 경우 (false = 취소 가정)
             throw new IllegalStateException("이미 취소 처리된 예약입니다.");
         }
-        LocalDateTime now = LocalDateTime.now();
+
+        // LocalDateTime now = LocalDateTime.now();
+        ZoneId seoulZoneId =  ZoneId.of("Asia/Seoul");
+        LocalDateTime now = LocalDateTime.now(seoulZoneId);
         if (reservation.getResStart() != null && now.isAfter(reservation.getResStart())) {
             System.out.println("[Service] 경고: 이미 시작된 예약 취소 시도 (현재 로직 허용)");
         }

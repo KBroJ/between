@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
@@ -27,7 +28,9 @@ public class CalendarService {
      */
     public CalendarDto.CalendarResponse generateCalendar(int year, int month, String branchId) {
         YearMonth yearMonth = YearMonth.of(year, month);
-        LocalDate today = LocalDate.now(); // 서버의 현재 날짜
+
+        ZoneId kstZoneId = ZoneId.of("Asia/Seoul");
+        LocalDate today = LocalDate.now(kstZoneId);
 
         // 1. 해당 월의 시작일과 마지막일 계산
         LocalDate firstDayOfMonth = yearMonth.atDay(1);

@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -74,8 +75,9 @@ public class TimeService {
 
         // 3. 모든 시간 슬롯 생성 및 상태 결정
         List<TimeDto> timeSlots = new ArrayList<>();
-        LocalDate today = LocalDate.now();
-        LocalTime now = LocalTime.now(); // 현재 시각
+        ZoneId kstZoneId = ZoneId.of("Asia/Seoul");
+        LocalDate today = LocalDate.now(kstZoneId);
+        LocalTime now = LocalTime.now(kstZoneId); // 현재 시각
 
         for (int hour = 0; hour < 24; hour++) {
             LocalTime currentTimeSlot = LocalTime.of(hour, 0); // 예: 00:00, 01:00, ..., 23:00
