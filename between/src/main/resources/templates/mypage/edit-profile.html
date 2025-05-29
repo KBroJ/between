@@ -67,7 +67,7 @@
         }
       }
 
-      function validatePhone() {
+      async function validatePhone() {
         const phoneValue = $phoneInput.val().trim();
         // 예시: 간단한 숫자 형식 검사 (실제로는 더 정교한 정규식 필요)
         const phoneRegex = /^[0-9]{10,11}$/; // 예: 10~11자리 숫자
@@ -77,28 +77,40 @@
         } else if (!phoneRegex.test(phoneValue)) {
           showError($phoneError, '올바른 연락처 형식이 아닙니다 (숫자 10~11자리).');
           return false;
-        } else {
-          clearError($phoneError);
+        }
+        clearError($phoneError);
 
-          $.ajax({
-            url: '/mypage/check-phone-duplicate', // 실제 중복 체크 API 엔드포인트
+        try {
+
+
+          const response = await $.ajax({
+            url: '/mypage/check-phone-duplicate', // 실제 서버 엔드포인트
             method: 'POST',
             contentType: 'application/json',
-            data: JSON.stringify({ phone: phoneValue }),
-            success: function(response) {
-              // 서버로부터 받은 응답 처리
-              console.log(response);
-              if (response === 'notAvailable') {
-                showError($phoneError, '연락처가 중복됩니다.')
-              };
-            },
-            error: function(xhr, status, error) {
-              console.error("Error: ", error);
-              // showError($phoneError, '서버 통신 오류');
-            }
-          })
+            dataType: 'text', // 서버가 text/plain으로 응답
+            data: JSON.stringify({ phone: phoneValue })
+          });
 
-          return true;
+          console.log('Phone validation response:', response);
+
+          if (response === 'notAvailable') {
+            showError($phoneError, '이미 사용 중인 연락처입니다.');
+            return false;
+          } else if (response === 'available') {
+            // 중복이 아니므로 에러 메시지 없음 (이미 위에서 clearError 호출됨)
+            // 성공 메시지를 표시하고 싶다면 여기서 처리
+            // showSuccess($phoneError, $phoneInput, '사용 가능한 연락처입니다.');
+            return true;
+          } else {
+            // 서버에서 예상치 못한 응답을 보낸 경우
+            showError($phoneError, '연락처 확인 중 알 수 없는 응답입니다.');
+            return false;
+          }
+        } catch (err) {
+          console.error('AJAX 오류:', err);
+          // 네트워크 오류나 서버 내부 오류 등
+          showError($phoneError, '연락처 확인 중 오류가 발생했습니다.');
+          return false;
         }
       }
 
@@ -118,21 +130,30 @@
 
       // 이벤트 리스너: 사용자가 입력 필드를 벗어날 때(blur) 검사
       $nameInput.on('blur', validateName);
-      $phoneInput.on('blur', validatePhone);
+      $phoneInput.on('blur', async function() {
+        // blur 이벤트에서는 await으로 결과를 기다릴 필요는 없지만,
+        // 함수 내부의 AJAX는 실행되어 에러 메시지 등이 표시됨.
+        // 반환값(Promise)은 여기서는 직접 사용하지 않음.
+        await validatePhone(); // isSubmitting = false (기본값)
+      });
 
       // 이벤트 리스너: 폼 제출 시 최종 검사
-      $form.on('submit', function (event) {
+      $form.on('submit', async function (event) {
+        event.preventDefault(); // 폼 제출 중단
         // 각 필드 유효성 검사 실행
         const isNameValid = validateName();
-        const isPhoneValid = validatePhone();
+        const isPhoneValid = await validatePhone();
 
+        console.log("isPhoneValid => ", isPhoneValid)
         // 하나라도 유효하지 않으면 폼 제출 막기
         if (!isNameValid || !isPhoneValid) {
-          event.preventDefault(); // 폼 제출 중단
+
           alert('입력 내용을 확인해주세요.'); // 또는 다른 방식의 알림
           return false;
+        } else {
+          this.submit();
         }
-        // 모든 검증 통과 시 폼 제출 진행 (기본 동작)
+
       });
 
     });

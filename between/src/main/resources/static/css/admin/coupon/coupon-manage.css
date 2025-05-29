@@ -181,3 +181,7 @@ input[type="text"], input[type="number"], textarea {
     border-radius: 3px;
     box-sizing: border-box;
 }
+
+.btn-cancel {
+    text-decoration: none;
+}
