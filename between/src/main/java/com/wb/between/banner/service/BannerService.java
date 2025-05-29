@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Slf4j
@@ -25,7 +26,8 @@ public class BannerService {
      * @return
      */
     public List<BannerListResponseDto> findBannerList() {
-        LocalDateTime now = LocalDateTime.now();
+        ZoneId seoulZoneId = ZoneId.of("Asia/Seoul");
+        LocalDateTime now = LocalDateTime.now(seoulZoneId);
         //배너목록 조회
         List<Banner> bannerList = bannerRepository.findBannerByUseAt("Y", now);
 
