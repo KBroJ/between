@@ -136,7 +136,28 @@ function handlePlanChange() {
 
      // --- 쿠폰 관련 함수 ---
      /** 쿠폰 목록 로드 */
-     async function loadAvailableCoupons() { console.log("쿠폰 로드 중..."); if(couponSelect) couponSelect.innerHTML = '<option value="">로딩 중...</option>'; try { await new Promise(r => setTimeout(r, 300)); const c = [{ id: 'D1000', name: '1,000원 할인', type: 'amount', value: 1000 }, { id: 'P10', name: '10% 할인', type: 'percent', value: 10 }]; availableCoupons = c; populateCouponDropdown(); } catch (e) { console.error("쿠폰 로드 실패:", e); if(couponSelect) couponSelect.innerHTML = '<option value="">로드 실패</option>'; } }
+     async function loadAvailableCoupons() {
+       console.log("쿠폰 로드 중...");
+       if (couponSelect)
+         couponSelect.innerHTML = '<option value="">로딩 중...</option>';
+       try {
+         await new Promise((r) => setTimeout(r, 300));
+         const c = [
+           {
+             id: "D1000",
+             name: "회원가입쿠폰 (1,000원 할인)",
+             type: "amount",
+             value: 1000,
+           },
+         ];
+         availableCoupons = c;
+         populateCouponDropdown();
+       } catch (e) {
+         console.error("쿠폰 로드 실패:", e);
+         if (couponSelect)
+           couponSelect.innerHTML = '<option value="">로드 실패</option>';
+       }
+     }
      /** 쿠폰 드롭다운 채우기 */
      function populateCouponDropdown() { if(!couponSelect) return; couponSelect.innerHTML = '<option value="">쿠폰을 선택하세요</option>'; availableCoupons.forEach(c => { const o = document.createElement('option'); o.value = c.id; o.textContent = c.name; o.dataset.type = c.type; o.dataset.value = c.value; couponSelect.appendChild(o); }); if (selectedCoupon) couponSelect.value = selectedCoupon.id; }
      /** 쿠폰 선택 변경 */
